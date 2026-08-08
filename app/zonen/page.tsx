@@ -24,7 +24,6 @@ export default async function ZonenPage() {
         name: z.name,
         imageUrl: z.imageUrl,
         plantCount: countByZone.get(z.id) ?? 0,
-        conflictLabel: z.conflictStatus === "done" ? z.conflictLabel : null,
       }))}
     />
   );
