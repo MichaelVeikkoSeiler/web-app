@@ -1,4 +1,4 @@
-import Anthropic from "@anthropic-ai/sdk";
+import OpenAI from "openai";
 import { eq } from "drizzle-orm";
 import { getDb, isDbConfigured } from "@/lib/db";
 import { plants } from "@/lib/db/schema";
@@ -49,37 +49,32 @@ function extractJson(text: string): unknown {
 }
 
 async function researchPlantCare(scientificName: string): Promise<EnrichmentResult> {
-  const apiKey = process.env.ANTHROPIC_API_KEY;
+  const apiKey = process.env.OPENAI_API_KEY;
   if (!apiKey) {
-    throw new Error("ANTHROPIC_API_KEY ist nicht konfiguriert.");
+    throw new Error("OPENAI_API_KEY ist nicht konfiguriert.");
   }
-  const client = new Anthropic({ apiKey });
+  const client = new OpenAI({ apiKey });
 
-  const message = await client.messages.create({
-    model: "claude-sonnet-5",
-    max_tokens: 2000,
-    system: SYSTEM_PROMPT,
-    tools: [
+  const response = await client.responses.create({
+    model: "gpt-5.6-terra",
+    max_output_tokens: 2000,
+    tools: [{ type: "web_search" }],
+    input: [
+      { type: "message", role: "system", content: SYSTEM_PROMPT },
       {
-        type: "web_search_20260318",
-        name: "web_search",
-        max_uses: 4,
-      },
-    ],
-    messages: [
-      {
+        type: "message",
         role: "user",
         content: `Recherchiere Pflegeinformationen für: ${scientificName}. Gib danach ausschliesslich das JSON-Objekt zurück.`,
       },
     ],
   });
 
-  const textBlock = message.content.find((b) => b.type === "text");
-  if (!textBlock || textBlock.type !== "text") {
-    throw new Error("Keine Textantwort von Claude erhalten.");
+  const text = response.output_text;
+  if (!text) {
+    throw new Error("Keine Textantwort von OpenAI erhalten.");
   }
 
-  const parsed = extractJson(textBlock.text) as EnrichmentResult;
+  const parsed = extractJson(text) as EnrichmentResult;
   return parsed;
 }
 
