@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from "react";
 import Link from "next/link";
-import { AlertTriangle, Check, Droplets, Scissors, Sprout } from "lucide-react";
+import { Check, Droplets, MapPin, Scissors, Sprout } from "lucide-react";
 import { waterPlant, markPruned, markFertilized } from "@/lib/actions/plants";
 import { Sheet } from "@/components/ui/sheet";
 import type { TodoItem } from "@/lib/plants-query";
@@ -38,17 +38,23 @@ export function AttentionList({
   conflicts: ZoneConflictItem[];
 }) {
   const [doneKeys, setDoneKeys] = useState<Set<string>>(new Set());
+  const [dismissedZoneIds, setDismissedZoneIds] = useState<Set<number>>(new Set());
   const [, startTransition] = useTransition();
   const [openConflict, setOpenConflict] = useState<ZoneConflictItem | null>(null);
 
   const visible = items.filter((item) => !doneKeys.has(itemKey(item)));
+  const visibleConflicts = conflicts.filter((c) => !dismissedZoneIds.has(c.zoneId));
 
   function handleCheck(item: TodoItem) {
     setDoneKeys((prev) => new Set(prev).add(itemKey(item)));
     startTransition(() => typeAction[item.type](item.plantId));
   }
 
-  if (visible.length === 0 && conflicts.length === 0) {
+  function handleDismissConflict(zoneId: number) {
+    setDismissedZoneIds((prev) => new Set(prev).add(zoneId));
+  }
+
+  if (visible.length === 0 && visibleConflicts.length === 0) {
     return (
       <p className="rounded-2xl border border-dashed border-border bg-warm-white p-6 text-sm text-forest-muted">
         Aktuell braucht nichts besondere Aufmerksamkeit.
@@ -85,17 +91,30 @@ export function AttentionList({
           );
         })}
 
-        {conflicts.map((c) => (
-          <li key={`conflict-${c.zoneId}`}>
+        {visibleConflicts.map((c) => (
+          <li
+            key={`conflict-${c.zoneId}`}
+            className="flex items-center gap-3 rounded-2xl border border-border bg-warm-white px-4 py-3"
+          >
+            <button
+              aria-label={`Konflikt in ${c.zoneName} ausblenden`}
+              onClick={() => handleDismissConflict(c.zoneId)}
+              className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border-2 border-sage text-transparent hover:bg-sage/20 hover:text-forest"
+            >
+              <Check className="h-4 w-4" strokeWidth={3} />
+            </button>
+            <MapPin className="h-4 w-4 shrink-0 text-attention-text" />
+            <Link
+              href={`/zonen/${c.zoneId}`}
+              className="flex-1 truncate text-sm text-forest hover:underline"
+            >
+              {c.zoneName}
+            </Link>
             <button
               onClick={() => setOpenConflict(c)}
-              className="flex w-full items-center gap-3 rounded-2xl border border-attention/60 bg-attention/10 px-4 py-3 text-left"
+              className="shrink-0 text-xs font-medium text-attention-text hover:underline"
             >
-              <AlertTriangle className="h-4 w-4 shrink-0 text-attention-text" />
-              <span className="flex-1 truncate text-sm text-forest">{c.zoneName}</span>
-              <span className="shrink-0 text-xs font-medium text-attention-text">
-                Konflikt: {c.label}
-              </span>
+              {c.label}
             </button>
           </li>
         ))}

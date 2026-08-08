@@ -28,7 +28,7 @@ Antworte ausschliesslich auf Deutsch und am Ende AUSSCHLIESSLICH mit einem einzi
 }
 
 Regeln:
-- "label": nur falls "hasConflict" true ist – ein bis zwei Wörter, die den Konflikt kurz benennen (z. B. "Bodenkonflikt", "Lichtkonkurrenz", "Nährstoffkonkurrenz"). Sonst null.
+- "label": nur falls "hasConflict" true ist – genau ein Wort, das den Konflikt kurz benennt (z. B. "Bodenkonflikt", "Lichtkonkurrenz", "Nährstoffkonkurrenz"). Sonst null.
 - "text": nur falls "hasConflict" true ist – 1-3 Sätze, die den Konflikt konkret erklären. Sonst null.
 - Wenn du unsicher bist oder nichts Eindeutiges findest, setze "hasConflict" auf false.`;
 
