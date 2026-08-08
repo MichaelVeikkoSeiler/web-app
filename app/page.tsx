@@ -18,7 +18,7 @@ export default async function Home() {
         <h1 className="font-display text-3xl text-forest sm:text-4xl">
           Willkommen in deinem Garten
         </h1>
-        <p className="mt-1 text-base text-forest-muted">Euer digitales Gartenjournal.</p>
+        <p className="mt-1 text-lg text-forest-muted">Euer digitales Gartenjournal.</p>
       </div>
 
       <HeroImage initialUrl={heroImageUrl} />
