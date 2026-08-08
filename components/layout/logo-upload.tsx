@@ -1,0 +1,54 @@
+"use client";
+
+import { useRef, useState, useTransition } from "react";
+import Image from "next/image";
+import { Plus, Loader2 } from "lucide-react";
+import { uploadHeroImage as uploadImage } from "@/lib/upload-photo";
+import { setLogoImage } from "@/lib/actions/settings";
+
+export function LogoUpload({ initialUrl }: { initialUrl: string | null }) {
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [url, setUrl] = useState(initialUrl);
+  const [uploading, setUploading] = useState(false);
+  const [, startTransition] = useTransition();
+
+  async function handleFile(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploading(true);
+    try {
+      const uploadedUrl = await uploadImage(file);
+      setUrl(uploadedUrl);
+      startTransition(() => setLogoImage(uploadedUrl));
+    } catch {
+      // Logo-Upload ist ein Detail ohne Fehler-UI - kann jederzeit erneut versucht werden.
+    } finally {
+      setUploading(false);
+      e.target.value = "";
+    }
+  }
+
+  return (
+    <button
+      onClick={() => fileInputRef.current?.click()}
+      disabled={uploading}
+      aria-label={url ? "Logo ändern" : "Logo hochladen"}
+      className="relative flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-border bg-warm-white text-forest-muted hover:border-sage disabled:opacity-50 sm:h-10 sm:w-10"
+    >
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="image/*"
+        className="hidden"
+        onChange={handleFile}
+      />
+      {uploading ? (
+        <Loader2 className="h-4 w-4 animate-spin" />
+      ) : url ? (
+        <Image src={url} alt="Logo" fill sizes="40px" className="object-cover" />
+      ) : (
+        <Plus className="h-4 w-4" strokeWidth={2.25} />
+      )}
+    </button>
+  );
+}
