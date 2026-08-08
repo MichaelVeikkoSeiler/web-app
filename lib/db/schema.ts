@@ -32,6 +32,10 @@ export const zones = pgTable("zones", {
   soilType: text("soil_type"),
   notes: text("notes"),
   imageUrl: text("image_url"),
+  conflictStatus: enrichmentStatusEnum("conflict_status").notNull().default("pending"),
+  conflictLabel: text("conflict_label"),
+  conflictText: text("conflict_text"),
+  conflictCheckedAt: timestamp("conflict_checked_at"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });

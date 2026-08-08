@@ -3,7 +3,7 @@
 import { useRef, useState, useTransition } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { Leaf, MapPin } from "lucide-react";
+import { AlertTriangle, Leaf, MapPin } from "lucide-react";
 import { reorderZones } from "@/lib/actions/zones";
 
 export type ZoneTile = {
@@ -11,6 +11,7 @@ export type ZoneTile = {
   name: string;
   imageUrl: string | null;
   plantCount: number;
+  conflictLabel: string | null;
 };
 
 const LONG_PRESS_MS = 350;
@@ -145,6 +146,12 @@ export function ZoneGrid({ zones }: { zones: ZoneTile[] }) {
                     <Leaf key={i} className="h-3 w-3 text-care-text" strokeWidth={2} />
                   ))}
                 </div>
+              )}
+              {zone.conflictLabel && (
+                <p className="mt-1 flex items-center justify-center gap-1 text-xs font-medium text-attention-text">
+                  <AlertTriangle className="h-3 w-3 shrink-0" />
+                  <span className="truncate">Konflikt: {zone.conflictLabel}</span>
+                </p>
               )}
             </div>
           </Link>

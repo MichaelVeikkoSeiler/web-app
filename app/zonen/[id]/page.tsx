@@ -6,6 +6,7 @@ import { zones, plantZoneAssignments, plants, plantPhotos } from "@/lib/db/schem
 import { ZoneImage } from "@/components/zones/zone-image";
 import { ZonePlants } from "@/components/zones/zone-plants";
 import { ZoneDetailActions } from "@/components/zones/zone-detail-actions";
+import { ZoneConflictBadge } from "@/components/zones/zone-conflict-badge";
 
 const lightIcon = {
   sonnig: Sun,
@@ -88,6 +89,9 @@ export default async function ZoneDetailPage({
           <span className="rounded-full bg-soil/40 px-2.5 py-1 text-soil-text">
             {zone.soilType}
           </span>
+        )}
+        {zone.conflictStatus === "done" && zone.conflictLabel && (
+          <ZoneConflictBadge label={zone.conflictLabel} text={zone.conflictText} />
         )}
       </div>
 

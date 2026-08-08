@@ -35,7 +35,7 @@ export function ZoneImage({
   }
 
   return (
-    <div className="relative aspect-[7/5] w-full overflow-hidden rounded-3xl bg-warm-white">
+    <div className="relative aspect-[4/3] w-full overflow-hidden rounded-3xl bg-warm-white sm:aspect-video">
       {imageUrl ? (
         <Image
           src={imageUrl}

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Plus } from "lucide-react";
+import { CloudSun, Plus } from "lucide-react";
 import { navItems } from "./nav-items";
 import { LogoUpload } from "./logo-upload";
 
@@ -43,6 +43,18 @@ export function TopHeader({ logoUrl }: { logoUrl: string | null }) {
         >
           <Plus className="h-4 w-4" strokeWidth={2.5} />
           Pflanze hinzufügen
+        </Link>
+
+        <Link
+          href="/wetter"
+          aria-label="Wetter"
+          className={`flex h-10 w-10 items-center justify-center rounded-full sm:hidden ${
+            pathname.startsWith("/wetter")
+              ? "bg-sage/40 text-forest"
+              : "text-forest-muted hover:bg-sage/20"
+          }`}
+        >
+          <CloudSun className="h-5 w-5" strokeWidth={pathname.startsWith("/wetter") ? 2.25 : 1.75} />
         </Link>
       </div>
     </header>

@@ -3,11 +3,12 @@
 import { revalidatePath } from "next/cache";
 import { after } from "next/server";
 import { del } from "@vercel/blob";
-import { eq, ilike, and } from "drizzle-orm";
+import { eq, ilike, and, inArray } from "drizzle-orm";
 import { getDb, isDbConfigured } from "@/lib/db";
 import { plants, plantZoneAssignments, plantPhotos, plantNotes, zones } from "@/lib/db/schema";
 import { identifyPlantPhoto, type PlantNetCandidate } from "@/lib/plantnet";
 import { enrichPlant } from "@/lib/enrichment";
+import { checkZoneConflict } from "@/lib/conflict-analysis";
 
 export async function identifyPlant(formData: FormData): Promise<{
   candidates: PlantNetCandidate[];
@@ -57,7 +58,7 @@ export async function findExistingPlant(scientificName: string) {
 export async function createPlantAndAssign(input: {
   scientificName: string;
   commonName?: string;
-  zoneId: number;
+  zoneIds: number[];
 }) {
   const db = getDb();
   const [plant] = await db
@@ -69,14 +70,23 @@ export async function createPlantAndAssign(input: {
     })
     .returning();
 
-  await db.insert(plantZoneAssignments).values({
-    plantId: plant.id,
-    zoneId: input.zoneId,
-  });
+  if (input.zoneIds.length > 0) {
+    await db
+      .insert(plantZoneAssignments)
+      .values(input.zoneIds.map((zoneId) => ({ plantId: plant.id, zoneId })));
+    await db
+      .update(zones)
+      .set({ conflictStatus: "pending" })
+      .where(inArray(zones.id, input.zoneIds));
+    for (const zoneId of input.zoneIds) {
+      after(() => checkZoneConflict(zoneId));
+    }
+  }
 
   after(() => enrichPlant(plant.id));
 
   revalidatePath("/pflanzen");
+  revalidatePath("/zonen");
   revalidatePath("/");
   return plant;
 }
@@ -87,8 +97,31 @@ export async function addZoneAssignment(plantId: number, zoneId: number) {
     .insert(plantZoneAssignments)
     .values({ plantId, zoneId })
     .onConflictDoNothing();
+  await db.update(zones).set({ conflictStatus: "pending" }).where(eq(zones.id, zoneId));
+  after(() => checkZoneConflict(zoneId));
   revalidatePath("/pflanzen");
   revalidatePath(`/pflanzen/${plantId}`);
+  revalidatePath("/zonen");
+  revalidatePath(`/zonen/${zoneId}`);
+}
+
+export async function addZoneAssignments(plantId: number, zoneIds: number[]) {
+  if (zoneIds.length === 0) return;
+  const db = getDb();
+  await db
+    .insert(plantZoneAssignments)
+    .values(zoneIds.map((zoneId) => ({ plantId, zoneId })))
+    .onConflictDoNothing();
+  await db.update(zones).set({ conflictStatus: "pending" }).where(inArray(zones.id, zoneIds));
+  for (const zoneId of zoneIds) {
+    after(() => checkZoneConflict(zoneId));
+  }
+  revalidatePath("/pflanzen");
+  revalidatePath(`/pflanzen/${plantId}`);
+  revalidatePath("/zonen");
+  for (const zoneId of zoneIds) {
+    revalidatePath(`/zonen/${zoneId}`);
+  }
 }
 
 export async function removeZoneAssignment(plantId: number, zoneId: number) {

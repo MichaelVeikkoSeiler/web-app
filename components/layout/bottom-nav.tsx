@@ -7,13 +7,13 @@ import { navItems } from "./nav-items";
 
 export function BottomNav() {
   const pathname = usePathname();
+  const pflanzenItem = navItems.find((item) => item.href === "/pflanzen")!;
+  const zonenItem = navItems.find((item) => item.href === "/zonen")!;
 
   return (
     <nav className="safe-bottom fixed inset-x-0 bottom-0 z-40 border-t border-border bg-warm-white/95 backdrop-blur sm:hidden">
       <div className="relative mx-auto flex max-w-lg items-center justify-around px-2 pt-2">
-        {navItems.slice(0, 1).map((item) => (
-          <NavLink key={item.href} {...item} active={isActive(pathname, item.href)} />
-        ))}
+        <NavLink {...pflanzenItem} active={isActive(pathname, pflanzenItem.href)} />
 
         <Link
           href="/pflanzen/neu"
@@ -23,9 +23,7 @@ export function BottomNav() {
           <Plus className="h-7 w-7" strokeWidth={2.5} />
         </Link>
 
-        {navItems.slice(1).map((item) => (
-          <NavLink key={item.href} {...item} active={isActive(pathname, item.href)} />
-        ))}
+        <NavLink {...zonenItem} active={isActive(pathname, zonenItem.href)} />
       </div>
     </nav>
   );

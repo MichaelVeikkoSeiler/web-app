@@ -5,12 +5,12 @@ import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { Camera, Images, Loader2, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { selectClasses } from "@/components/ui/field";
+import { ZoneMultiSelect } from "@/components/zones/zone-multi-select";
 import {
   identifyPlant,
   findExistingPlant,
   createPlantAndAssign,
-  addZoneAssignment,
+  addZoneAssignments,
   savePlantPhoto,
 } from "@/lib/actions/plants";
 import { uploadPlantPhoto } from "@/lib/upload-photo";
@@ -83,12 +83,12 @@ export function NewPlantWizard({ zones }: { zones: Zone[] }) {
 
   async function confirmAdditionalZone(
     plantId: number,
-    zoneId: number,
+    zoneIds: number[],
   ) {
     setStep({ name: "saving" });
     setSaveError(null);
     try {
-      await addZoneAssignment(plantId, zoneId);
+      await addZoneAssignments(plantId, zoneIds);
       await finishWithPhoto(plantId);
     } catch {
       setSaveError("Zuordnung fehlgeschlagen. Bitte erneut versuchen.");
@@ -96,14 +96,14 @@ export function NewPlantWizard({ zones }: { zones: Zone[] }) {
     }
   }
 
-  async function confirmNewPlant(candidate: PlantNetCandidate, zoneId: number) {
+  async function confirmNewPlant(candidate: PlantNetCandidate, zoneIds: number[]) {
     setStep({ name: "saving" });
     setSaveError(null);
     try {
       const plant = await createPlantAndAssign({
         scientificName: candidate.scientificName,
         commonName: candidate.commonNames[0],
-        zoneId,
+        zoneIds,
       });
       await finishWithPhoto(plant.id);
     } catch {
@@ -212,7 +212,7 @@ export function NewPlantWizard({ zones }: { zones: Zone[] }) {
           existing={step.existing}
           zones={zones}
           onSameZone={() => confirmSameZone(step.existing.plant.id)}
-          onNewZone={(zoneId) => confirmAdditionalZone(step.existing.plant.id, zoneId)}
+          onNewZone={(zoneIds) => confirmAdditionalZone(step.existing.plant.id, zoneIds)}
         />
       )}
 
@@ -220,7 +220,7 @@ export function NewPlantWizard({ zones }: { zones: Zone[] }) {
         <NewPlantZoneStep
           candidate={step.candidate}
           zones={zones}
-          onConfirm={(zoneId) => confirmNewPlant(step.candidate, zoneId)}
+          onConfirm={(zoneIds) => confirmNewPlant(step.candidate, zoneIds)}
         />
       )}
 
@@ -253,13 +253,22 @@ function ExistingPlantStep({
   existing: NonNullable<ExistingCheck>;
   zones: Zone[];
   onSameZone: () => void;
-  onNewZone: (zoneId: number) => void;
+  onNewZone: (zoneIds: number[]) => void;
 }) {
   const [showZonePicker, setShowZonePicker] = useState(false);
   const availableZones = zones.filter(
     (z) => !existing.assignedZones.some((az) => az.id === z.id),
   );
-  const [zoneId, setZoneId] = useState<number | undefined>(availableZones[0]?.id);
+  const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
+
+  function toggleZone(id: number) {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  }
 
   return (
     <div className="flex flex-col gap-3 rounded-2xl border border-border bg-warm-white p-4">
@@ -282,24 +291,19 @@ function ExistingPlantStep({
           </Button>
           {availableZones.length > 0 && (
             <Button variant="secondary" onClick={() => setShowZonePicker(true)}>
-              Zusätzlich einer anderen Zone zuordnen
+              Zusätzlich anderen Zonen zuordnen
             </Button>
           )}
         </div>
       ) : (
         <div className="flex flex-col gap-2 pt-2">
-          <select
-            className={selectClasses}
-            value={zoneId}
-            onChange={(e) => setZoneId(Number(e.target.value))}
+          <ZoneMultiSelect zones={availableZones} selected={selectedIds} onToggle={toggleZone} />
+          <Button
+            disabled={selectedIds.size === 0}
+            onClick={() => onNewZone([...selectedIds])}
           >
-            {availableZones.map((z) => (
-              <option key={z.id} value={z.id}>
-                {z.name}
-              </option>
-            ))}
-          </select>
-          <Button onClick={() => zoneId && onNewZone(zoneId)}>Zone zuordnen</Button>
+            Zonen zuordnen
+          </Button>
         </div>
       )}
     </div>
@@ -313,9 +317,20 @@ function NewPlantZoneStep({
 }: {
   candidate: PlantNetCandidate;
   zones: Zone[];
-  onConfirm: (zoneId: number) => void;
+  onConfirm: (zoneIds: number[]) => void;
 }) {
-  const [zoneId, setZoneId] = useState<number | undefined>(zones[0]?.id);
+  const [selectedIds, setSelectedIds] = useState<Set<number>>(
+    zones[0] ? new Set([zones[0].id]) : new Set(),
+  );
+
+  function toggleZone(id: number) {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  }
 
   return (
     <div className="flex flex-col gap-3 rounded-2xl border border-border bg-warm-white p-4">
@@ -328,19 +343,12 @@ function NewPlantZoneStep({
         </p>
       ) : (
         <>
-          <select
-            className={selectClasses}
-            value={zoneId}
-            onChange={(e) => setZoneId(Number(e.target.value))}
+          <ZoneMultiSelect zones={zones} selected={selectedIds} onToggle={toggleZone} />
+          <Button
+            disabled={selectedIds.size === 0}
+            onClick={() => onConfirm([...selectedIds])}
           >
-            {zones.map((z) => (
-              <option key={z.id} value={z.id}>
-                {z.name}
-              </option>
-            ))}
-          </select>
-          <Button onClick={() => zoneId && onConfirm(zoneId)}>
-            Pflanze anlegen und Zone zuordnen
+            Pflanze anlegen und Zonen zuordnen
           </Button>
         </>
       )}

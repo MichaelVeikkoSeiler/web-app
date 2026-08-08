@@ -41,7 +41,7 @@ Regeln:
 - "watering.rhythmDays": typischer Giessrhythmus in Tagen unter normalen Bedingungen (Richtwert als Zahl, z.B. 3 für alle 3 Tage, 7 für wöchentlich).
 - Wenn eine Angabe nicht ermittelbar ist, setze das Feld auf null (bzw. bei rhythmDays einen plausiblen Schätzwert).`;
 
-function extractJson(text: string): unknown {
+export function extractJson(text: string): unknown {
   const start = text.indexOf("{");
   const end = text.lastIndexOf("}");
   if (start === -1 || end === -1) throw new Error("Keine JSON-Antwort gefunden.");

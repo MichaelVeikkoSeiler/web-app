@@ -18,9 +18,8 @@ export default async function Home() {
 
       <div className="text-center">
         <h1 className="font-display text-3xl text-forest sm:text-4xl">
-          Willkommen in deinem Garten
+          Unsere Gartenwelt
         </h1>
-        <p className="mt-1 text-lg text-forest-muted">Euer digitales Gartenjournal</p>
       </div>
 
       <section className="flex flex-col gap-3">

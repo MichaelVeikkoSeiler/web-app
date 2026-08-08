@@ -18,16 +18,16 @@ export function PlantCard({ plant }: { plant: PlantCardData }) {
   return (
     <Link
       href={`/pflanzen/${plant.id}`}
-      className="group flex flex-col gap-2 rounded-2xl border border-border bg-warm-white p-3 transition-shadow hover:shadow-md"
+      className="flex flex-col gap-2 rounded-2xl p-1 transition-shadow hover:shadow-md"
     >
-      <div className="relative aspect-square overflow-hidden rounded-xl bg-cream">
+      <div className="relative aspect-square overflow-hidden rounded-2xl border border-border bg-warm-white">
         {plant.photoUrl ? (
           <Image
             src={plant.photoUrl}
             alt={plant.germanName ?? plant.scientificName}
             fill
             sizes="(max-width: 640px) 45vw, 220px"
-            className="object-cover transition-transform group-hover:scale-105"
+            className="object-cover"
           />
         ) : (
           <div className="flex h-full items-center justify-center text-forest-muted/40">
@@ -52,8 +52,8 @@ export function PlantCard({ plant }: { plant: PlantCardData }) {
           )}
         </div>
       </div>
-      <div>
-        <h3 className="truncate text-sm font-semibold text-forest">
+      <div className="px-1 text-center">
+        <h3 className="truncate text-base font-semibold text-forest">
           {plant.germanName ?? plant.scientificName}
         </h3>
         <p className="truncate text-xs italic text-forest-muted">

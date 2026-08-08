@@ -4,8 +4,9 @@ import { useState, useTransition } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { Plus, X, MapPin } from "lucide-react";
-import { addZoneAssignment, removeZoneAssignment } from "@/lib/actions/plants";
-import { selectClasses } from "@/components/ui/field";
+import { addZoneAssignments, removeZoneAssignment } from "@/lib/actions/plants";
+import { Button } from "@/components/ui/button";
+import { ZoneMultiSelect } from "@/components/zones/zone-multi-select";
 
 type Zone = { id: number; name: string; imageUrl: string | null };
 
@@ -22,8 +23,16 @@ export function ZoneChips({
   const [pending, startTransition] = useTransition();
   const [removingId, setRemovingId] = useState<number | null>(null);
   const available = allZones.filter((z) => !assignedZones.some((az) => az.id === z.id));
-  const [zoneId, setZoneId] = useState<number | undefined>(undefined);
-  const selectedZoneId = zoneId ?? available[0]?.id;
+  const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
+
+  function toggleZone(id: number) {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  }
 
   function handleRemove(zoneId: number) {
     setRemovingId(zoneId);
@@ -65,32 +74,33 @@ export function ZoneChips({
 
       {available.length > 0 &&
         (adding ? (
-          <div className="flex items-center gap-1.5">
-            <select
-              className={selectClasses + " min-h-9 py-1 text-sm"}
-              value={selectedZoneId}
-              onChange={(e) => setZoneId(Number(e.target.value))}
-            >
-              {available.map((z) => (
-                <option key={z.id} value={z.id}>
-                  {z.name}
-                </option>
-              ))}
-            </select>
-            <button
-              disabled={pending}
-              onClick={() =>
-                selectedZoneId &&
-                startTransition(async () => {
-                  await addZoneAssignment(plantId, selectedZoneId);
-                  setZoneId(undefined);
+          <div className="flex w-full flex-col gap-2">
+            <ZoneMultiSelect zones={available} selected={selectedIds} onToggle={toggleZone} />
+            <div className="flex gap-2">
+              <Button
+                variant="secondary"
+                className="flex-1"
+                onClick={() => {
+                  setSelectedIds(new Set());
                   setAdding(false);
-                })
-              }
-              className="rounded-full bg-sage px-3 py-1.5 text-sm font-medium text-forest"
-            >
-              OK
-            </button>
+                }}
+              >
+                Abbrechen
+              </Button>
+              <Button
+                className="flex-1"
+                disabled={pending || selectedIds.size === 0}
+                onClick={() =>
+                  startTransition(async () => {
+                    await addZoneAssignments(plantId, [...selectedIds]);
+                    setSelectedIds(new Set());
+                    setAdding(false);
+                  })
+                }
+              >
+                Hinzufügen
+              </Button>
+            </div>
           </div>
         ) : (
           <button
