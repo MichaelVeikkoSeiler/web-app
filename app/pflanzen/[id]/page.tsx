@@ -10,6 +10,7 @@ import { PhotoGallery } from "@/components/plants/photo-gallery";
 import { EnrichmentStatus } from "@/components/plants/enrichment-status";
 import { ZoneChips } from "@/components/plants/zone-chips";
 import { DeletePlantButton } from "@/components/plants/delete-plant-button";
+import { SpeciesCorrection } from "@/components/plants/species-correction";
 
 export default async function PflanzeDetailPage({
   params,
@@ -64,11 +65,14 @@ export default async function PflanzeDetailPage({
         )}
       </div>
 
-      <div>
-        <h1 className="font-display text-3xl text-forest">
-          {plant.germanName ?? plant.scientificName}
-        </h1>
-        <p className="italic text-forest-muted">{plant.scientificName}</p>
+      <div className="flex items-start justify-between gap-2">
+        <div>
+          <h1 className="font-display text-3xl text-forest">
+            {plant.germanName ?? plant.scientificName}
+          </h1>
+          <p className="italic text-forest-muted">{plant.scientificName}</p>
+        </div>
+        <SpeciesCorrection plantId={plant.id} />
       </div>
 
       <ZoneChips plantId={plant.id} assignedZones={assignedZones} allZones={allZones} />

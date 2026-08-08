@@ -217,6 +217,81 @@ export async function deletePlant(plantId: number) {
   revalidatePath("/");
 }
 
+export async function searchSpecies(query: string): Promise<{ scientificName: string }[]> {
+  const trimmed = query.trim();
+  if (trimmed.length === 0) return [];
+
+  try {
+    const url = `https://api.gbif.org/v1/species/suggest?q=${encodeURIComponent(trimmed)}&rank=SPECIES&limit=8`;
+    const res = await fetch(url);
+    if (!res.ok) return [];
+    const data = (await res.json()) as Array<{
+      canonicalName?: string;
+      kingdom?: string;
+    }>;
+
+    const names: string[] = [];
+    const seen = new Set<string>();
+    for (const item of data) {
+      if (!item.canonicalName) continue;
+      if (item.kingdom && item.kingdom !== "Plantae") continue;
+      if (seen.has(item.canonicalName)) continue;
+      seen.add(item.canonicalName);
+      names.push(item.canonicalName);
+    }
+    return names.map((scientificName) => ({ scientificName }));
+  } catch {
+    return [];
+  }
+}
+
+export async function correctPlantSpecies(
+  plantId: number,
+  scientificName: string,
+): Promise<{ ok: boolean; error?: string }> {
+  const trimmed = scientificName.trim();
+  if (!trimmed) return { ok: false, error: "Bitte eine Pflanzenart auswählen." };
+
+  const db = getDb();
+  try {
+    await db
+      .update(plants)
+      .set({
+        scientificName: trimmed,
+        germanName: null,
+        commonName: null,
+        factsText: null,
+        isFruitOrBerry: false,
+        bloomPeriodText: null,
+        bloomStartMonth: null,
+        bloomEndMonth: null,
+        harvestPeriodText: null,
+        harvestStartMonth: null,
+        harvestEndMonth: null,
+        pruningPeriodText: null,
+        pruningStartMonth: null,
+        pruningEndMonth: null,
+        fertilizingPeriodText: null,
+        fertilizingStartMonth: null,
+        fertilizingEndMonth: null,
+        wateringRhythmDays: null,
+        wateringNotes: null,
+        enrichmentStatus: "pending",
+        enrichmentError: null,
+        updatedAt: new Date(),
+      })
+      .where(eq(plants.id, plantId));
+  } catch {
+    return { ok: false, error: "Diese Pflanzenart ist bereits erfasst." };
+  }
+
+  revalidatePath(`/pflanzen/${plantId}`);
+  revalidatePath("/pflanzen");
+  revalidatePath("/");
+  after(() => enrichPlant(plantId));
+  return { ok: true };
+}
+
 export async function retryEnrichment(plantId: number) {
   const db = getDb();
   await db
