@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { eq, sql } from "drizzle-orm";
 import { z } from "zod";
-import { db } from "@/lib/db";
+import { getDb } from "@/lib/db";
 import { zones } from "@/lib/db/schema";
 
 const zoneSchema = z.object({
@@ -19,6 +19,7 @@ export type ZoneInput = z.infer<typeof zoneSchema>;
 
 export async function createZone(input: ZoneInput) {
   const data = zoneSchema.parse(input);
+  const db = getDb();
   const [{ maxOrder }] = await db
     .select({ maxOrder: sql<number>`coalesce(max(${zones.orderIndex}), -1)` })
     .from(zones);
@@ -43,6 +44,7 @@ export async function createZone(input: ZoneInput) {
 
 export async function updateZone(id: number, input: ZoneInput) {
   const data = zoneSchema.parse(input);
+  const db = getDb();
   const [zone] = await db
     .update(zones)
     .set({
@@ -62,12 +64,14 @@ export async function updateZone(id: number, input: ZoneInput) {
 }
 
 export async function deleteZone(id: number) {
+  const db = getDb();
   await db.delete(zones).where(eq(zones.id, id));
   revalidatePath("/zonen");
   revalidatePath("/pflanzen");
 }
 
 export async function reorderZones(orderedIds: number[]) {
+  const db = getDb();
   await Promise.all(
     orderedIds.map((id, index) =>
       db.update(zones).set({ orderIndex: index }).where(eq(zones.id, id)),

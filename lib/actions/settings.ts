@@ -1,14 +1,15 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { db } from "@/lib/db";
+import { getDb, isDbConfigured } from "@/lib/db";
 import { settings } from "@/lib/db/schema";
 
 export async function getSiteSettings(): Promise<{
   heroImageUrl: string | null;
   logoUrl: string | null;
 }> {
-  const [row] = await db.select().from(settings).limit(1);
+  if (!isDbConfigured) return { heroImageUrl: null, logoUrl: null };
+  const [row] = await getDb().select().from(settings).limit(1);
   return {
     heroImageUrl: row?.heroImageUrl ?? null,
     logoUrl: row?.logoUrl ?? null,
@@ -16,12 +17,13 @@ export async function getSiteSettings(): Promise<{
 }
 
 export async function getHeroImageUrl(): Promise<string | null> {
-  const [row] = await db.select().from(settings).limit(1);
+  if (!isDbConfigured) return null;
+  const [row] = await getDb().select().from(settings).limit(1);
   return row?.heroImageUrl ?? null;
 }
 
 export async function setHeroImage(url: string) {
-  await db
+  await getDb()
     .insert(settings)
     .values({ id: 1, heroImageUrl: url })
     .onConflictDoUpdate({
@@ -32,7 +34,7 @@ export async function setHeroImage(url: string) {
 }
 
 export async function setLogoImage(url: string) {
-  await db
+  await getDb()
     .insert(settings)
     .values({ id: 1, logoUrl: url })
     .onConflictDoUpdate({

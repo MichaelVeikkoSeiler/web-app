@@ -1,6 +1,6 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { eq } from "drizzle-orm";
-import { db } from "@/lib/db";
+import { getDb, isDbConfigured } from "@/lib/db";
 import { plants } from "@/lib/db/schema";
 
 type Period = { text: string | null; startMonth: number | null; endMonth: number | null };
@@ -84,6 +84,8 @@ async function researchPlantCare(scientificName: string): Promise<EnrichmentResu
 }
 
 export async function enrichPlant(plantId: number) {
+  if (!isDbConfigured) return;
+  const db = getDb();
   try {
     const [plant] = await db.select().from(plants).where(eq(plants.id, plantId)).limit(1);
     if (!plant) return;
@@ -117,7 +119,7 @@ export async function enrichPlant(plantId: number) {
       })
       .where(eq(plants.id, plantId));
   } catch (e) {
-    await db
+    await getDb()
       .update(plants)
       .set({
         enrichmentStatus: "failed",

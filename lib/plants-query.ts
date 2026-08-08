@@ -1,5 +1,5 @@
 import { eq } from "drizzle-orm";
-import { db } from "@/lib/db";
+import { getDb, isDbConfigured } from "@/lib/db";
 import { plants, plantPhotos, plantZoneAssignments, zones } from "@/lib/db/schema";
 import { isMonthInRange } from "@/lib/date-utils";
 import { computeHelpFlags } from "@/lib/help-logic";
@@ -7,6 +7,9 @@ import { getWeatherSnapshot } from "@/lib/openmeteo";
 import type { PlantCardData } from "@/components/plants/plant-card";
 
 export async function getPlantCards(): Promise<PlantCardData[]> {
+  if (!isDbConfigured) return [];
+
+  const db = getDb();
   const [allPlants, assignments, photos, weather] = await Promise.all([
     db.select().from(plants),
     db

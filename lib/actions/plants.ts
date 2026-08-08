@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { after } from "next/server";
 import { del } from "@vercel/blob";
 import { eq, ilike, and } from "drizzle-orm";
-import { db } from "@/lib/db";
+import { getDb, isDbConfigured } from "@/lib/db";
 import { plants, plantZoneAssignments, plantPhotos, plantNotes, zones } from "@/lib/db/schema";
 import { identifyPlantPhoto, type PlantNetCandidate } from "@/lib/plantnet";
 import { enrichPlant } from "@/lib/enrichment";
@@ -35,6 +35,8 @@ export async function identifyPlant(formData: FormData): Promise<{
 }
 
 export async function findExistingPlant(scientificName: string) {
+  if (!isDbConfigured) return null;
+  const db = getDb();
   const [plant] = await db
     .select()
     .from(plants)
@@ -57,6 +59,7 @@ export async function createPlantAndAssign(input: {
   commonName?: string;
   zoneId: number;
 }) {
+  const db = getDb();
   const [plant] = await db
     .insert(plants)
     .values({
@@ -79,6 +82,7 @@ export async function createPlantAndAssign(input: {
 }
 
 export async function addZoneAssignment(plantId: number, zoneId: number) {
+  const db = getDb();
   await db
     .insert(plantZoneAssignments)
     .values({ plantId, zoneId })
@@ -88,6 +92,7 @@ export async function addZoneAssignment(plantId: number, zoneId: number) {
 }
 
 export async function removeZoneAssignment(plantId: number, zoneId: number) {
+  const db = getDb();
   await db
     .delete(plantZoneAssignments)
     .where(
@@ -105,6 +110,7 @@ export async function savePlantPhoto(
   blobUrl: string,
   isPrimary: boolean,
 ) {
+  const db = getDb();
   if (isPrimary) {
     await db
       .update(plantPhotos)
@@ -119,16 +125,17 @@ export async function savePlantPhoto(
 export async function addNote(plantId: number, text: string) {
   const trimmed = text.trim();
   if (!trimmed) return;
-  await db.insert(plantNotes).values({ plantId, text: trimmed });
+  await getDb().insert(plantNotes).values({ plantId, text: trimmed });
   revalidatePath(`/pflanzen/${plantId}`);
 }
 
 export async function deleteNote(noteId: number, plantId: number) {
-  await db.delete(plantNotes).where(eq(plantNotes.id, noteId));
+  await getDb().delete(plantNotes).where(eq(plantNotes.id, noteId));
   revalidatePath(`/pflanzen/${plantId}`);
 }
 
 export async function waterPlant(plantId: number) {
+  const db = getDb();
   await db
     .update(plants)
     .set({ lastWateredAt: new Date(), updatedAt: new Date() })
@@ -139,6 +146,7 @@ export async function waterPlant(plantId: number) {
 }
 
 export async function deletePlant(plantId: number) {
+  const db = getDb();
   const photos = await db
     .select({ blobUrl: plantPhotos.blobUrl })
     .from(plantPhotos)
@@ -155,6 +163,7 @@ export async function deletePlant(plantId: number) {
 }
 
 export async function retryEnrichment(plantId: number) {
+  const db = getDb();
   await db
     .update(plants)
     .set({ enrichmentStatus: "pending", enrichmentError: null })

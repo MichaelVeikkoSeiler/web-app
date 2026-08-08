@@ -1,28 +1,30 @@
 import { eq } from "drizzle-orm";
-import { db } from "@/lib/db";
+import { getDb, isDbConfigured } from "@/lib/db";
 import { zones, plantZoneAssignments, plants } from "@/lib/db/schema";
 import { ZoneList } from "@/components/zones/zone-list";
 
 export default async function ZonenPage() {
-  const [zoneRows, assignments, allPlants] = await Promise.all([
-    db.select().from(zones).orderBy(zones.orderIndex),
-    db
-      .select({
-        zoneId: plantZoneAssignments.zoneId,
-        plantId: plants.id,
-        germanName: plants.germanName,
-        scientificName: plants.scientificName,
-      })
-      .from(plantZoneAssignments)
-      .innerJoin(plants, eq(plantZoneAssignments.plantId, plants.id)),
-    db
-      .select({
-        id: plants.id,
-        germanName: plants.germanName,
-        scientificName: plants.scientificName,
-      })
-      .from(plants),
-  ]);
+  const [zoneRows, assignments, allPlants] = isDbConfigured
+    ? await Promise.all([
+        getDb().select().from(zones).orderBy(zones.orderIndex),
+        getDb()
+          .select({
+            zoneId: plantZoneAssignments.zoneId,
+            plantId: plants.id,
+            germanName: plants.germanName,
+            scientificName: plants.scientificName,
+          })
+          .from(plantZoneAssignments)
+          .innerJoin(plants, eq(plantZoneAssignments.plantId, plants.id)),
+        getDb()
+          .select({
+            id: plants.id,
+            germanName: plants.germanName,
+            scientificName: plants.scientificName,
+          })
+          .from(plants),
+      ])
+    : [[], [], []];
 
   const plantsByZone = new Map<number, { id: number; name: string }[]>();
   for (const a of assignments) {

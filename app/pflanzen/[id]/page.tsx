@@ -2,7 +2,7 @@ import Image from "next/image";
 import { notFound } from "next/navigation";
 import { eq } from "drizzle-orm";
 import { Leaf } from "lucide-react";
-import { db } from "@/lib/db";
+import { getDb, isDbConfigured } from "@/lib/db";
 import { plants, plantPhotos, plantNotes, plantZoneAssignments, zones } from "@/lib/db/schema";
 import { CareInfoGrid } from "@/components/plants/care-info-grid";
 import { NoteList } from "@/components/plants/note-list";
@@ -20,7 +20,9 @@ export default async function PflanzeDetailPage({
   const { id } = await params;
   const plantId = Number(id);
   if (Number.isNaN(plantId)) notFound();
+  if (!isDbConfigured) notFound();
 
+  const db = getDb();
   const [plant] = await db.select().from(plants).where(eq(plants.id, plantId)).limit(1);
   if (!plant) notFound();
 
