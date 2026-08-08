@@ -5,22 +5,16 @@ import { Plus } from "lucide-react";
 import { Sheet } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { ZoneForm } from "@/components/zones/zone-form";
-import { ZoneReorderList, type Zone } from "@/components/zones/zone-reorder-list";
+import { ZoneGrid, type ZoneTile } from "@/components/zones/zone-grid";
 
-export function ZoneList({
-  zones,
-  allPlants,
-}: {
-  zones: Zone[];
-  allPlants: { id: number; name: string }[];
-}) {
-  const [sheetZone, setSheetZone] = useState<Zone | "new" | null>(null);
+export function ZoneList({ zones }: { zones: ZoneTile[] }) {
+  const [creating, setCreating] = useState(false);
 
   return (
     <div className="flex flex-col gap-4">
       <div className="flex items-center justify-between">
         <h1 className="font-display text-2xl text-forest">Zonen</h1>
-        <Button onClick={() => setSheetZone("new")}>
+        <Button onClick={() => setCreating(true)}>
           <Plus className="h-4 w-4" strokeWidth={2.5} />
           Neue Zone
         </Button>
@@ -34,21 +28,14 @@ export function ZoneList({
       ) : (
         <>
           <p className="text-xs text-forest-muted">
-            Zum Umsortieren eine Zone kurz gedrückt halten und verschieben.
+            Zone antippen für Details, kurz gedrückt halten zum Umsortieren.
           </p>
-          <ZoneReorderList zones={zones} allPlants={allPlants} onEdit={setSheetZone} />
+          <ZoneGrid zones={zones} />
         </>
       )}
 
-      <Sheet
-        open={sheetZone !== null}
-        onClose={() => setSheetZone(null)}
-        title={sheetZone === "new" ? "Neue Zone" : "Zone bearbeiten"}
-      >
-        <ZoneForm
-          zone={sheetZone && sheetZone !== "new" ? sheetZone : undefined}
-          onDone={() => setSheetZone(null)}
-        />
+      <Sheet open={creating} onClose={() => setCreating(false)} title="Neue Zone">
+        <ZoneForm onDone={() => setCreating(false)} />
       </Sheet>
     </div>
   );

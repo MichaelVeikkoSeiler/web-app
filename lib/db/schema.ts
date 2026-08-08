@@ -32,6 +32,7 @@ export const zones = pgTable("zones", {
   orientation: orientationEnum("orientation").notNull(),
   soilType: text("soil_type"),
   notes: text("notes"),
+  imageUrl: text("image_url"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });

@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { del } from "@vercel/blob";
 import { eq, sql } from "drizzle-orm";
 import { z } from "zod";
 import { getDb } from "@/lib/db";
@@ -63,9 +64,41 @@ export async function updateZone(id: number, input: ZoneInput) {
   return zone;
 }
 
+export async function saveZoneImage(zoneId: number, blobUrl: string) {
+  const db = getDb();
+  const [existing] = await db
+    .select({ imageUrl: zones.imageUrl })
+    .from(zones)
+    .where(eq(zones.id, zoneId))
+    .limit(1);
+
+  await db
+    .update(zones)
+    .set({ imageUrl: blobUrl, updatedAt: new Date() })
+    .where(eq(zones.id, zoneId));
+
+  if (existing?.imageUrl) {
+    await del(existing.imageUrl).catch(() => {});
+  }
+
+  revalidatePath("/zonen");
+  revalidatePath(`/zonen/${zoneId}`);
+}
+
 export async function deleteZone(id: number) {
   const db = getDb();
+  const [existing] = await db
+    .select({ imageUrl: zones.imageUrl })
+    .from(zones)
+    .where(eq(zones.id, id))
+    .limit(1);
+
   await db.delete(zones).where(eq(zones.id, id));
+
+  if (existing?.imageUrl) {
+    await del(existing.imageUrl).catch(() => {});
+  }
+
   revalidatePath("/zonen");
   revalidatePath("/pflanzen");
 }
