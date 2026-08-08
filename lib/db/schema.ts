@@ -26,7 +26,6 @@ export const enrichmentStatusEnum = pgEnum("enrichment_status", [
 export const zones = pgTable("zones", {
   id: serial("id").primaryKey(),
   name: text("name").notNull(),
-  number: integer("number"),
   orderIndex: integer("order_index").notNull().default(0),
   light: lightConditionEnum("light").notNull(),
   orientation: orientationEnum("orientation").notNull(),

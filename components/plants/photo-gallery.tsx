@@ -2,14 +2,15 @@
 
 import { useRef, useState, useTransition } from "react";
 import Image from "next/image";
-import { Plus, Loader2 } from "lucide-react";
+import { Camera, Images, Loader2 } from "lucide-react";
 import { uploadPlantPhoto } from "@/lib/upload-photo";
 import { savePlantPhoto } from "@/lib/actions/plants";
 
 type Photo = { id: number; blobUrl: string; isPrimary: boolean };
 
 export function PhotoGallery({ plantId, photos }: { plantId: number; photos: Photo[] }) {
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const cameraInputRef = useRef<HTMLInputElement>(null);
+  const galleryInputRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
   const [, startTransition] = useTransition();
 
@@ -37,22 +38,35 @@ export function PhotoGallery({ plantId, photos }: { plantId: number; photos: Pho
       ))}
 
       <input
-        ref={fileInputRef}
+        ref={cameraInputRef}
+        type="file"
+        accept="image/*"
+        capture="environment"
+        className="hidden"
+        onChange={handleFile}
+      />
+      <input
+        ref={galleryInputRef}
         type="file"
         accept="image/*"
         className="hidden"
         onChange={handleFile}
       />
       <button
-        onClick={() => fileInputRef.current?.click()}
+        onClick={() => cameraInputRef.current?.click()}
         disabled={uploading}
+        aria-label="Foto mit Kamera aufnehmen"
         className="flex aspect-square items-center justify-center rounded-xl border-2 border-dashed border-border text-forest-muted hover:border-sage disabled:opacity-50"
       >
-        {uploading ? (
-          <Loader2 className="h-5 w-5 animate-spin" />
-        ) : (
-          <Plus className="h-5 w-5" />
-        )}
+        {uploading ? <Loader2 className="h-5 w-5 animate-spin" /> : <Camera className="h-5 w-5" />}
+      </button>
+      <button
+        onClick={() => galleryInputRef.current?.click()}
+        disabled={uploading}
+        aria-label="Foto aus Galerie wählen"
+        className="flex aspect-square items-center justify-center rounded-xl border-2 border-dashed border-border text-forest-muted hover:border-sage disabled:opacity-50"
+      >
+        {uploading ? <Loader2 className="h-5 w-5 animate-spin" /> : <Images className="h-5 w-5" />}
       </button>
     </div>
   );

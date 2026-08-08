@@ -7,7 +7,6 @@ import {
   Cherry,
   Scissors,
   Sprout,
-  Sparkles,
   ChevronDown,
   type LucideIcon,
 } from "lucide-react";
@@ -31,7 +30,6 @@ export function CareInfoGrid({
     wateringNotes: string | null;
     pruningPeriodText: string | null;
     fertilizingPeriodText: string | null;
-    factsText: string | null;
   };
 }) {
   const [openKeys, setOpenKeys] = useState<Set<string>>(new Set());
@@ -87,17 +85,6 @@ export function CareInfoGrid({
       text: plant.fertilizingPeriodText,
       colorClass: "bg-soil/40 text-soil-text",
     },
-    ...(plant.factsText
-      ? [
-          {
-            key: "facts",
-            icon: Sparkles,
-            label: "Wissenswertes",
-            text: plant.factsText,
-            colorClass: "bg-sun/40 text-sun-text",
-          },
-        ]
-      : []),
   ];
 
   return (

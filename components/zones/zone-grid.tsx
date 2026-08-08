@@ -3,13 +3,12 @@
 import { useRef, useState, useTransition } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { MapPin } from "lucide-react";
+import { Leaf, MapPin } from "lucide-react";
 import { reorderZones } from "@/lib/actions/zones";
 
 export type ZoneTile = {
   id: number;
   name: string;
-  number: number | null;
   imageUrl: string | null;
   plantCount: number;
 };
@@ -138,18 +137,15 @@ export function ZoneGrid({ zones }: { zones: ZoneTile[] }) {
                 </div>
               )}
             </div>
-            <div className="px-1">
-              <h3 className="flex items-center gap-1.5 text-sm font-semibold text-forest">
-                {zone.number != null && (
-                  <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-cream text-[11px] font-semibold text-forest-muted">
-                    {zone.number}
-                  </span>
-                )}
-                <span className="truncate">{zone.name}</span>
-              </h3>
-              <p className="truncate text-xs text-forest-muted">
-                {zone.plantCount} {zone.plantCount === 1 ? "Pflanze" : "Pflanzen"}
-              </p>
+            <div className="px-1 text-center">
+              <h3 className="truncate text-base font-semibold text-forest">{zone.name}</h3>
+              {zone.plantCount > 0 && (
+                <div className="mt-1 flex flex-wrap items-center justify-center gap-0.5">
+                  {Array.from({ length: zone.plantCount }).map((_, i) => (
+                    <Leaf key={i} className="h-3 w-3 text-care-text" strokeWidth={2} />
+                  ))}
+                </div>
+              )}
             </div>
           </Link>
         );

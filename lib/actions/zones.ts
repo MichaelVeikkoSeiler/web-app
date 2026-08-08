@@ -9,7 +9,6 @@ import { zones } from "@/lib/db/schema";
 
 const zoneSchema = z.object({
   name: z.string().trim().min(1, "Name ist erforderlich"),
-  number: z.coerce.number().int().optional().nullable(),
   light: z.enum(["schattig", "halbschattig", "sonnig"]),
   orientation: z.enum(["N", "O", "S", "W"]),
   soilType: z.string().trim().optional(),
@@ -29,7 +28,6 @@ export async function createZone(input: ZoneInput) {
     .insert(zones)
     .values({
       name: data.name,
-      number: data.number ?? null,
       light: data.light,
       orientation: data.orientation,
       soilType: data.soilType || null,
@@ -50,7 +48,6 @@ export async function updateZone(id: number, input: ZoneInput) {
     .update(zones)
     .set({
       name: data.name,
-      number: data.number ?? null,
       light: data.light,
       orientation: data.orientation,
       soilType: data.soilType || null,

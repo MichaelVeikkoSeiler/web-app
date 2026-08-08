@@ -69,12 +69,13 @@ export default async function PflanzeDetailPage({
           {plant.germanName ?? plant.scientificName}
         </h1>
         <p className="italic text-forest-muted">{plant.scientificName}</p>
-        {plant.commonName && (
-          <p className="mt-1 text-sm text-forest-muted">„{plant.commonName}“</p>
-        )}
       </div>
 
       <ZoneChips plantId={plant.id} assignedZones={assignedZones} allZones={allZones} />
+
+      {plant.factsText && (
+        <p className="text-sm leading-relaxed text-forest">{plant.factsText}</p>
+      )}
 
       <EnrichmentStatus
         plantId={plant.id}

@@ -22,7 +22,6 @@ export default async function ZonenPage() {
       zones={zoneRows.map((z) => ({
         id: z.id,
         name: z.name,
-        number: z.number,
         imageUrl: z.imageUrl,
         plantCount: countByZone.get(z.id) ?? 0,
       }))}

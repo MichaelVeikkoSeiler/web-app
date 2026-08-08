@@ -73,14 +73,7 @@ export default async function ZoneDetailPage({
       <ZoneImage zoneId={zone.id} imageUrl={zone.imageUrl} name={zone.name} />
 
       <div>
-        <h1 className="flex items-center gap-2 font-display text-3xl text-forest">
-          {zone.number != null && (
-            <span className="flex h-8 w-8 items-center justify-center rounded-full bg-cream text-sm font-semibold text-forest-muted">
-              {zone.number}
-            </span>
-          )}
-          {zone.name}
-        </h1>
+        <h1 className="font-display text-3xl text-forest">{zone.name}</h1>
       </div>
 
       <div className="flex flex-wrap gap-2 text-xs">
@@ -110,7 +103,6 @@ export default async function ZoneDetailPage({
           zone={{
             id: zone.id,
             name: zone.name,
-            number: zone.number,
             light: zone.light,
             orientation: zone.orientation,
             soilType: zone.soilType ?? "",

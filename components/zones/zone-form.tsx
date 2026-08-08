@@ -16,7 +16,6 @@ export function ZoneForm({
 }) {
   const [form, setForm] = useState<ZoneInput>({
     name: zone?.name ?? "",
-    number: zone?.number ?? null,
     light: zone?.light ?? "halbschattig",
     orientation: zone?.orientation ?? "S",
     soilType: zone?.soilType ?? "",
@@ -51,22 +50,6 @@ export function ZoneForm({
           placeholder="z. B. Beet beim Gartenhaus"
           value={form.name}
           onChange={(e) => setForm({ ...form, name: e.target.value })}
-        />
-      </Field>
-
-      <Field label="Nummer (optional)">
-        <input
-          type="number"
-          inputMode="numeric"
-          className={inputClasses}
-          placeholder="z. B. 3"
-          value={form.number ?? ""}
-          onChange={(e) =>
-            setForm({
-              ...form,
-              number: e.target.value === "" ? null : Number(e.target.value),
-            })
-          }
         />
       </Field>
 
