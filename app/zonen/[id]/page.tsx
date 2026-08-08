@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 import { eq } from "drizzle-orm";
 import { Sun, CloudSun, CloudMoon } from "lucide-react";
 import { getDb, isDbConfigured } from "@/lib/db";
-import { zones, plantZoneAssignments, plants } from "@/lib/db/schema";
+import { zones, plantZoneAssignments, plants, plantPhotos } from "@/lib/db/schema";
 import { ZoneImage } from "@/components/zones/zone-image";
 import { ZonePlants } from "@/components/zones/zone-plants";
 import { ZoneDetailActions } from "@/components/zones/zone-detail-actions";
@@ -29,7 +29,7 @@ export default async function ZoneDetailPage({
   const [zone] = await db.select().from(zones).where(eq(zones.id, zoneId)).limit(1);
   if (!zone) notFound();
 
-  const [assignments, allPlants] = await Promise.all([
+  const [assignments, allPlantRows, primaryPhotos] = await Promise.all([
     db
       .select({
         plantId: plants.id,
@@ -46,11 +46,24 @@ export default async function ZoneDetailPage({
         scientificName: plants.scientificName,
       })
       .from(plants),
+    db
+      .select({ plantId: plantPhotos.plantId, blobUrl: plantPhotos.blobUrl })
+      .from(plantPhotos)
+      .where(eq(plantPhotos.isPrimary, true)),
   ]);
+
+  const photoByPlant = new Map(primaryPhotos.map((p) => [p.plantId, p.blobUrl]));
 
   const assignedPlants = assignments.map((a) => ({
     id: a.plantId,
     name: a.germanName ?? a.scientificName,
+    photoUrl: photoByPlant.get(a.plantId) ?? null,
+  }));
+
+  const allPlants = allPlantRows.map((p) => ({
+    id: p.id,
+    name: p.germanName ?? p.scientificName,
+    photoUrl: photoByPlant.get(p.id) ?? null,
   }));
 
   const Icon = lightIcon[zone.light];
@@ -89,10 +102,7 @@ export default async function ZoneDetailPage({
 
       <section className="flex flex-col gap-3">
         <h2 className="font-display text-lg text-forest">Pflanzen</h2>
-        <ZonePlants zoneId={zone.id} assignedPlants={assignedPlants} allPlants={allPlants.map((p) => ({
-          id: p.id,
-          name: p.germanName ?? p.scientificName,
-        }))} />
+        <ZonePlants zoneId={zone.id} assignedPlants={assignedPlants} allPlants={allPlants} />
       </section>
 
       <div className="mt-2 border-t border-border pt-4">
