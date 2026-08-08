@@ -57,10 +57,12 @@ export const plants = pgTable("plants", {
   pruningPeriodText: text("pruning_period_text"),
   pruningStartMonth: integer("pruning_start_month"),
   pruningEndMonth: integer("pruning_end_month"),
+  lastPrunedAt: timestamp("last_pruned_at"),
 
   fertilizingPeriodText: text("fertilizing_period_text"),
   fertilizingStartMonth: integer("fertilizing_start_month"),
   fertilizingEndMonth: integer("fertilizing_end_month"),
+  lastFertilizedAt: timestamp("last_fertilized_at"),
 
   wateringRhythmDays: integer("watering_rhythm_days"),
   wateringNotes: text("watering_notes"),

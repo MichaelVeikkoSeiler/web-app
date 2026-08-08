@@ -145,6 +145,28 @@ export async function waterPlant(plantId: number) {
   revalidatePath("/");
 }
 
+export async function markPruned(plantId: number) {
+  const db = getDb();
+  await db
+    .update(plants)
+    .set({ lastPrunedAt: new Date(), updatedAt: new Date() })
+    .where(eq(plants.id, plantId));
+  revalidatePath(`/pflanzen/${plantId}`);
+  revalidatePath("/pflanzen");
+  revalidatePath("/");
+}
+
+export async function markFertilized(plantId: number) {
+  const db = getDb();
+  await db
+    .update(plants)
+    .set({ lastFertilizedAt: new Date(), updatedAt: new Date() })
+    .where(eq(plants.id, plantId));
+  revalidatePath(`/pflanzen/${plantId}`);
+  revalidatePath("/pflanzen");
+  revalidatePath("/");
+}
+
 export async function deletePlant(plantId: number) {
   const db = getDb();
   const photos = await db

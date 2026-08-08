@@ -35,7 +35,7 @@ Antworte ausschliesslich auf Deutsch und antworte am Ende AUSSCHLIESSLICH mit ei
 }
 
 Regeln:
-- "factsText": 2-4 kurze, interessante Sätze über die Pflanze (Herkunft, Besonderheiten).
+- "factsText": 2-5 kurze, interessante Sätze über die Pflanze (Herkunft, Besonderheiten). Die genaue Anzahl richtet sich danach, wie viel Wissenswertes es zu dieser Pflanze gibt.
 - "isFruitOrBerry": true nur bei Frucht- oder Beerenpflanzen. Wenn false, setze "harvest" auf { "text": null, "startMonth": null, "endMonth": null }.
 - Monate als Zahlen 1-12. Wenn ein Zeitraum den Jahreswechsel überschreitet (z.B. November bis Februar), ist startMonth > endMonth erlaubt.
 - "watering.rhythmDays": typischer Giessrhythmus in Tagen unter normalen Bedingungen (Richtwert als Zahl, z.B. 3 für alle 3 Tage, 7 für wöchentlich).

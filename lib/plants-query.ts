@@ -52,3 +52,38 @@ export async function getPlantCards(): Promise<PlantCardData[]> {
     };
   });
 }
+
+export type TodoItem = {
+  plantId: number;
+  plantName: string;
+  type: "water" | "prune" | "fertilize";
+  label: string;
+};
+
+export async function getTodoItems(): Promise<TodoItem[]> {
+  if (!isDbConfigured) return [];
+
+  const db = getDb();
+  const [allPlants, weather] = await Promise.all([
+    db.select().from(plants),
+    getWeatherSnapshot().catch(() => null),
+  ]);
+  const precipitation = weather?.precipitationLast7Days ?? Infinity;
+  const now = new Date();
+
+  const items: TodoItem[] = [];
+  for (const plant of allPlants) {
+    const help = computeHelpFlags(plant, precipitation, now);
+    const plantName = plant.germanName ?? plant.scientificName;
+    if (help.needsWater) {
+      items.push({ plantId: plant.id, plantName, type: "water", label: "Giessen" });
+    }
+    if (help.needsPruning) {
+      items.push({ plantId: plant.id, plantName, type: "prune", label: "Rückschnitt" });
+    }
+    if (help.needsFertilizing) {
+      items.push({ plantId: plant.id, plantName, type: "fertilize", label: "Düngen" });
+    }
+  }
+  return items;
+}

@@ -92,13 +92,6 @@ export default async function PflanzeDetailPage({
         </section>
       )}
 
-      {plant.factsText && (
-        <section className="flex flex-col gap-2">
-          <h2 className="font-display text-lg text-forest">Wissenswertes</h2>
-          <p className="text-sm leading-relaxed text-forest">{plant.factsText}</p>
-        </section>
-      )}
-
       <section className="flex flex-col gap-3">
         <h2 className="font-display text-lg text-forest">Fotos</h2>
         <PhotoGallery plantId={plant.id} photos={photos} />

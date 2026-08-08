@@ -1,12 +1,14 @@
-import { isMonthInRange, daysSince } from "@/lib/date-utils";
+import { daysSince, isTaskDueThisPeriod } from "@/lib/date-utils";
 
 export type PlantForHelp = {
   wateringRhythmDays: number | null;
   lastWateredAt: Date | null;
   pruningStartMonth: number | null;
   pruningEndMonth: number | null;
+  lastPrunedAt: Date | null;
   fertilizingStartMonth: number | null;
   fertilizingEndMonth: number | null;
+  lastFertilizedAt: Date | null;
 };
 
 export type HelpFlags = {
@@ -31,16 +33,17 @@ export function computeHelpFlags(
       precipitationLast7Days < RAIN_THRESHOLD_MM,
   );
 
-  const currentMonth = now.getMonth() + 1;
-  const needsPruning = isMonthInRange(
-    currentMonth,
+  const needsPruning = isTaskDueThisPeriod(
+    now,
     plant.pruningStartMonth,
     plant.pruningEndMonth,
+    plant.lastPrunedAt,
   );
-  const needsFertilizing = isMonthInRange(
-    currentMonth,
+  const needsFertilizing = isTaskDueThisPeriod(
+    now,
     plant.fertilizingStartMonth,
     plant.fertilizingEndMonth,
+    plant.lastFertilizedAt,
   );
 
   return {
