@@ -32,7 +32,7 @@ export function HeroImage({ initialUrl }: { initialUrl: string | null }) {
 
   return (
     <div className="flex flex-col gap-2">
-      <div className="relative aspect-square w-full overflow-hidden rounded-3xl bg-warm-white">
+      <div className="relative aspect-square w-full overflow-hidden rounded-3xl bg-warm-white sm:aspect-video">
         <input
           ref={fileInputRef}
           type="file"

@@ -3,7 +3,7 @@
 import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-import { Camera, Loader2, Check } from "lucide-react";
+import { Camera, Images, Loader2, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { selectClasses } from "@/components/ui/field";
 import {
@@ -30,7 +30,8 @@ type Step =
 
 export function NewPlantWizard({ zones }: { zones: Zone[] }) {
   const router = useRouter();
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const cameraInputRef = useRef<HTMLInputElement>(null);
+  const galleryInputRef = useRef<HTMLInputElement>(null);
   const [photoFile, setPhotoFile] = useState<File | null>(null);
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
   const [step, setStep] = useState<Step>({ name: "capture" });
@@ -117,7 +118,15 @@ export function NewPlantWizard({ zones }: { zones: Zone[] }) {
 
       <div className="flex flex-col items-center gap-4 rounded-2xl border border-border bg-warm-white p-5">
         <input
-          ref={fileInputRef}
+          ref={cameraInputRef}
+          type="file"
+          accept="image/*"
+          capture="environment"
+          className="hidden"
+          onChange={handlePhotoChange}
+        />
+        <input
+          ref={galleryInputRef}
           type="file"
           accept="image/*"
           className="hidden"
@@ -129,26 +138,25 @@ export function NewPlantWizard({ zones }: { zones: Zone[] }) {
             <Image src={photoPreview} alt="Aufgenommenes Foto" fill className="object-cover" unoptimized />
           </div>
         ) : (
-          <button
-            onClick={() => fileInputRef.current?.click()}
-            className="flex aspect-square w-full max-w-xs flex-col items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-border text-forest-muted"
-          >
+          <div className="flex aspect-square w-full max-w-xs flex-col items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-border text-forest-muted">
             <Camera className="h-10 w-10" strokeWidth={1.5} />
             <span className="text-sm font-medium">Foto aufnehmen oder wählen</span>
-          </button>
+          </div>
         )}
 
-        {photoPreview && (
-          <div className="flex w-full gap-2">
-            <Button variant="secondary" className="flex-1" onClick={() => fileInputRef.current?.click()}>
-              Anderes Foto
-            </Button>
-            {step.name === "capture" && (
-              <Button className="flex-1" onClick={runIdentify}>
-                Erkennen
-              </Button>
-            )}
-          </div>
+        <div className="flex w-full gap-2">
+          <Button variant="secondary" className="flex-1" onClick={() => cameraInputRef.current?.click()}>
+            <Camera className="h-4 w-4" /> Kamera
+          </Button>
+          <Button variant="secondary" className="flex-1" onClick={() => galleryInputRef.current?.click()}>
+            <Images className="h-4 w-4" /> Galerie
+          </Button>
+        </div>
+
+        {photoPreview && step.name === "capture" && (
+          <Button className="w-full" onClick={runIdentify}>
+            Erkennen
+          </Button>
         )}
       </div>
 
