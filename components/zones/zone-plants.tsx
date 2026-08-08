@@ -50,16 +50,25 @@ export function ZonePlants({
         {assignedPlants.map((p) => (
           <span
             key={p.id}
-            className="flex items-center gap-1.5 rounded-full bg-bloom/40 py-1.5 pl-3 pr-1.5 text-sm text-bloom-text"
+            className="flex items-center gap-2 rounded-xl border border-border bg-warm-white py-1.5 pl-1.5 pr-2"
           >
-            <Link href={`/pflanzen/${p.id}`} className="hover:underline">
-              {p.name}
+            <Link href={`/pflanzen/${p.id}`} className="flex items-center gap-2">
+              <span className="relative h-9 w-9 shrink-0 overflow-hidden rounded-lg bg-cream">
+                {p.photoUrl ? (
+                  <Image src={p.photoUrl} alt="" fill sizes="36px" className="object-cover" />
+                ) : (
+                  <span className="flex h-full items-center justify-center text-forest-muted/40">
+                    <Leaf className="h-4 w-4" strokeWidth={1.5} />
+                  </span>
+                )}
+              </span>
+              <span className="text-sm text-forest hover:underline">{p.name}</span>
             </Link>
             <button
               aria-label={`${p.name} aus Zone entfernen`}
               disabled={pending && busyId === p.id}
               onClick={() => handleRemove(p.id)}
-              className="flex h-5 w-5 items-center justify-center rounded-full hover:bg-bloom-text/20 disabled:opacity-50"
+              className="flex h-6 w-6 items-center justify-center rounded-full text-forest-muted hover:bg-cream disabled:opacity-50"
             >
               <X className="h-3.5 w-3.5" />
             </button>

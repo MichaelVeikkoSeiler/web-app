@@ -34,11 +34,14 @@ export default async function PflanzeDetailPage({
       .orderBy(plantPhotos.isPrimary),
     db.select().from(plantNotes).where(eq(plantNotes.plantId, plantId)).orderBy(plantNotes.createdAt),
     db
-      .select({ id: zones.id, name: zones.name })
+      .select({ id: zones.id, name: zones.name, imageUrl: zones.imageUrl })
       .from(plantZoneAssignments)
       .innerJoin(zones, eq(plantZoneAssignments.zoneId, zones.id))
       .where(eq(plantZoneAssignments.plantId, plantId)),
-    db.select({ id: zones.id, name: zones.name }).from(zones).orderBy(zones.name),
+    db
+      .select({ id: zones.id, name: zones.name, imageUrl: zones.imageUrl })
+      .from(zones)
+      .orderBy(zones.name),
   ]);
 
   const primaryPhoto = photos.find((p) => p.isPrimary) ?? photos[0];

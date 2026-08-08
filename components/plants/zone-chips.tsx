@@ -1,9 +1,13 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { Plus, X } from "lucide-react";
+import Link from "next/link";
+import Image from "next/image";
+import { Plus, X, MapPin } from "lucide-react";
 import { addZoneAssignment, removeZoneAssignment } from "@/lib/actions/plants";
 import { selectClasses } from "@/components/ui/field";
+
+type Zone = { id: number; name: string; imageUrl: string | null };
 
 export function ZoneChips({
   plantId,
@@ -11,8 +15,8 @@ export function ZoneChips({
   allZones,
 }: {
   plantId: number;
-  assignedZones: { id: number; name: string }[];
-  allZones: { id: number; name: string }[];
+  assignedZones: Zone[];
+  allZones: Zone[];
 }) {
   const [adding, setAdding] = useState(false);
   const [pending, startTransition] = useTransition();
@@ -34,14 +38,25 @@ export function ZoneChips({
       {assignedZones.map((z) => (
         <span
           key={z.id}
-          className="flex items-center gap-1.5 rounded-full bg-care/40 py-1.5 pl-3 pr-1.5 text-sm text-care-text"
+          className="flex items-center gap-2 rounded-xl border border-border bg-warm-white py-1.5 pl-1.5 pr-2"
         >
-          {z.name}
+          <Link href={`/zonen/${z.id}`} className="flex items-center gap-2">
+            <span className="relative h-9 w-9 shrink-0 overflow-hidden rounded-lg bg-cream">
+              {z.imageUrl ? (
+                <Image src={z.imageUrl} alt="" fill sizes="36px" className="object-cover" />
+              ) : (
+                <span className="flex h-full items-center justify-center text-forest-muted/40">
+                  <MapPin className="h-4 w-4" strokeWidth={1.5} />
+                </span>
+              )}
+            </span>
+            <span className="text-sm text-forest hover:underline">{z.name}</span>
+          </Link>
           <button
             aria-label={`Zone ${z.name} entfernen`}
             disabled={pending && removingId === z.id}
             onClick={() => handleRemove(z.id)}
-            className="flex h-5 w-5 items-center justify-center rounded-full hover:bg-care-text/20 disabled:opacity-50"
+            className="flex h-6 w-6 items-center justify-center rounded-full text-forest-muted hover:bg-cream disabled:opacity-50"
           >
             <X className="h-3.5 w-3.5" />
           </button>
