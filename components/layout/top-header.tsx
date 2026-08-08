@@ -15,13 +15,13 @@ export function TopHeader({ logoUrl }: { logoUrl: string | null }) {
         <div className="flex items-center gap-3">
           <LogoUpload initialUrl={logoUrl} />
           <Link href="/" className="font-display text-lg text-forest sm:text-xl">
-            GartenApp
+            Seilers Garten
           </Link>
         </div>
 
         <nav className="hidden items-center gap-1 sm:flex">
           {navItems.map(({ href, label, icon: Icon }) => {
-            const active = href === "/" ? pathname === "/" : pathname.startsWith(href);
+            const active = pathname.startsWith(href);
             return (
               <Link
                 key={href}

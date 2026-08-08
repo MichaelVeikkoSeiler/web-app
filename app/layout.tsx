@@ -10,7 +10,7 @@ const quicksand = Quicksand({
 });
 
 export const metadata: Metadata = {
-  title: "GartenApp",
+  title: "Seilers Garten",
   description: "Das digitale Gartenjournal für unsere Familie",
 };
 
@@ -24,9 +24,9 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="de"
-      className={`${quicksand.variable} h-full antialiased`}
+      className={`${quicksand.variable} h-full overflow-x-hidden antialiased`}
     >
-      <body className="min-h-full flex flex-col bg-cream text-forest">
+      <body className="min-h-full flex flex-col overflow-x-hidden bg-cream text-forest">
         <AppShell>{children}</AppShell>
       </body>
     </html>

@@ -7,7 +7,6 @@ import { plants, plantPhotos, plantNotes, plantZoneAssignments, zones } from "@/
 import { CareInfoGrid } from "@/components/plants/care-info-grid";
 import { NoteList } from "@/components/plants/note-list";
 import { PhotoGallery } from "@/components/plants/photo-gallery";
-import { WaterButton } from "@/components/plants/water-button";
 import { EnrichmentStatus } from "@/components/plants/enrichment-status";
 import { ZoneChips } from "@/components/plants/zone-chips";
 import { DeletePlantButton } from "@/components/plants/delete-plant-button";
@@ -76,8 +75,6 @@ export default async function PflanzeDetailPage({
       </div>
 
       <ZoneChips plantId={plant.id} assignedZones={assignedZones} allZones={allZones} />
-
-      <WaterButton plantId={plant.id} lastWateredAt={plant.lastWateredAt} />
 
       <EnrichmentStatus
         plantId={plant.id}

@@ -12,7 +12,9 @@ export default async function Home() {
 
   return (
     <div className="flex flex-col gap-6">
-      <HeroImage initialUrl={heroImageUrl} />
+      <div className="relative left-1/2 -mt-4 w-screen -ml-[50vw] sm:-mt-8">
+        <HeroImage initialUrl={heroImageUrl} />
+      </div>
 
       <div className="text-center">
         <h1 className="font-display text-3xl text-forest sm:text-4xl">

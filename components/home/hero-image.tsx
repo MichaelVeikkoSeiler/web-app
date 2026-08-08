@@ -32,7 +32,7 @@ export function HeroImage({ initialUrl }: { initialUrl: string | null }) {
 
   return (
     <div className="flex flex-col gap-2">
-      <div className="relative aspect-square w-full overflow-hidden rounded-3xl bg-warm-white sm:aspect-video">
+      <div className="relative aspect-square w-full overflow-hidden rounded-b-3xl bg-warm-white sm:aspect-video">
         <input
           ref={fileInputRef}
           type="file"
@@ -47,7 +47,7 @@ export function HeroImage({ initialUrl }: { initialUrl: string | null }) {
               src={url}
               alt="Unser Garten"
               fill
-              sizes="(max-width: 768px) 100vw, 896px"
+              sizes="100vw"
               className="object-cover"
               priority
             />

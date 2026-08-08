@@ -11,7 +11,7 @@ export function BottomNav() {
   return (
     <nav className="safe-bottom fixed inset-x-0 bottom-0 z-40 border-t border-border bg-warm-white/95 backdrop-blur sm:hidden">
       <div className="relative mx-auto flex max-w-lg items-center justify-around px-2 pt-2">
-        {navItems.slice(0, 2).map((item) => (
+        {navItems.slice(0, 1).map((item) => (
           <NavLink key={item.href} {...item} active={isActive(pathname, item.href)} />
         ))}
 
@@ -23,7 +23,7 @@ export function BottomNav() {
           <Plus className="h-7 w-7" strokeWidth={2.5} />
         </Link>
 
-        {navItems.slice(2).map((item) => (
+        {navItems.slice(1).map((item) => (
           <NavLink key={item.href} {...item} active={isActive(pathname, item.href)} />
         ))}
       </div>
