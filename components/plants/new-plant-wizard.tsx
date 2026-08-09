@@ -1,10 +1,11 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-import { Camera, Images, Loader2, Check } from "lucide-react";
+import { Camera, Images, Loader2, Check, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { inputClasses } from "@/components/ui/field";
 import { ZoneMultiSelect } from "@/components/zones/zone-multi-select";
 import {
   identifyPlant,
@@ -12,6 +13,7 @@ import {
   createPlantAndAssign,
   addZoneAssignments,
   savePlantPhoto,
+  searchSpecies,
 } from "@/lib/actions/plants";
 import { uploadPlantPhoto } from "@/lib/upload-photo";
 import type { PlantNetCandidate } from "@/lib/plantnet";
@@ -220,6 +222,8 @@ export function NewPlantWizard({
               ))}
             </>
           )}
+
+          <ManualSpeciesSearch onSelect={(scientificName) => pickCandidate(makeManualCandidate(scientificName))} />
         </div>
       )}
 
@@ -259,6 +263,88 @@ function StatusBox({ icon, text }: { icon: React.ReactNode; text: string }) {
     <div className="flex items-center gap-3 rounded-2xl border border-border bg-warm-white px-4 py-4 text-sm text-forest-muted">
       {icon}
       {text}
+    </div>
+  );
+}
+
+function makeManualCandidate(scientificName: string): PlantNetCandidate {
+  return { scientificName, commonNames: [], family: "", score: 0 };
+}
+
+function ManualSpeciesSearch({ onSelect }: { onSelect: (scientificName: string) => void }) {
+  const [open, setOpen] = useState(false);
+  const [query, setQuery] = useState("");
+  const [results, setResults] = useState<{ scientificName: string }[]>([]);
+  const [searching, setSearching] = useState(false);
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+
+    debounceRef.current = setTimeout(async () => {
+      const trimmed = query.trim();
+      if (trimmed.length === 0) {
+        setResults([]);
+        setSearching(false);
+        return;
+      }
+      setSearching(true);
+      const r = await searchSpecies(query);
+      setResults(r);
+      setSearching(false);
+    }, 250);
+
+    return () => {
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+    };
+  }, [query]);
+
+  if (!open) {
+    return (
+      <button
+        onClick={() => setOpen(true)}
+        className="flex items-center gap-2 self-start text-sm font-medium text-forest-muted hover:text-forest"
+      >
+        <Search className="h-4 w-4" />
+        Art nicht dabei? Manuell eingeben
+      </button>
+    );
+  }
+
+  return (
+    <div className="flex flex-col gap-3 rounded-2xl border border-border bg-warm-white p-4">
+      <input
+        autoFocus
+        value={query}
+        onChange={(e) => setQuery(e.target.value)}
+        placeholder="Pflanzenart suchen…"
+        className={inputClasses}
+      />
+
+      {searching && (
+        <div className="flex items-center gap-2 text-sm text-forest-muted">
+          <Loader2 className="h-4 w-4 animate-spin" />
+          Suche…
+        </div>
+      )}
+
+      {!searching && results.length > 0 && (
+        <div className="flex flex-col gap-1">
+          {results.map((r) => (
+            <button
+              key={r.scientificName}
+              onClick={() => onSelect(r.scientificName)}
+              className="rounded-xl px-3 py-2 text-left text-sm italic text-forest hover:bg-cream"
+            >
+              {r.scientificName}
+            </button>
+          ))}
+        </div>
+      )}
+
+      {!searching && query.trim().length > 0 && results.length === 0 && (
+        <p className="text-sm text-forest-muted">Keine Treffer.</p>
+      )}
     </div>
   );
 }
