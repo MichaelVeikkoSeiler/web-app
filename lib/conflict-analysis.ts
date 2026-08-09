@@ -47,7 +47,7 @@ async function analyzeConflict(input: {
 
   const response = await client.responses.create({
     model: "gpt-5.6-terra",
-    max_output_tokens: 600,
+    max_output_tokens: 2000,
     tools: [{ type: "web_search" }],
     input: [
       { type: "message", role: "system", content: SYSTEM_PROMPT },
