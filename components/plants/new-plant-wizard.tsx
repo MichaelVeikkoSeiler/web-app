@@ -28,7 +28,13 @@ type Step =
   | { name: "new-zone"; candidate: PlantNetCandidate }
   | { name: "saving" };
 
-export function NewPlantWizard({ zones }: { zones: Zone[] }) {
+export function NewPlantWizard({
+  zones,
+  initialZoneId = null,
+}: {
+  zones: Zone[];
+  initialZoneId?: number | null;
+}) {
   const router = useRouter();
   const cameraInputRef = useRef<HTMLInputElement>(null);
   const galleryInputRef = useRef<HTMLInputElement>(null);
@@ -57,6 +63,21 @@ export function NewPlantWizard({ zones }: { zones: Zone[] }) {
   async function pickCandidate(candidate: PlantNetCandidate) {
     setStep({ name: "checking", candidate });
     const existing = await findExistingPlant(candidate.scientificName);
+
+    if (initialZoneId) {
+      if (existing) {
+        const alreadyInZone = existing.assignedZones.some((z) => z.id === initialZoneId);
+        if (alreadyInZone) {
+          await confirmSameZone(existing.plant.id);
+        } else {
+          await confirmAdditionalZone(existing.plant.id, [initialZoneId]);
+        }
+      } else {
+        await confirmNewPlant(candidate, [initialZoneId]);
+      }
+      return;
+    }
+
     if (existing) {
       setStep({ name: "existing", candidate, existing });
     } else {
