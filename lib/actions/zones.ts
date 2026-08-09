@@ -82,6 +82,27 @@ export async function saveZoneImage(zoneId: number, blobUrl: string) {
   revalidatePath(`/zonen/${zoneId}`);
 }
 
+export async function clearZoneImage(zoneId: number) {
+  const db = getDb();
+  const [existing] = await db
+    .select({ imageUrl: zones.imageUrl })
+    .from(zones)
+    .where(eq(zones.id, zoneId))
+    .limit(1);
+
+  await db
+    .update(zones)
+    .set({ imageUrl: null, updatedAt: new Date() })
+    .where(eq(zones.id, zoneId));
+
+  if (existing?.imageUrl) {
+    await del(existing.imageUrl).catch(() => {});
+  }
+
+  revalidatePath("/zonen");
+  revalidatePath(`/zonen/${zoneId}`);
+}
+
 export async function deleteZone(id: number) {
   const db = getDb();
   const [existing] = await db

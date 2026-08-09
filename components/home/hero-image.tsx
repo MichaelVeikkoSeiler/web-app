@@ -1,10 +1,10 @@
 "use client";
 
-import { useRef, useState, useTransition } from "react";
+import { useRef, useState } from "react";
 import Image from "next/image";
-import { Camera, ChevronLeft, ChevronRight, Loader2, Plus } from "lucide-react";
+import { Camera, ChevronLeft, ChevronRight, Loader2, Plus, Trash2 } from "lucide-react";
 import { uploadHeroImage } from "@/lib/upload-photo";
-import { addHeroImage, type HeroPhoto } from "@/lib/actions/settings";
+import { addHeroImage, deleteHeroImage, type HeroPhoto } from "@/lib/actions/settings";
 
 export function HeroImage({ initialPhotos }: { initialPhotos: HeroPhoto[] }) {
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -13,8 +13,8 @@ export function HeroImage({ initialPhotos }: { initialPhotos: HeroPhoto[] }) {
     index: 0,
   });
   const [uploading, setUploading] = useState(false);
+  const [deletingId, setDeletingId] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [, startTransition] = useTransition();
   const touchStartX = useRef<number | null>(null);
 
   const current = photos[index];
@@ -31,18 +31,39 @@ export function HeroImage({ initialPhotos }: { initialPhotos: HeroPhoto[] }) {
     if (!file) return;
     setUploading(true);
     setError(null);
+    const tempId = -Date.now();
     try {
       const url = await uploadHeroImage(file);
       setState((prev) => {
-        const nextPhotos = [...prev.photos, { id: -Date.now(), blobUrl: url }];
+        const nextPhotos = [...prev.photos, { id: tempId, blobUrl: url }];
         return { photos: nextPhotos, index: nextPhotos.length - 1 };
       });
-      startTransition(() => addHeroImage(url));
+      const saved = await addHeroImage(url);
+      setState((prev) => ({
+        ...prev,
+        photos: prev.photos.map((p) => (p.id === tempId ? saved : p)),
+      }));
     } catch {
       setError("Upload fehlgeschlagen. Ist das Bild kleiner als 30 MB?");
     } finally {
       setUploading(false);
       e.target.value = "";
+    }
+  }
+
+  async function handleDelete() {
+    if (!current || current.id < 0) return;
+    const id = current.id;
+    setDeletingId(id);
+    try {
+      await deleteHeroImage(id);
+      setState((prev) => {
+        const nextPhotos = prev.photos.filter((p) => p.id !== id);
+        const nextIndex = nextPhotos.length === 0 ? 0 : Math.min(prev.index, nextPhotos.length - 1);
+        return { photos: nextPhotos, index: nextIndex };
+      });
+    } finally {
+      setDeletingId(null);
     }
   }
 
@@ -58,6 +79,8 @@ export function HeroImage({ initialPhotos }: { initialPhotos: HeroPhoto[] }) {
     if (delta > SWIPE_THRESHOLD) goTo(index - 1);
     else if (delta < -SWIPE_THRESHOLD) goTo(index + 1);
   }
+
+  const deleting = current ? deletingId === current.id : false;
 
   return (
     <div className="flex flex-col gap-2">
@@ -103,18 +126,32 @@ export function HeroImage({ initialPhotos }: { initialPhotos: HeroPhoto[] }) {
           )}
 
           {current && (
-            <button
-              onClick={() => fileInputRef.current?.click()}
-              disabled={uploading}
-              aria-label="Foto hinzufügen"
-              className="absolute right-3 top-3 flex h-10 w-10 items-center justify-center rounded-full bg-warm-white/90 text-forest shadow-sm backdrop-blur hover:bg-warm-white disabled:opacity-50"
-            >
-              {uploading ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : (
-                <Plus className="h-4 w-4" />
-              )}
-            </button>
+            <div className="absolute right-3 top-3 flex gap-2">
+              <button
+                onClick={handleDelete}
+                disabled={uploading || deleting || current.id < 0}
+                aria-label="Foto löschen"
+                className="flex h-10 w-10 items-center justify-center rounded-full bg-warm-white/90 text-forest shadow-sm backdrop-blur hover:bg-attention/20 hover:text-attention-text disabled:opacity-50"
+              >
+                {deleting ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Trash2 className="h-4 w-4" />
+                )}
+              </button>
+              <button
+                onClick={() => fileInputRef.current?.click()}
+                disabled={uploading || deleting}
+                aria-label="Foto hinzufügen"
+                className="flex h-10 w-10 items-center justify-center rounded-full bg-warm-white/90 text-forest shadow-sm backdrop-blur hover:bg-warm-white disabled:opacity-50"
+              >
+                {uploading ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Plus className="h-4 w-4" />
+                )}
+              </button>
+            </div>
           )}
 
           {photos.length > 1 && (

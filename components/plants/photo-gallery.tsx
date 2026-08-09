@@ -2,9 +2,9 @@
 
 import { useRef, useState, useTransition } from "react";
 import Image from "next/image";
-import { Camera, Images, Loader2 } from "lucide-react";
+import { Camera, Images, Loader2, X } from "lucide-react";
 import { uploadPlantPhoto } from "@/lib/upload-photo";
-import { savePlantPhoto } from "@/lib/actions/plants";
+import { savePlantPhoto, deletePlantPhoto } from "@/lib/actions/plants";
 
 type Photo = { id: number; blobUrl: string; isPrimary: boolean };
 
@@ -12,7 +12,8 @@ export function PhotoGallery({ plantId, photos }: { plantId: number; photos: Pho
   const cameraInputRef = useRef<HTMLInputElement>(null);
   const galleryInputRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
-  const [, startTransition] = useTransition();
+  const [pending, startTransition] = useTransition();
+  const [deletingId, setDeletingId] = useState<number | null>(null);
 
   async function handleFile(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -29,11 +30,31 @@ export function PhotoGallery({ plantId, photos }: { plantId: number; photos: Pho
     }
   }
 
+  function handleDelete(photoId: number) {
+    setDeletingId(photoId);
+    startTransition(async () => {
+      await deletePlantPhoto(photoId, plantId);
+      setDeletingId(null);
+    });
+  }
+
   return (
     <div className="grid grid-cols-3 gap-2 sm:grid-cols-4">
       {photos.map((p) => (
         <div key={p.id} className="relative aspect-square overflow-hidden rounded-xl bg-cream">
           <Image src={p.blobUrl} alt="" fill sizes="150px" className="object-cover" />
+          <button
+            onClick={() => handleDelete(p.id)}
+            disabled={pending && deletingId === p.id}
+            aria-label="Foto löschen"
+            className="absolute right-1 top-1 flex h-6 w-6 items-center justify-center rounded-full bg-forest/70 text-warm-white hover:bg-attention disabled:opacity-50"
+          >
+            {pending && deletingId === p.id ? (
+              <Loader2 className="h-3.5 w-3.5 animate-spin" />
+            ) : (
+              <X className="h-3.5 w-3.5" />
+            )}
+          </button>
         </div>
       ))}
 

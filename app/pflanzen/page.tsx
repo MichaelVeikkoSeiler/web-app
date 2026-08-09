@@ -1,5 +1,9 @@
 import { getPlantsGroupedByZone } from "@/lib/plants-query";
-import { getPlantsHeroImageUrl, setPlantsHeroImage } from "@/lib/actions/settings";
+import {
+  getPlantsHeroImageUrl,
+  setPlantsHeroImage,
+  clearPlantsHeroImage,
+} from "@/lib/actions/settings";
 import { PlantsOverview } from "@/components/plants/plants-overview";
 import { HeroBanner } from "@/components/layout/hero-banner";
 
@@ -16,6 +20,7 @@ export default async function PflanzenPage() {
         alt="Pflanzen"
         uploadLabel="Bild hochladen"
         onUpload={setPlantsHeroImage}
+        onDelete={clearPlantsHeroImage}
       />
       <PlantsOverview totalCount={totalCount} groups={groups} />
     </div>

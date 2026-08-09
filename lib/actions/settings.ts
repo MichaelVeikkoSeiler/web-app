@@ -1,7 +1,8 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { sql } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
+import { del } from "@vercel/blob";
 import { getDb, isDbConfigured } from "@/lib/db";
 import { settings, heroImages } from "@/lib/db/schema";
 
@@ -28,12 +29,30 @@ export async function getHeroImages(): Promise<HeroPhoto[]> {
   return rows;
 }
 
-export async function addHeroImage(url: string) {
+export async function addHeroImage(url: string): Promise<HeroPhoto> {
   const db = getDb();
   const [{ maxOrder }] = await db
     .select({ maxOrder: sql<number>`coalesce(max(${heroImages.orderIndex}), -1)` })
     .from(heroImages);
-  await db.insert(heroImages).values({ blobUrl: url, orderIndex: maxOrder + 1 });
+  const [row] = await db
+    .insert(heroImages)
+    .values({ blobUrl: url, orderIndex: maxOrder + 1 })
+    .returning({ id: heroImages.id, blobUrl: heroImages.blobUrl });
+  revalidatePath("/");
+  return row;
+}
+
+export async function deleteHeroImage(id: number) {
+  const db = getDb();
+  const [row] = await db
+    .select({ blobUrl: heroImages.blobUrl })
+    .from(heroImages)
+    .where(eq(heroImages.id, id))
+    .limit(1);
+  if (!row) return;
+
+  await db.delete(heroImages).where(eq(heroImages.id, id));
+  await del(row.blobUrl).catch(() => {});
   revalidatePath("/");
 }
 
@@ -44,13 +63,39 @@ export async function getPlantsHeroImageUrl(): Promise<string | null> {
 }
 
 export async function setPlantsHeroImage(url: string) {
-  await getDb()
+  const db = getDb();
+  const [existing] = await db
+    .select({ url: settings.plantsHeroImageUrl })
+    .from(settings)
+    .where(eq(settings.id, 1))
+    .limit(1);
+
+  await db
     .insert(settings)
     .values({ id: 1, plantsHeroImageUrl: url })
     .onConflictDoUpdate({
       target: settings.id,
       set: { plantsHeroImageUrl: url, updatedAt: new Date() },
     });
+
+  if (existing?.url) await del(existing.url).catch(() => {});
+  revalidatePath("/pflanzen");
+}
+
+export async function clearPlantsHeroImage() {
+  const db = getDb();
+  const [existing] = await db
+    .select({ url: settings.plantsHeroImageUrl })
+    .from(settings)
+    .where(eq(settings.id, 1))
+    .limit(1);
+
+  await db
+    .update(settings)
+    .set({ plantsHeroImageUrl: null, updatedAt: new Date() })
+    .where(eq(settings.id, 1));
+
+  if (existing?.url) await del(existing.url).catch(() => {});
   revalidatePath("/pflanzen");
 }
 
@@ -61,13 +106,39 @@ export async function getZonesHeroImageUrl(): Promise<string | null> {
 }
 
 export async function setZonesHeroImage(url: string) {
-  await getDb()
+  const db = getDb();
+  const [existing] = await db
+    .select({ url: settings.zonesHeroImageUrl })
+    .from(settings)
+    .where(eq(settings.id, 1))
+    .limit(1);
+
+  await db
     .insert(settings)
     .values({ id: 1, zonesHeroImageUrl: url })
     .onConflictDoUpdate({
       target: settings.id,
       set: { zonesHeroImageUrl: url, updatedAt: new Date() },
     });
+
+  if (existing?.url) await del(existing.url).catch(() => {});
+  revalidatePath("/zonen");
+}
+
+export async function clearZonesHeroImage() {
+  const db = getDb();
+  const [existing] = await db
+    .select({ url: settings.zonesHeroImageUrl })
+    .from(settings)
+    .where(eq(settings.id, 1))
+    .limit(1);
+
+  await db
+    .update(settings)
+    .set({ zonesHeroImageUrl: null, updatedAt: new Date() })
+    .where(eq(settings.id, 1));
+
+  if (existing?.url) await del(existing.url).catch(() => {});
   revalidatePath("/zonen");
 }
 

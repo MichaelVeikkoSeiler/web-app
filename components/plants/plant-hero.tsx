@@ -1,20 +1,36 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useRef, useState, useTransition } from "react";
 import Image from "next/image";
-import { ChevronLeft, ChevronRight, Leaf } from "lucide-react";
+import { ChevronLeft, ChevronRight, Leaf, Loader2, Trash2 } from "lucide-react";
+import { deletePlantPhoto } from "@/lib/actions/plants";
 
 type Photo = { id: number; blobUrl: string; isPrimary: boolean };
 
-export function PlantHero({ photos, alt }: { photos: Photo[]; alt: string }) {
+export function PlantHero({
+  plantId,
+  photos,
+  alt,
+}: {
+  plantId: number;
+  photos: Photo[];
+  alt: string;
+}) {
   const ordered = [...photos].sort((a, b) => Number(b.isPrimary) - Number(a.isPrimary));
   const [index, setIndex] = useState(0);
+  const [pending, startTransition] = useTransition();
   const touchStartX = useRef<number | null>(null);
 
-  const current = ordered[index];
+  const safeIndex = ordered.length > 0 ? Math.min(index, ordered.length - 1) : 0;
+  const current = ordered[safeIndex];
 
   function goTo(i: number) {
     setIndex((i + ordered.length) % ordered.length);
+  }
+
+  function handleDelete() {
+    if (!current) return;
+    startTransition(() => deletePlantPhoto(current.id, plantId));
   }
 
   function onTouchStart(e: React.TouchEvent) {
@@ -26,8 +42,8 @@ export function PlantHero({ photos, alt }: { photos: Photo[]; alt: string }) {
     const delta = e.changedTouches[0].clientX - touchStartX.current;
     touchStartX.current = null;
     const SWIPE_THRESHOLD = 40;
-    if (delta > SWIPE_THRESHOLD) goTo(index - 1);
-    else if (delta < -SWIPE_THRESHOLD) goTo(index + 1);
+    if (delta > SWIPE_THRESHOLD) goTo(safeIndex - 1);
+    else if (delta < -SWIPE_THRESHOLD) goTo(safeIndex + 1);
   }
 
   return (
@@ -52,17 +68,28 @@ export function PlantHero({ photos, alt }: { photos: Photo[]; alt: string }) {
         </div>
       )}
 
+      {current && (
+        <button
+          onClick={handleDelete}
+          disabled={pending}
+          aria-label="Foto löschen"
+          className="absolute right-3 top-3 flex h-10 w-10 items-center justify-center rounded-full bg-warm-white/90 text-forest shadow-sm backdrop-blur hover:bg-attention/20 hover:text-attention-text disabled:opacity-50"
+        >
+          {pending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
+        </button>
+      )}
+
       {ordered.length > 1 && (
         <>
           <button
-            onClick={() => goTo(index - 1)}
+            onClick={() => goTo(safeIndex - 1)}
             aria-label="Vorheriges Foto"
             className="absolute left-3 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-forest/60 text-warm-white backdrop-blur-sm hover:bg-forest/80"
           >
             <ChevronLeft className="h-5 w-5" />
           </button>
           <button
-            onClick={() => goTo(index + 1)}
+            onClick={() => goTo(safeIndex + 1)}
             aria-label="Nächstes Foto"
             className="absolute right-3 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-forest/60 text-warm-white backdrop-blur-sm hover:bg-forest/80"
           >
@@ -76,7 +103,7 @@ export function PlantHero({ photos, alt }: { photos: Photo[]; alt: string }) {
                 onClick={() => goTo(i)}
                 aria-label={`Foto ${i + 1} anzeigen`}
                 className={`h-1.5 rounded-full transition-all ${
-                  i === index ? "w-4 bg-warm-white" : "w-1.5 bg-warm-white/50"
+                  i === safeIndex ? "w-4 bg-warm-white" : "w-1.5 bg-warm-white/50"
                 }`}
               />
             ))}

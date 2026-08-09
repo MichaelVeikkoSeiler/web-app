@@ -1,6 +1,10 @@
 import { getDb, isDbConfigured } from "@/lib/db";
 import { zones, plantZoneAssignments } from "@/lib/db/schema";
-import { getZonesHeroImageUrl, setZonesHeroImage } from "@/lib/actions/settings";
+import {
+  getZonesHeroImageUrl,
+  setZonesHeroImage,
+  clearZonesHeroImage,
+} from "@/lib/actions/settings";
 import { ZoneList } from "@/components/zones/zone-list";
 import { HeroBanner } from "@/components/layout/hero-banner";
 
@@ -27,6 +31,7 @@ export default async function ZonenPage() {
         alt="Zonen"
         uploadLabel="Bild hochladen"
         onUpload={setZonesHeroImage}
+        onDelete={clearZonesHeroImage}
       />
       <ZoneList
         zones={zoneRows.map((z) => ({

@@ -155,6 +155,34 @@ export async function savePlantPhoto(
   revalidatePath("/pflanzen");
 }
 
+export async function deletePlantPhoto(photoId: number, plantId: number) {
+  const db = getDb();
+  const [photo] = await db
+    .select()
+    .from(plantPhotos)
+    .where(eq(plantPhotos.id, photoId))
+    .limit(1);
+  if (!photo) return;
+
+  await db.delete(plantPhotos).where(eq(plantPhotos.id, photoId));
+  await del(photo.blobUrl).catch(() => {});
+
+  if (photo.isPrimary) {
+    const [next] = await db
+      .select({ id: plantPhotos.id })
+      .from(plantPhotos)
+      .where(eq(plantPhotos.plantId, plantId))
+      .limit(1);
+    if (next) {
+      await db.update(plantPhotos).set({ isPrimary: true }).where(eq(plantPhotos.id, next.id));
+    }
+  }
+
+  revalidatePath(`/pflanzen/${plantId}`);
+  revalidatePath("/pflanzen");
+  revalidatePath("/");
+}
+
 export async function addNote(plantId: number, text: string) {
   const trimmed = text.trim();
   if (!trimmed) return;

@@ -2,7 +2,7 @@
 
 import { useRef, useState, useTransition } from "react";
 import Image from "next/image";
-import { Camera, Loader2, Pencil } from "lucide-react";
+import { Camera, Loader2, Pencil, Trash2 } from "lucide-react";
 import { uploadHeroImage } from "@/lib/upload-photo";
 
 export function HeroBanner({
@@ -10,15 +10,18 @@ export function HeroBanner({
   alt,
   uploadLabel,
   onUpload,
+  onDelete,
 }: {
   initialUrl: string | null;
   alt: string;
   uploadLabel: string;
   onUpload: (url: string) => Promise<void>;
+  onDelete: () => Promise<void>;
 }) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [url, setUrl] = useState(initialUrl);
   const [uploading, setUploading] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [, startTransition] = useTransition();
 
@@ -36,6 +39,16 @@ export function HeroBanner({
     } finally {
       setUploading(false);
       e.target.value = "";
+    }
+  }
+
+  async function handleDelete() {
+    setDeleting(true);
+    try {
+      await onDelete();
+      setUrl(null);
+    } finally {
+      setDeleting(false);
     }
   }
 
@@ -61,18 +74,32 @@ export function HeroBanner({
                 className="object-cover"
                 priority
               />
-              <button
-                onClick={() => fileInputRef.current?.click()}
-                disabled={uploading}
-                className="absolute right-3 top-3 flex h-10 w-10 items-center justify-center rounded-full bg-warm-white/90 text-forest shadow-sm backdrop-blur hover:bg-warm-white disabled:opacity-50"
-                aria-label="Bild ändern"
-              >
-                {uploading ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                ) : (
-                  <Pencil className="h-4 w-4" />
-                )}
-              </button>
+              <div className="absolute right-3 top-3 flex gap-2">
+                <button
+                  onClick={handleDelete}
+                  disabled={uploading || deleting}
+                  aria-label="Bild löschen"
+                  className="flex h-10 w-10 items-center justify-center rounded-full bg-warm-white/90 text-forest shadow-sm backdrop-blur hover:bg-attention/20 hover:text-attention-text disabled:opacity-50"
+                >
+                  {deleting ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <Trash2 className="h-4 w-4" />
+                  )}
+                </button>
+                <button
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={uploading || deleting}
+                  aria-label="Bild ändern"
+                  className="flex h-10 w-10 items-center justify-center rounded-full bg-warm-white/90 text-forest shadow-sm backdrop-blur hover:bg-warm-white disabled:opacity-50"
+                >
+                  {uploading ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <Pencil className="h-4 w-4" />
+                  )}
+                </button>
+              </div>
             </>
           ) : (
             <button

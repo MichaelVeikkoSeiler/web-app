@@ -2,9 +2,9 @@
 
 import { useRef, useState, useTransition } from "react";
 import Image from "next/image";
-import { Camera, Loader2, MapPin } from "lucide-react";
+import { Camera, Loader2, MapPin, Trash2 } from "lucide-react";
 import { uploadZoneImage } from "@/lib/upload-photo";
-import { saveZoneImage } from "@/lib/actions/zones";
+import { saveZoneImage, clearZoneImage } from "@/lib/actions/zones";
 
 export function ZoneImage({
   zoneId,
@@ -17,7 +17,8 @@ export function ZoneImage({
 }) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
-  const [, startTransition] = useTransition();
+  const [pending, startTransition] = useTransition();
+  const [deleting, setDeleting] = useState(false);
 
   async function handleFile(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -32,6 +33,14 @@ export function ZoneImage({
       setUploading(false);
       e.target.value = "";
     }
+  }
+
+  function handleDelete() {
+    setDeleting(true);
+    startTransition(async () => {
+      await clearZoneImage(zoneId);
+      setDeleting(false);
+    });
   }
 
   return (
@@ -58,18 +67,34 @@ export function ZoneImage({
         className="hidden"
         onChange={handleFile}
       />
-      <button
-        onClick={() => fileInputRef.current?.click()}
-        disabled={uploading}
-        className="absolute bottom-3 right-3 flex h-11 items-center gap-2 rounded-full bg-forest/80 px-4 text-sm font-medium text-warm-white backdrop-blur-sm hover:bg-forest disabled:opacity-50"
-      >
-        {uploading ? (
-          <Loader2 className="h-4 w-4 animate-spin" />
-        ) : (
-          <Camera className="h-4 w-4" />
+      <div className="absolute bottom-3 right-3 flex gap-2">
+        {imageUrl && (
+          <button
+            onClick={handleDelete}
+            disabled={uploading || pending}
+            aria-label="Bild löschen"
+            className="flex h-11 w-11 items-center justify-center rounded-full bg-forest/80 text-warm-white backdrop-blur-sm hover:bg-attention disabled:opacity-50"
+          >
+            {deleting ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <Trash2 className="h-4 w-4" />
+            )}
+          </button>
         )}
-        {imageUrl ? "Bild ändern" : "Bild hinzufügen"}
-      </button>
+        <button
+          onClick={() => fileInputRef.current?.click()}
+          disabled={uploading || pending}
+          className="flex h-11 items-center gap-2 rounded-full bg-forest/80 px-4 text-sm font-medium text-warm-white backdrop-blur-sm hover:bg-forest disabled:opacity-50"
+        >
+          {uploading ? (
+            <Loader2 className="h-4 w-4 animate-spin" />
+          ) : (
+            <Camera className="h-4 w-4" />
+          )}
+          {imageUrl ? "Bild ändern" : "Bild hinzufügen"}
+        </button>
+      </div>
     </div>
   );
 }
