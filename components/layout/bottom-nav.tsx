@@ -9,11 +9,14 @@ export function BottomNav() {
   const pathname = usePathname();
   const pflanzenItem = navItems.find((item) => item.href === "/pflanzen")!;
   const zonenItem = navItems.find((item) => item.href === "/zonen")!;
+  const wetterItem = navItems.find((item) => item.href === "/wetter")!;
+  const besonderheitenItem = navItems.find((item) => item.href === "/besonderheiten")!;
 
   return (
     <nav className="safe-bottom fixed inset-x-0 bottom-0 z-40 border-t border-border bg-warm-white/95 backdrop-blur sm:hidden">
       <div className="relative mx-auto flex max-w-lg items-center justify-around px-2 pt-2">
         <NavLink {...pflanzenItem} active={isActive(pathname, pflanzenItem.href)} />
+        <NavLink {...zonenItem} active={isActive(pathname, zonenItem.href)} />
 
         <Link
           href="/pflanzen/neu"
@@ -23,7 +26,8 @@ export function BottomNav() {
           <Plus className="h-7 w-7" strokeWidth={2.5} />
         </Link>
 
-        <NavLink {...zonenItem} active={isActive(pathname, zonenItem.href)} />
+        <NavLink {...wetterItem} active={isActive(pathname, wetterItem.href)} />
+        <NavLink {...besonderheitenItem} active={isActive(pathname, besonderheitenItem.href)} />
       </div>
     </nav>
   );

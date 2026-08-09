@@ -3,6 +3,7 @@ import { getDb, isDbConfigured } from "@/lib/db";
 import { plants, plantPhotos, plantZoneAssignments, zones } from "@/lib/db/schema";
 import { computeHelpFlags } from "@/lib/help-logic";
 import { getWeatherSnapshot } from "@/lib/openmeteo";
+import { isMonthInRange, isTaskDueThisPeriod } from "@/lib/date-utils";
 
 export type PlantListItem = {
   id: number;
@@ -129,4 +130,61 @@ export async function getTodoItems(): Promise<TodoItem[]> {
     }
   }
   return items;
+}
+
+export type HighlightPlant = { plantId: number; plantName: string };
+
+export type PlantHighlights = {
+  mostFrequentWatering: (HighlightPlant & { rhythmDays: number })[];
+  leastFrequentWatering: (HighlightPlant & { rhythmDays: number })[];
+  bloomingThisMonth: HighlightPlant[];
+  pruningThisMonth: HighlightPlant[];
+};
+
+export async function getPlantHighlights(): Promise<PlantHighlights> {
+  if (!isDbConfigured) {
+    return {
+      mostFrequentWatering: [],
+      leastFrequentWatering: [],
+      bloomingThisMonth: [],
+      pruningThisMonth: [],
+    };
+  }
+
+  const db = getDb();
+  const allPlants = await db.select().from(plants);
+  const now = new Date();
+  const currentMonth = now.getMonth() + 1;
+
+  const withRhythm = allPlants.filter(
+    (p): p is typeof p & { wateringRhythmDays: number } => p.wateringRhythmDays != null,
+  );
+  const minRhythm = withRhythm.length > 0 ? Math.min(...withRhythm.map((p) => p.wateringRhythmDays)) : null;
+  const maxRhythm = withRhythm.length > 0 ? Math.max(...withRhythm.map((p) => p.wateringRhythmDays)) : null;
+
+  function toHighlight(plant: (typeof allPlants)[number]): HighlightPlant {
+    return { plantId: plant.id, plantName: plant.germanName ?? plant.scientificName };
+  }
+
+  const mostFrequentWatering = withRhythm
+    .filter((p) => p.wateringRhythmDays === minRhythm)
+    .map((p) => ({ ...toHighlight(p), rhythmDays: p.wateringRhythmDays }));
+
+  const leastFrequentWatering = withRhythm
+    .filter((p) => p.wateringRhythmDays === maxRhythm)
+    .map((p) => ({ ...toHighlight(p), rhythmDays: p.wateringRhythmDays }));
+
+  const bloomingThisMonth = allPlants
+    .filter((p) => isMonthInRange(currentMonth, p.bloomStartMonth, p.bloomEndMonth))
+    .map(toHighlight);
+
+  const pruningThisMonth = allPlants
+    .filter((p) => isTaskDueThisPeriod(now, p.pruningStartMonth, p.pruningEndMonth, p.lastPrunedAt))
+    .map(toHighlight);
+
+  for (const list of [mostFrequentWatering, leastFrequentWatering, bloomingThisMonth, pruningThisMonth]) {
+    list.sort((a, b) => a.plantName.localeCompare(b.plantName, "de"));
+  }
+
+  return { mostFrequentWatering, leastFrequentWatering, bloomingThisMonth, pruningThisMonth };
 }
