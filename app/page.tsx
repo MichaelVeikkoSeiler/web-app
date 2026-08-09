@@ -3,14 +3,14 @@ import { eq, and, isNotNull } from "drizzle-orm";
 import { AttentionList } from "@/components/home/attention-list";
 import { getTodoItems } from "@/lib/plants-query";
 import { HeroImage } from "@/components/home/hero-image";
-import { getHeroImageUrl } from "@/lib/actions/settings";
+import { getHeroImages } from "@/lib/actions/settings";
 import { getDb, isDbConfigured } from "@/lib/db";
 import { zones } from "@/lib/db/schema";
 
 export default async function Home() {
-  const [todoItems, heroImageUrl, conflictRows] = await Promise.all([
+  const [todoItems, heroPhotos, conflictRows] = await Promise.all([
     getTodoItems(),
-    getHeroImageUrl(),
+    getHeroImages(),
     isDbConfigured
       ? getDb()
           .select({
@@ -33,9 +33,7 @@ export default async function Home() {
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="relative left-1/2 -mt-4 w-screen -ml-[50vw] sm:-mt-8">
-        <HeroImage initialUrl={heroImageUrl} />
-      </div>
+      <HeroImage initialPhotos={heroPhotos} />
 
       <div className="text-center">
         <h1 className="font-display text-3xl text-forest sm:text-4xl">

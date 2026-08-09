@@ -2,16 +2,29 @@
 
 import { useRef, useState, useTransition } from "react";
 import Image from "next/image";
-import { Camera, Loader2, Pencil } from "lucide-react";
+import { Camera, ChevronLeft, ChevronRight, Loader2, Plus } from "lucide-react";
 import { uploadHeroImage } from "@/lib/upload-photo";
-import { setHeroImage } from "@/lib/actions/settings";
+import { addHeroImage, type HeroPhoto } from "@/lib/actions/settings";
 
-export function HeroImage({ initialUrl }: { initialUrl: string | null }) {
+export function HeroImage({ initialPhotos }: { initialPhotos: HeroPhoto[] }) {
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [url, setUrl] = useState(initialUrl);
+  const [{ photos, index }, setState] = useState<{ photos: HeroPhoto[]; index: number }>({
+    photos: initialPhotos,
+    index: 0,
+  });
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [, startTransition] = useTransition();
+  const touchStartX = useRef<number | null>(null);
+
+  const current = photos[index];
+
+  function goTo(i: number) {
+    setState((prev) => {
+      if (prev.photos.length === 0) return prev;
+      return { ...prev, index: (i + prev.photos.length) % prev.photos.length };
+    });
+  }
 
   async function handleFile(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -19,9 +32,12 @@ export function HeroImage({ initialUrl }: { initialUrl: string | null }) {
     setUploading(true);
     setError(null);
     try {
-      const uploadedUrl = await uploadHeroImage(file);
-      setUrl(uploadedUrl);
-      startTransition(() => setHeroImage(uploadedUrl));
+      const url = await uploadHeroImage(file);
+      setState((prev) => {
+        const nextPhotos = [...prev.photos, { id: -Date.now(), blobUrl: url }];
+        return { photos: nextPhotos, index: nextPhotos.length - 1 };
+      });
+      startTransition(() => addHeroImage(url));
     } catch {
       setError("Upload fehlgeschlagen. Ist das Bild kleiner als 30 MB?");
     } finally {
@@ -30,56 +46,109 @@ export function HeroImage({ initialUrl }: { initialUrl: string | null }) {
     }
   }
 
+  function onTouchStart(e: React.TouchEvent) {
+    touchStartX.current = e.touches[0].clientX;
+  }
+
+  function onTouchEnd(e: React.TouchEvent) {
+    if (touchStartX.current === null) return;
+    const delta = e.changedTouches[0].clientX - touchStartX.current;
+    touchStartX.current = null;
+    const SWIPE_THRESHOLD = 40;
+    if (delta > SWIPE_THRESHOLD) goTo(index - 1);
+    else if (delta < -SWIPE_THRESHOLD) goTo(index + 1);
+  }
+
   return (
     <div className="flex flex-col gap-2">
-      <div className="relative aspect-[4/3] w-full overflow-hidden rounded-b-3xl bg-warm-white sm:aspect-video">
-        <input
-          ref={fileInputRef}
-          type="file"
-          accept="image/*"
-          className="hidden"
-          onChange={handleFile}
-        />
+      <div className="relative left-1/2 -mt-4 w-screen -ml-[50vw] sm:-mt-8">
+        <div
+          className="relative aspect-[4/3] w-full overflow-hidden rounded-b-3xl bg-warm-white sm:aspect-video"
+          onTouchStart={photos.length > 1 ? onTouchStart : undefined}
+          onTouchEnd={photos.length > 1 ? onTouchEnd : undefined}
+        >
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            className="hidden"
+            onChange={handleFile}
+          />
 
-        {url ? (
-          <>
+          {current ? (
             <Image
-              src={url}
+              key={current.id}
+              src={current.blobUrl}
               alt="Unser Garten"
               fill
               sizes="100vw"
               className="object-cover"
               priority
             />
+          ) : (
             <button
               onClick={() => fileInputRef.current?.click()}
               disabled={uploading}
+              className="flex h-full w-full flex-col items-center justify-center gap-2 border-2 border-dashed border-border text-forest-muted disabled:opacity-50"
+            >
+              {uploading ? (
+                <Loader2 className="h-8 w-8 animate-spin" />
+              ) : (
+                <>
+                  <Camera className="h-8 w-8" strokeWidth={1.5} />
+                  <span className="text-sm font-medium">Gartenbild hochladen</span>
+                </>
+              )}
+            </button>
+          )}
+
+          {current && (
+            <button
+              onClick={() => fileInputRef.current?.click()}
+              disabled={uploading}
+              aria-label="Foto hinzufügen"
               className="absolute right-3 top-3 flex h-10 w-10 items-center justify-center rounded-full bg-warm-white/90 text-forest shadow-sm backdrop-blur hover:bg-warm-white disabled:opacity-50"
-              aria-label="Bild ändern"
             >
               {uploading ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
               ) : (
-                <Pencil className="h-4 w-4" />
+                <Plus className="h-4 w-4" />
               )}
             </button>
-          </>
-        ) : (
-          <button
-            onClick={() => fileInputRef.current?.click()}
-            disabled={uploading}
-            className="flex h-full w-full flex-col items-center justify-center gap-2 border-2 border-dashed border-border text-forest-muted disabled:opacity-50"
-          >
-            {uploading ? (
-              <Loader2 className="h-8 w-8 animate-spin" />
-            ) : (
-              <>
-                <Camera className="h-8 w-8" strokeWidth={1.5} />
-                <span className="text-sm font-medium">Gartenbild hochladen</span>
-              </>
-            )}
-          </button>
-        )}
+          )}
+
+          {photos.length > 1 && (
+            <>
+              <button
+                onClick={() => goTo(index - 1)}
+                aria-label="Vorheriges Foto"
+                className="absolute left-3 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-forest/60 text-warm-white backdrop-blur-sm hover:bg-forest/80"
+              >
+                <ChevronLeft className="h-5 w-5" />
+              </button>
+              <button
+                onClick={() => goTo(index + 1)}
+                aria-label="Nächstes Foto"
+                className="absolute right-3 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-forest/60 text-warm-white backdrop-blur-sm hover:bg-forest/80"
+              >
+                <ChevronRight className="h-5 w-5" />
+              </button>
+
+              <div className="absolute bottom-3 left-1/2 flex -translate-x-1/2 gap-1.5">
+                {photos.map((p, i) => (
+                  <button
+                    key={p.id}
+                    onClick={() => goTo(i)}
+                    aria-label={`Foto ${i + 1} anzeigen`}
+                    className={`h-1.5 rounded-full transition-all ${
+                      i === index ? "w-4 bg-warm-white" : "w-1.5 bg-warm-white/50"
+                    }`}
+                  />
+                ))}
+              </div>
+            </>
+          )}
+        </div>
       </div>
 
       {error && <p className="text-sm text-attention-text">{error}</p>}

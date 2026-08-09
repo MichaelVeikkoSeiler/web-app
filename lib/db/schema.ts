@@ -109,7 +109,16 @@ export const settings = pgTable("settings", {
   id: integer("id").primaryKey().default(1),
   heroImageUrl: text("hero_image_url"),
   logoUrl: text("logo_url"),
+  plantsHeroImageUrl: text("plants_hero_image_url"),
+  zonesHeroImageUrl: text("zones_hero_image_url"),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+export const heroImages = pgTable("hero_images", {
+  id: serial("id").primaryKey(),
+  blobUrl: text("blob_url").notNull(),
+  orderIndex: integer("order_index").notNull().default(0),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
 export const plantNotes = pgTable("plant_notes", {
