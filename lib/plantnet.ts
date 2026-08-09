@@ -5,6 +5,8 @@ export type PlantNetCandidate = {
   family: string;
 };
 
+const IDENTIFY_TIMEOUT_MS = 12_000;
+
 export async function identifyPlantPhoto(
   file: File,
 ): Promise<PlantNetCandidate[]> {
@@ -19,7 +21,21 @@ export async function identifyPlantPhoto(
   form.append("organs", "auto");
 
   const url = `https://my-api.plantnet.org/v2/identify/${project}?api-key=${apiKey}`;
-  const res = await fetch(url, { method: "POST", body: form });
+  let res: Response;
+  try {
+    res = await fetch(url, {
+      method: "POST",
+      body: form,
+      signal: AbortSignal.timeout(IDENTIFY_TIMEOUT_MS),
+    });
+  } catch (e) {
+    if (e instanceof Error && e.name === "TimeoutError") {
+      throw new Error(
+        "Erkennung hat zu lange gedauert. Bitte Art manuell eingeben.",
+      );
+    }
+    throw e;
+  }
 
   if (!res.ok) {
     if (res.status === 404) {
