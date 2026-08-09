@@ -1,12 +1,11 @@
-import Image from "next/image";
 import { notFound } from "next/navigation";
 import { eq } from "drizzle-orm";
-import { Leaf } from "lucide-react";
 import { getDb, isDbConfigured } from "@/lib/db";
 import { plants, plantPhotos, plantNotes, plantZoneAssignments, zones } from "@/lib/db/schema";
 import { CareInfoGrid } from "@/components/plants/care-info-grid";
 import { NoteList } from "@/components/plants/note-list";
 import { PhotoGallery } from "@/components/plants/photo-gallery";
+import { PlantHero } from "@/components/plants/plant-hero";
 import { EnrichmentStatus } from "@/components/plants/enrichment-status";
 import { ZoneChips } from "@/components/plants/zone-chips";
 import { DeletePlantButton } from "@/components/plants/delete-plant-button";
@@ -44,26 +43,9 @@ export default async function PflanzeDetailPage({
       .orderBy(zones.name),
   ]);
 
-  const primaryPhoto = photos.find((p) => p.isPrimary) ?? photos[0];
-
   return (
     <div className="mx-auto flex max-w-2xl flex-col gap-6">
-      <div className="relative aspect-[7/5] w-full overflow-hidden rounded-3xl bg-cream">
-        {primaryPhoto ? (
-          <Image
-            src={primaryPhoto.blobUrl}
-            alt={plant.germanName ?? plant.scientificName}
-            fill
-            sizes="(max-width: 672px) 100vw, 672px"
-            className="object-cover"
-            priority
-          />
-        ) : (
-          <div className="flex h-full items-center justify-center text-forest-muted/40">
-            <Leaf className="h-16 w-16" strokeWidth={1.25} />
-          </div>
-        )}
-      </div>
+      <PlantHero photos={photos} alt={plant.germanName ?? plant.scientificName} />
 
       <div className="flex items-start justify-between gap-2">
         <div>
