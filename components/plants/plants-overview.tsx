@@ -39,8 +39,23 @@ export function PlantsOverview({ groups }: { groups: ZoneGroup[] }) {
                 <button
                   onClick={() => toggle(group.zoneId)}
                   aria-expanded={open}
-                  className="flex w-full items-center gap-2 px-4 py-3 text-left"
+                  className="flex w-full items-center gap-3 px-4 py-3 text-left"
                 >
+                  <span className="relative h-9 w-9 shrink-0 overflow-hidden rounded-lg bg-cream">
+                    {group.zoneImageUrl ? (
+                      <Image
+                        src={group.zoneImageUrl}
+                        alt=""
+                        fill
+                        sizes="36px"
+                        className="object-cover"
+                      />
+                    ) : (
+                      <span className="flex h-full items-center justify-center text-forest-muted/40">
+                        <Leaf className="h-4 w-4" strokeWidth={1.5} />
+                      </span>
+                    )}
+                  </span>
                   <span className="flex-1 font-display text-base text-forest">
                     {group.zoneName}
                   </span>

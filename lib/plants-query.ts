@@ -13,6 +13,7 @@ export type PlantListItem = {
 export type ZoneGroup = {
   zoneId: number | null;
   zoneName: string;
+  zoneImageUrl: string | null;
   plants: PlantListItem[];
 };
 
@@ -22,7 +23,10 @@ export async function getPlantsGroupedByZone(): Promise<ZoneGroup[]> {
   const db = getDb();
   const [allPlants, allZones, assignments, photos] = await Promise.all([
     db.select().from(plants),
-    db.select({ id: zones.id, name: zones.name }).from(zones).orderBy(zones.orderIndex),
+    db
+      .select({ id: zones.id, name: zones.name, imageUrl: zones.imageUrl })
+      .from(zones)
+      .orderBy(zones.orderIndex),
     db
       .select({ plantId: plantZoneAssignments.plantId, zoneId: plantZoneAssignments.zoneId })
       .from(plantZoneAssignments),
@@ -49,7 +53,12 @@ export async function getPlantsGroupedByZone(): Promise<ZoneGroup[]> {
     };
   }
 
-  const groups: ZoneGroup[] = allZones.map((z) => ({ zoneId: z.id, zoneName: z.name, plants: [] }));
+  const groups: ZoneGroup[] = allZones.map((z) => ({
+    zoneId: z.id,
+    zoneName: z.name,
+    zoneImageUrl: z.imageUrl,
+    plants: [],
+  }));
   const groupByZoneId = new Map(groups.map((g) => [g.zoneId, g]));
   const unassigned: PlantListItem[] = [];
 
@@ -71,7 +80,12 @@ export async function getPlantsGroupedByZone(): Promise<ZoneGroup[]> {
 
   const nonEmptyGroups = groups.filter((g) => g.plants.length > 0);
   if (unassigned.length > 0) {
-    nonEmptyGroups.push({ zoneId: null, zoneName: "Ohne Zone", plants: unassigned });
+    nonEmptyGroups.push({
+      zoneId: null,
+      zoneName: "Ohne Zone",
+      zoneImageUrl: null,
+      plants: unassigned,
+    });
   }
 
   return nonEmptyGroups;
