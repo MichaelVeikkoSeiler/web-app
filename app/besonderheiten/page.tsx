@@ -9,7 +9,7 @@ export default async function BesonderheitenPage() {
     <div className="flex flex-col gap-6">
       <h1 className="flex items-center gap-2 font-display text-2xl text-forest">
         <Sparkles className="h-6 w-6 text-forest-muted" strokeWidth={1.75} />
-        Besonderheiten
+        Speziell
       </h1>
 
       <Section
