@@ -15,6 +15,7 @@ type EnrichmentResult = {
   pruning: Period;
   fertilizing: Period;
   watering: { rhythmDays: number; notes: string };
+  careDifficulty: number;
 };
 
 const SYSTEM_PROMPT = `Du bist ein Gartenexperte, der Pflegeinformationen für ein privates Garten-Journal recherchiert.
@@ -31,7 +32,8 @@ Antworte ausschliesslich auf Deutsch und antworte am Ende AUSSCHLIESSLICH mit ei
   "harvest": { "text": string | null, "startMonth": number | null, "endMonth": number | null },
   "pruning": { "text": string | null, "startMonth": number | null, "endMonth": number | null },
   "fertilizing": { "text": string | null, "startMonth": number | null, "endMonth": number | null },
-  "watering": { "rhythmDays": number, "notes": string }
+  "watering": { "rhythmDays": number, "notes": string },
+  "careDifficulty": number
 }
 
 Regeln:
@@ -39,7 +41,8 @@ Regeln:
 - "isFruitOrBerry": true nur bei Frucht- oder Beerenpflanzen. Wenn false, setze "harvest" auf { "text": null, "startMonth": null, "endMonth": null }.
 - Monate als Zahlen 1-12. Wenn ein Zeitraum den Jahreswechsel überschreitet (z.B. November bis Februar), ist startMonth > endMonth erlaubt.
 - "watering.rhythmDays": typischer Giessrhythmus in Tagen unter normalen Bedingungen (Richtwert als Zahl, z.B. 3 für alle 3 Tage, 7 für wöchentlich).
-- Wenn eine Angabe nicht ermittelbar ist, setze das Feld auf null (bzw. bei rhythmDays einen plausiblen Schätzwert).`;
+- "careDifficulty": Pflegeaufwand/Anspruch dieser Pflanze auf einer Skala von 1 (sehr pflegeleicht, verzeiht viel) bis 10 (sehr anspruchsvoll, braucht viel Aufmerksamkeit und Fachwissen), basierend auf Ansprüchen an Standort, Schnitt, Giessen, Krankheitsanfälligkeit etc.
+- Wenn eine Angabe nicht ermittelbar ist, setze das Feld auf null (bzw. bei rhythmDays und careDifficulty einen plausiblen Schätzwert).`;
 
 export function extractJson(text: string): unknown {
   const start = text.indexOf("{");
@@ -108,6 +111,7 @@ export async function enrichPlant(plantId: number) {
         fertilizingEndMonth: result.fertilizing?.endMonth ?? null,
         wateringRhythmDays: result.watering?.rhythmDays ?? null,
         wateringNotes: result.watering?.notes ?? null,
+        careDifficulty: result.careDifficulty ?? null,
         enrichmentStatus: "done",
         enrichmentError: null,
         updatedAt: new Date(),

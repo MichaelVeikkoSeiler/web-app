@@ -71,6 +71,9 @@ export const plants = pgTable("plants", {
   wateringNotes: text("watering_notes"),
   lastWateredAt: timestamp("last_watered_at"),
 
+  /** Pflegeaufwand 1 (sehr pflegeleicht) bis 10 (sehr anspruchsvoll), via Websearch ermittelt. */
+  careDifficulty: integer("care_difficulty"),
+
   enrichmentStatus: enrichmentStatusEnum("enrichment_status")
     .notNull()
     .default("pending"),

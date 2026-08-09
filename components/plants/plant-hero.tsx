@@ -47,11 +47,12 @@ export function PlantHero({
   }
 
   return (
-    <div
-      className="relative aspect-[7/5] w-full overflow-hidden rounded-3xl bg-cream"
-      onTouchStart={ordered.length > 1 ? onTouchStart : undefined}
-      onTouchEnd={ordered.length > 1 ? onTouchEnd : undefined}
-    >
+    <div className="relative left-1/2 -mt-4 w-screen -ml-[50vw] sm:-mt-8">
+      <div
+        className="relative aspect-[4/3] w-full overflow-hidden rounded-b-3xl bg-warm-white sm:aspect-video"
+        onTouchStart={ordered.length > 1 ? onTouchStart : undefined}
+        onTouchEnd={ordered.length > 1 ? onTouchEnd : undefined}
+      >
       {current ? (
         <Image
           key={current.id}
@@ -110,6 +111,7 @@ export function PlantHero({
           </div>
         </>
       )}
+      </div>
     </div>
   );
 }

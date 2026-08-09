@@ -44,50 +44,52 @@ export default async function PflanzeDetailPage({
   ]);
 
   return (
-    <div className="mx-auto flex max-w-2xl flex-col gap-6">
+    <div className="flex flex-col gap-6">
       <PlantHero plantId={plant.id} photos={photos} alt={plant.germanName ?? plant.scientificName} />
 
-      <div className="flex items-start justify-between gap-2">
-        <div>
-          <h1 className="font-display text-3xl text-forest">
-            {plant.germanName ?? plant.scientificName}
-          </h1>
-          <p className="italic text-forest-muted">{plant.scientificName}</p>
+      <div className="mx-auto flex w-full max-w-2xl flex-col gap-6">
+        <div className="flex items-start justify-between gap-2">
+          <div>
+            <h1 className="font-display text-3xl text-forest">
+              {plant.germanName ?? plant.scientificName}
+            </h1>
+            <p className="italic text-forest-muted">{plant.scientificName}</p>
+          </div>
+          <SpeciesCorrection plantId={plant.id} />
         </div>
-        <SpeciesCorrection plantId={plant.id} />
-      </div>
 
-      <ZoneChips plantId={plant.id} assignedZones={assignedZones} allZones={allZones} />
+        <ZoneChips plantId={plant.id} assignedZones={assignedZones} allZones={allZones} />
 
-      {plant.factsText && (
-        <p className="text-sm leading-relaxed text-forest">{plant.factsText}</p>
-      )}
+        {plant.factsText && (
+          <p className="text-sm leading-relaxed text-forest">{plant.factsText}</p>
+        )}
 
-      <EnrichmentStatus
-        plantId={plant.id}
-        status={plant.enrichmentStatus}
-        error={plant.enrichmentError}
-      />
+        <EnrichmentStatus
+          plantId={plant.id}
+          status={plant.enrichmentStatus}
+          error={plant.enrichmentError}
+        />
 
-      {plant.enrichmentStatus === "done" && (
+        {plant.enrichmentStatus === "done" && (
+          <section className="flex flex-col gap-3">
+            <h2 className="font-display text-lg text-forest">Pflege</h2>
+            <CareInfoGrid plant={plant} />
+          </section>
+        )}
+
         <section className="flex flex-col gap-3">
-          <h2 className="font-display text-lg text-forest">Pflege</h2>
-          <CareInfoGrid plant={plant} />
+          <h2 className="font-display text-lg text-forest">Fotos</h2>
+          <PhotoGallery plantId={plant.id} photos={photos} />
         </section>
-      )}
 
-      <section className="flex flex-col gap-3">
-        <h2 className="font-display text-lg text-forest">Fotos</h2>
-        <PhotoGallery plantId={plant.id} photos={photos} />
-      </section>
+        <section className="flex flex-col gap-3">
+          <h2 className="font-display text-lg text-forest">Notizen</h2>
+          <NoteList plantId={plant.id} notes={notes} />
+        </section>
 
-      <section className="flex flex-col gap-3">
-        <h2 className="font-display text-lg text-forest">Notizen</h2>
-        <NoteList plantId={plant.id} notes={notes} />
-      </section>
-
-      <div className="mt-2 border-t border-border pt-4">
-        <DeletePlantButton plantId={plant.id} />
+        <div className="mt-2 border-t border-border pt-4">
+          <DeletePlantButton plantId={plant.id} />
+        </div>
       </div>
     </div>
   );

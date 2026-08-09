@@ -1,11 +1,9 @@
 import Link from "next/link";
-import { Droplets, Flower2, Scissors, Sparkles, type LucideIcon } from "lucide-react";
-import { getPlantHighlights, type HighlightPlant } from "@/lib/plants-query";
-import { monthName } from "@/lib/date-utils";
+import { Droplets, Flower2, Flame, Feather, Sparkles, type LucideIcon } from "lucide-react";
+import { getPlantHighlights, type RankedHighlight } from "@/lib/plants-query";
 
 export default async function BesonderheitenPage() {
   const highlights = await getPlantHighlights();
-  const month = monthName(new Date().getMonth() + 1);
 
   return (
     <div className="flex flex-col gap-6">
@@ -14,41 +12,53 @@ export default async function BesonderheitenPage() {
         Besonderheiten
       </h1>
 
-      <Section icon={Droplets} colorClass="bg-water/40 text-water-text" title="Giesst am häufigsten">
-        {highlights.mostFrequentWatering.length === 0 ? (
-          <EmptyRow text="Keine Angabe zum Giessrhythmus vorhanden." />
-        ) : (
-          highlights.mostFrequentWatering.map((p) => (
-            <PlantRow key={p.plantId} plant={p} detail={`alle ${p.rhythmDays} Tage`} />
-          ))
-        )}
-      </Section>
+      <Section
+        icon={Droplets}
+        colorClass="bg-water/40 text-water-text"
+        title="Braucht am meisten Wasser"
+        items={highlights.mostWater}
+        emptyText="Keine Angabe zum Giessrhythmus vorhanden."
+      />
 
-      <Section icon={Droplets} colorClass="bg-water/40 text-water-text" title="Giesst am seltensten">
-        {highlights.leastFrequentWatering.length === 0 ? (
-          <EmptyRow text="Keine Angabe zum Giessrhythmus vorhanden." />
-        ) : (
-          highlights.leastFrequentWatering.map((p) => (
-            <PlantRow key={p.plantId} plant={p} detail={`alle ${p.rhythmDays} Tage`} />
-          ))
-        )}
-      </Section>
+      <Section
+        icon={Droplets}
+        colorClass="bg-water/40 text-water-text"
+        title="Braucht am wenigsten Wasser"
+        items={highlights.leastWater}
+        emptyText="Keine Angabe zum Giessrhythmus vorhanden."
+      />
 
-      <Section icon={Flower2} colorClass="bg-bloom/40 text-bloom-text" title={`Blütezeit im ${month}`}>
-        {highlights.bloomingThisMonth.length === 0 ? (
-          <EmptyRow text="Keine Pflanze blüht diesen Monat." />
-        ) : (
-          highlights.bloomingThisMonth.map((p) => <PlantRow key={p.plantId} plant={p} />)
-        )}
-      </Section>
+      <Section
+        icon={Flower2}
+        colorClass="bg-bloom/40 text-bloom-text"
+        title="Blüht am längsten"
+        items={highlights.longestBloom}
+        emptyText="Keine Angabe zur Blütezeit vorhanden."
+      />
 
-      <Section icon={Scissors} colorClass="bg-care/40 text-care-text" title={`Rückschnitt im ${month}`}>
-        {highlights.pruningThisMonth.length === 0 ? (
-          <EmptyRow text="Keine Pflanze braucht diesen Monat Rückschnitt." />
-        ) : (
-          highlights.pruningThisMonth.map((p) => <PlantRow key={p.plantId} plant={p} />)
-        )}
-      </Section>
+      <Section
+        icon={Flower2}
+        colorClass="bg-bloom/40 text-bloom-text"
+        title="Blüht am wenigsten lang"
+        items={highlights.shortestBloom}
+        emptyText="Keine Angabe zur Blütezeit vorhanden."
+      />
+
+      <Section
+        icon={Flame}
+        colorClass="bg-sun/40 text-sun-text"
+        title="Allgemein am anspruchsvollsten"
+        items={highlights.mostDemanding}
+        emptyText="Keine Angabe zum Pflegeaufwand vorhanden."
+      />
+
+      <Section
+        icon={Feather}
+        colorClass="bg-soil/40 text-soil-text"
+        title="Allgemein am pflegeleichtesten"
+        items={highlights.leastDemanding}
+        emptyText="Keine Angabe zum Pflegeaufwand vorhanden."
+      />
     </div>
   );
 }
@@ -57,12 +67,14 @@ function Section({
   icon: Icon,
   colorClass,
   title,
-  children,
+  items,
+  emptyText,
 }: {
   icon: LucideIcon;
   colorClass: string;
   title: string;
-  children: React.ReactNode;
+  items: RankedHighlight[];
+  emptyText: string;
 }) {
   return (
     <section className="flex flex-col gap-3 rounded-2xl border border-border bg-warm-white p-4">
@@ -72,23 +84,23 @@ function Section({
         </span>
         {title}
       </h2>
-      <div className="flex flex-col gap-1">{children}</div>
+      <div className="flex flex-col gap-1">
+        {items.length === 0 ? (
+          <p className="px-2 py-1 text-sm text-forest-muted">{emptyText}</p>
+        ) : (
+          items.map((p, i) => (
+            <Link
+              key={p.plantId}
+              href={`/pflanzen/${p.plantId}`}
+              className="flex items-center gap-3 rounded-xl px-2 py-2 text-sm hover:bg-cream"
+            >
+              <span className="w-5 shrink-0 text-xs text-forest-muted">{i + 1}.</span>
+              <span className="flex-1 text-forest">{p.plantName}</span>
+              <span className="text-xs text-forest-muted">{p.display}</span>
+            </Link>
+          ))
+        )}
+      </div>
     </section>
   );
-}
-
-function PlantRow({ plant, detail }: { plant: HighlightPlant; detail?: string }) {
-  return (
-    <Link
-      href={`/pflanzen/${plant.plantId}`}
-      className="flex items-center justify-between gap-3 rounded-xl px-2 py-2 text-sm hover:bg-cream"
-    >
-      <span className="text-forest">{plant.plantName}</span>
-      {detail && <span className="text-xs text-forest-muted">{detail}</span>}
-    </Link>
-  );
-}
-
-function EmptyRow({ text }: { text: string }) {
-  return <p className="px-2 py-1 text-sm text-forest-muted">{text}</p>;
 }

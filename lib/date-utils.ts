@@ -30,6 +30,12 @@ export function monthName(month: number): string {
   return MONTH_NAMES[month - 1] ?? "";
 }
 
+/** Dauer eines Monats-Zeitraums in Monaten (inklusiv), Jahreswechsel berücksichtigt. */
+export function monthRangeDuration(startMonth: number, endMonth: number): number {
+  if (startMonth <= endMonth) return endMonth - startMonth + 1;
+  return 12 - startMonth + 1 + endMonth;
+}
+
 export function daysSince(date: Date | null): number | null {
   if (!date) return null;
   const diffMs = Date.now() - date.getTime();
