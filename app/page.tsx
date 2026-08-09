@@ -46,7 +46,7 @@ export default async function Home() {
       <section className="flex flex-col gap-3">
         <h2 className="flex items-center gap-2 font-display text-lg text-forest">
           <AlertCircle className="h-5 w-5 text-attention-text" />
-          Ich brauche deine Aufmerksamkeit
+          Braucht deine Aufmerksamkeit
         </h2>
         <AttentionList items={todoItems} conflicts={conflicts} />
       </section>

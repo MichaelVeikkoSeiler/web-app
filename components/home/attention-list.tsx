@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from "react";
 import Link from "next/link";
-import { Check, Droplets, MapPin, Scissors, Sprout } from "lucide-react";
+import { Check, ChevronDown, Droplets, MapPin, Scissors, Sprout } from "lucide-react";
 import { waterPlant, markPruned, markFertilized } from "@/lib/actions/plants";
 import { Sheet } from "@/components/ui/sheet";
 import type { TodoItem } from "@/lib/plants-query";
@@ -14,6 +14,14 @@ export type ZoneConflictItem = {
   text: string | null;
 };
 
+type GroupKey = TodoItem["type"] | "conflicts";
+
+const typeOrder: TodoItem["type"][] = ["water", "prune", "fertilize"];
+const typeLabel: Record<TodoItem["type"], string> = {
+  water: "Giessen",
+  prune: "Rückschnitt",
+  fertilize: "Düngen",
+};
 const typeIcon = { water: Droplets, prune: Scissors, fertilize: Sprout };
 const typeColor = {
   water: "text-water-text",
@@ -39,11 +47,25 @@ export function AttentionList({
 }) {
   const [doneKeys, setDoneKeys] = useState<Set<string>>(new Set());
   const [dismissedZoneIds, setDismissedZoneIds] = useState<Set<number>>(new Set());
+  const [openGroups, setOpenGroups] = useState<Set<GroupKey>>(new Set());
   const [, startTransition] = useTransition();
   const [openConflict, setOpenConflict] = useState<ZoneConflictItem | null>(null);
 
   const visible = items.filter((item) => !doneKeys.has(itemKey(item)));
   const visibleConflicts = conflicts.filter((c) => !dismissedZoneIds.has(c.zoneId));
+
+  const groups = typeOrder
+    .map((type) => ({ type, items: visible.filter((item) => item.type === type) }))
+    .filter((g) => g.items.length > 0);
+
+  function toggle(key: GroupKey) {
+    setOpenGroups((prev) => {
+      const next = new Set(prev);
+      if (next.has(key)) next.delete(key);
+      else next.add(key);
+      return next;
+    });
+  }
 
   function handleCheck(item: TodoItem) {
     setDoneKeys((prev) => new Set(prev).add(itemKey(item)));
@@ -54,7 +76,7 @@ export function AttentionList({
     setDismissedZoneIds((prev) => new Set(prev).add(zoneId));
   }
 
-  if (visible.length === 0 && visibleConflicts.length === 0) {
+  if (groups.length === 0 && visibleConflicts.length === 0) {
     return (
       <p className="rounded-2xl border border-dashed border-border bg-warm-white p-6 text-sm text-forest-muted">
         Aktuell braucht nichts besondere Aufmerksamkeit.
@@ -64,61 +86,106 @@ export function AttentionList({
 
   return (
     <>
-      <ul className="flex flex-col gap-2">
-        {visible.map((item) => {
-          const Icon = typeIcon[item.type];
+      <div className="flex flex-col gap-2">
+        {groups.map((group) => {
+          const open = openGroups.has(group.type);
+          const Icon = typeIcon[group.type];
           return (
-            <li
-              key={itemKey(item)}
-              className="flex items-center gap-3 rounded-2xl border border-border bg-warm-white px-4 py-3"
+            <div
+              key={group.type}
+              className="overflow-hidden rounded-2xl border border-border bg-warm-white"
             >
               <button
-                aria-label={`${item.label} für ${item.plantName} erledigt`}
-                onClick={() => handleCheck(item)}
-                className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border-2 border-sage text-transparent hover:bg-sage/20 hover:text-forest"
+                onClick={() => toggle(group.type)}
+                aria-expanded={open}
+                className="flex w-full items-center gap-3 px-4 py-3 text-left"
               >
-                <Check className="h-4 w-4" strokeWidth={3} />
+                <Icon className={`h-4 w-4 shrink-0 ${typeColor[group.type]}`} />
+                <span className="flex-1 font-display text-base text-forest">
+                  {typeLabel[group.type]}
+                </span>
+                <span className="text-xs text-forest-muted">{group.items.length}</span>
+                <ChevronDown
+                  className={`h-4 w-4 shrink-0 text-forest-muted transition-transform ${open ? "rotate-180" : ""}`}
+                />
               </button>
-              <Icon className={`h-4 w-4 shrink-0 ${typeColor[item.type]}`} />
-              <Link
-                href={`/pflanzen/${item.plantId}`}
-                className="flex-1 truncate text-sm text-forest hover:underline"
-              >
-                {item.plantName}
-              </Link>
-              <span className="text-xs text-forest-muted">{item.label}</span>
-            </li>
+
+              {open && (
+                <div className="flex flex-col gap-1 border-t border-border p-2">
+                  {group.items.map((item) => (
+                    <div
+                      key={itemKey(item)}
+                      className="flex items-center gap-3 rounded-xl px-2 py-2 hover:bg-cream"
+                    >
+                      <button
+                        aria-label={`${item.label} für ${item.plantName} erledigt`}
+                        onClick={() => handleCheck(item)}
+                        className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border-2 border-sage text-transparent hover:bg-sage/20 hover:text-forest"
+                      >
+                        <Check className="h-4 w-4" strokeWidth={3} />
+                      </button>
+                      <Link
+                        href={`/pflanzen/${item.plantId}`}
+                        className="flex-1 truncate text-sm text-forest hover:underline"
+                      >
+                        {item.plantName}
+                      </Link>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
           );
         })}
 
-        {visibleConflicts.map((c) => (
-          <li
-            key={`conflict-${c.zoneId}`}
-            className="flex items-center gap-3 rounded-2xl border border-border bg-warm-white px-4 py-3"
-          >
+        {visibleConflicts.length > 0 && (
+          <div className="overflow-hidden rounded-2xl border border-border bg-warm-white">
             <button
-              aria-label={`Konflikt in ${c.zoneName} ausblenden`}
-              onClick={() => handleDismissConflict(c.zoneId)}
-              className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border-2 border-sage text-transparent hover:bg-sage/20 hover:text-forest"
+              onClick={() => toggle("conflicts")}
+              aria-expanded={openGroups.has("conflicts")}
+              className="flex w-full items-center gap-3 px-4 py-3 text-left"
             >
-              <Check className="h-4 w-4" strokeWidth={3} />
+              <MapPin className="h-4 w-4 shrink-0 text-attention-text" />
+              <span className="flex-1 font-display text-base text-forest">Zonenkonflikte</span>
+              <span className="text-xs text-forest-muted">{visibleConflicts.length}</span>
+              <ChevronDown
+                className={`h-4 w-4 shrink-0 text-forest-muted transition-transform ${openGroups.has("conflicts") ? "rotate-180" : ""}`}
+              />
             </button>
-            <MapPin className="h-4 w-4 shrink-0 text-attention-text" />
-            <Link
-              href={`/zonen/${c.zoneId}`}
-              className="flex-1 truncate text-sm text-forest hover:underline"
-            >
-              {c.zoneName}
-            </Link>
-            <button
-              onClick={() => setOpenConflict(c)}
-              className="shrink-0 text-xs font-medium text-attention-text hover:underline"
-            >
-              {c.label}
-            </button>
-          </li>
-        ))}
-      </ul>
+
+            {openGroups.has("conflicts") && (
+              <div className="flex flex-col gap-1 border-t border-border p-2">
+                {visibleConflicts.map((c) => (
+                  <div
+                    key={`conflict-${c.zoneId}`}
+                    className="flex items-center gap-3 rounded-xl px-2 py-2 hover:bg-cream"
+                  >
+                    <button
+                      aria-label={`Konflikt in ${c.zoneName} ausblenden`}
+                      onClick={() => handleDismissConflict(c.zoneId)}
+                      className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border-2 border-sage text-transparent hover:bg-sage/20 hover:text-forest"
+                    >
+                      <Check className="h-4 w-4" strokeWidth={3} />
+                    </button>
+                    <Link
+                      href={`/zonen/${c.zoneId}`}
+                      className="flex-1 truncate text-sm text-forest hover:underline"
+                    >
+                      {c.zoneName}
+                    </Link>
+                    <button
+                      onClick={() => setOpenConflict(c)}
+                      className="shrink-0 text-xs font-medium text-attention-text hover:underline"
+                    >
+                      {c.label}
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+      </div>
 
       <Sheet
         open={openConflict !== null}
