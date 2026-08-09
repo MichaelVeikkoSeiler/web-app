@@ -1,56 +1,80 @@
 import { eq } from "drizzle-orm";
 import { getDb, isDbConfigured } from "@/lib/db";
 import { plants, plantPhotos, plantZoneAssignments, zones } from "@/lib/db/schema";
-import { isMonthInRange } from "@/lib/date-utils";
 import { computeHelpFlags } from "@/lib/help-logic";
 import { getWeatherSnapshot } from "@/lib/openmeteo";
-import type { PlantCardData } from "@/components/plants/plant-card";
 
-export async function getPlantCards(): Promise<PlantCardData[]> {
+export type PlantListItem = {
+  id: number;
+  name: string;
+  photoUrl: string | null;
+};
+
+export type ZoneGroup = {
+  zoneId: number | null;
+  zoneName: string;
+  plants: PlantListItem[];
+};
+
+export async function getPlantsGroupedByZone(): Promise<ZoneGroup[]> {
   if (!isDbConfigured) return [];
 
   const db = getDb();
-  const [allPlants, assignments, photos, weather] = await Promise.all([
+  const [allPlants, allZones, assignments, photos] = await Promise.all([
     db.select().from(plants),
+    db.select({ id: zones.id, name: zones.name }).from(zones).orderBy(zones.orderIndex),
     db
-      .select({ plantId: plantZoneAssignments.plantId, zoneName: zones.name })
-      .from(plantZoneAssignments)
-      .innerJoin(zones, eq(plantZoneAssignments.zoneId, zones.id)),
+      .select({ plantId: plantZoneAssignments.plantId, zoneId: plantZoneAssignments.zoneId })
+      .from(plantZoneAssignments),
     db.select().from(plantPhotos).where(eq(plantPhotos.isPrimary, true)),
-    getWeatherSnapshot().catch(() => null),
   ]);
-
-  const zoneNamesByPlant = new Map<number, string[]>();
-  for (const a of assignments) {
-    const list = zoneNamesByPlant.get(a.plantId) ?? [];
-    list.push(a.zoneName);
-    zoneNamesByPlant.set(a.plantId, list);
-  }
 
   const photoByPlant = new Map<number, string>();
   for (const p of photos) {
     if (!photoByPlant.has(p.plantId)) photoByPlant.set(p.plantId, p.blobUrl);
   }
 
-  const currentMonth = new Date().getMonth() + 1;
-  const precipitation = weather?.precipitationLast7Days ?? Infinity;
+  const zoneIdsByPlant = new Map<number, number[]>();
+  for (const a of assignments) {
+    const list = zoneIdsByPlant.get(a.plantId) ?? [];
+    list.push(a.zoneId);
+    zoneIdsByPlant.set(a.plantId, list);
+  }
 
-  return allPlants.map((plant) => {
-    const help = computeHelpFlags(plant, precipitation);
+  function toListItem(plant: (typeof allPlants)[number]): PlantListItem {
     return {
       id: plant.id,
-      scientificName: plant.scientificName,
-      germanName: plant.germanName,
-      commonName: plant.commonName,
+      name: plant.germanName ?? plant.scientificName,
       photoUrl: photoByPlant.get(plant.id) ?? null,
-      zoneNames: zoneNamesByPlant.get(plant.id) ?? [],
-      inBloom: isMonthInRange(currentMonth, plant.bloomStartMonth, plant.bloomEndMonth),
-      canHarvest:
-        plant.isFruitOrBerry &&
-        isMonthInRange(currentMonth, plant.harvestStartMonth, plant.harvestEndMonth),
-      needsHelp: help.needsHelp,
     };
-  });
+  }
+
+  const groups: ZoneGroup[] = allZones.map((z) => ({ zoneId: z.id, zoneName: z.name, plants: [] }));
+  const groupByZoneId = new Map(groups.map((g) => [g.zoneId, g]));
+  const unassigned: PlantListItem[] = [];
+
+  for (const plant of allPlants) {
+    const zoneIds = zoneIdsByPlant.get(plant.id) ?? [];
+    if (zoneIds.length === 0) {
+      unassigned.push(toListItem(plant));
+      continue;
+    }
+    for (const zoneId of zoneIds) {
+      groupByZoneId.get(zoneId)?.plants.push(toListItem(plant));
+    }
+  }
+
+  for (const group of groups) {
+    group.plants.sort((a, b) => a.name.localeCompare(b.name, "de"));
+  }
+  unassigned.sort((a, b) => a.name.localeCompare(b.name, "de"));
+
+  const nonEmptyGroups = groups.filter((g) => g.plants.length > 0);
+  if (unassigned.length > 0) {
+    nonEmptyGroups.push({ zoneId: null, zoneName: "Ohne Zone", plants: unassigned });
+  }
+
+  return nonEmptyGroups;
 }
 
 export type TodoItem = {

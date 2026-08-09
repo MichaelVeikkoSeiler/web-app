@@ -1,88 +1,86 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import { Leaf } from "lucide-react";
-import { PlantCard, type PlantCardData } from "@/components/plants/plant-card";
-import { selectClasses } from "@/components/ui/field";
+import { useState } from "react";
+import Link from "next/link";
+import Image from "next/image";
+import { ChevronDown, Leaf } from "lucide-react";
+import type { ZoneGroup } from "@/lib/plants-query";
 
-type Filter = "alle" | "bluete" | "pfluecken" | "zone" | "hilfe";
+export function PlantsOverview({ groups }: { groups: ZoneGroup[] }) {
+  const [openZoneIds, setOpenZoneIds] = useState<Set<number | null>>(new Set());
 
-const filters: { key: Filter; label: string }[] = [
-  { key: "alle", label: "Alle" },
-  { key: "bluete", label: "In Blüte" },
-  { key: "pfluecken", label: "Pflücken" },
-  { key: "zone", label: "Zonen" },
-  { key: "hilfe", label: "Hilfe" },
-];
-
-export function PlantsOverview({
-  plants,
-  zones,
-}: {
-  plants: PlantCardData[];
-  zones: { id: number; name: string }[];
-}) {
-  const [filter, setFilter] = useState<Filter>("alle");
-  const [zoneName, setZoneName] = useState<string | undefined>(zones[0]?.name);
-
-  const filtered = useMemo(() => {
-    switch (filter) {
-      case "bluete":
-        return plants.filter((p) => p.inBloom);
-      case "pfluecken":
-        return plants.filter((p) => p.canHarvest);
-      case "hilfe":
-        return plants.filter((p) => p.needsHelp);
-      case "zone":
-        return plants.filter((p) => zoneName && p.zoneNames.includes(zoneName));
-      default:
-        return plants;
-    }
-  }, [plants, filter, zoneName]);
+  function toggle(zoneId: number | null) {
+    setOpenZoneIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(zoneId)) next.delete(zoneId);
+      else next.add(zoneId);
+      return next;
+    });
+  }
 
   return (
     <div className="flex flex-col gap-5">
       <h1 className="font-display text-2xl text-forest">Pflanzen</h1>
 
-      <div className="flex flex-wrap items-center gap-2">
-        {filters.map((f) => (
-          <button
-            key={f.key}
-            onClick={() => setFilter(f.key)}
-            className={`min-h-11 rounded-full px-4 text-sm font-medium transition-colors ${
-              filter === f.key
-                ? "bg-sage text-forest"
-                : "bg-warm-white text-forest-muted border border-border hover:bg-cream"
-            }`}
-          >
-            {f.label}
-          </button>
-        ))}
-        {filter === "zone" && (
-          <select
-            className={selectClasses + " min-h-11 w-auto"}
-            value={zoneName}
-            onChange={(e) => setZoneName(e.target.value)}
-          >
-            {zones.map((z) => (
-              <option key={z.id} value={z.name}>
-                {z.name}
-              </option>
-            ))}
-          </select>
-        )}
-      </div>
-
-      {filtered.length === 0 ? (
+      {groups.length === 0 ? (
         <div className="flex flex-col items-center gap-2 rounded-2xl border border-dashed border-border bg-warm-white p-10 text-center text-forest-muted">
           <Leaf className="h-8 w-8" strokeWidth={1.25} />
-          <p className="text-sm">Keine Pflanzen in dieser Ansicht.</p>
+          <p className="text-sm">Noch keine Pflanzen erfasst.</p>
         </div>
       ) : (
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4">
-          {filtered.map((p) => (
-            <PlantCard key={p.id} plant={p} />
-          ))}
+        <div className="flex flex-col gap-2">
+          {groups.map((group) => {
+            const open = openZoneIds.has(group.zoneId);
+            return (
+              <div
+                key={group.zoneId ?? "none"}
+                className="overflow-hidden rounded-2xl border border-border bg-warm-white"
+              >
+                <button
+                  onClick={() => toggle(group.zoneId)}
+                  aria-expanded={open}
+                  className="flex w-full items-center gap-2 px-4 py-3 text-left"
+                >
+                  <span className="flex-1 font-display text-base text-forest">
+                    {group.zoneName}
+                  </span>
+                  <span className="text-xs text-forest-muted">{group.plants.length}</span>
+                  <ChevronDown
+                    className={`h-4 w-4 shrink-0 text-forest-muted transition-transform ${open ? "rotate-180" : ""}`}
+                  />
+                </button>
+
+                {open && (
+                  <div className="flex flex-col gap-1 border-t border-border p-2">
+                    {group.plants.map((p) => (
+                      <Link
+                        key={p.id}
+                        href={`/pflanzen/${p.id}`}
+                        className="flex items-center gap-3 rounded-xl px-2 py-2 hover:bg-cream"
+                      >
+                        <span className="relative h-11 w-11 shrink-0 overflow-hidden rounded-lg bg-cream">
+                          {p.photoUrl ? (
+                            <Image
+                              src={p.photoUrl}
+                              alt=""
+                              fill
+                              sizes="44px"
+                              className="object-cover"
+                            />
+                          ) : (
+                            <span className="flex h-full items-center justify-center text-forest-muted/40">
+                              <Leaf className="h-5 w-5" strokeWidth={1.5} />
+                            </span>
+                          )}
+                        </span>
+                        <span className="text-sm text-forest">{p.name}</span>
+                      </Link>
+                    ))}
+                  </div>
+                )}
+              </div>
+            );
+          })}
         </div>
       )}
     </div>
