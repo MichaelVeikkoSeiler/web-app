@@ -17,8 +17,13 @@ export type ZoneGroup = {
   plants: PlantListItem[];
 };
 
-export async function getPlantsGroupedByZone(): Promise<ZoneGroup[]> {
-  if (!isDbConfigured) return [];
+export type PlantsOverviewData = {
+  totalCount: number;
+  groups: ZoneGroup[];
+};
+
+export async function getPlantsGroupedByZone(): Promise<PlantsOverviewData> {
+  if (!isDbConfigured) return { totalCount: 0, groups: [] };
 
   const db = getDb();
   const [allPlants, allZones, assignments, photos] = await Promise.all([
@@ -88,7 +93,7 @@ export async function getPlantsGroupedByZone(): Promise<ZoneGroup[]> {
     });
   }
 
-  return nonEmptyGroups;
+  return { totalCount: allPlants.length, groups: nonEmptyGroups };
 }
 
 export type TodoItem = {

@@ -6,7 +6,13 @@ import Image from "next/image";
 import { ChevronDown, Leaf } from "lucide-react";
 import type { ZoneGroup } from "@/lib/plants-query";
 
-export function PlantsOverview({ groups }: { groups: ZoneGroup[] }) {
+export function PlantsOverview({
+  totalCount,
+  groups,
+}: {
+  totalCount: number;
+  groups: ZoneGroup[];
+}) {
   const [openZoneIds, setOpenZoneIds] = useState<Set<number | null>>(new Set());
 
   function toggle(zoneId: number | null) {
@@ -20,7 +26,9 @@ export function PlantsOverview({ groups }: { groups: ZoneGroup[] }) {
 
   return (
     <div className="flex flex-col gap-5">
-      <h1 className="font-display text-2xl text-forest">Pflanzen</h1>
+      <h1 className="font-display text-2xl text-forest">
+        {totalCount} {totalCount === 1 ? "Pflanze" : "Pflanzen"}
+      </h1>
 
       {groups.length === 0 ? (
         <div className="flex flex-col items-center gap-2 rounded-2xl border border-dashed border-border bg-warm-white p-10 text-center text-forest-muted">
