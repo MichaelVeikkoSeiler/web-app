@@ -47,7 +47,7 @@ export function PlantHero({
   }
 
   return (
-    <div className="relative left-1/2 -mt-4 w-screen -ml-[50vw] sm:-mt-8 md:static md:left-auto md:w-full md:max-w-2xl md:mx-auto">
+    <div className="relative left-1/2 -mt-4 w-screen -ml-[50vw] sm:-mt-8 md:static md:left-auto md:ml-0 md:w-full">
       <div
         className="relative aspect-[4/3] w-full overflow-hidden rounded-b-3xl bg-warm-white sm:aspect-video"
         onTouchStart={ordered.length > 1 ? onTouchStart : undefined}
@@ -59,7 +59,7 @@ export function PlantHero({
           src={current.blobUrl}
           alt={alt}
           fill
-          sizes="(max-width: 672px) 100vw, 672px"
+          sizes="(max-width: 767px) 100vw, 1024px"
           className="object-cover"
           priority
         />
