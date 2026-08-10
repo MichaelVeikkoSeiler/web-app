@@ -142,6 +142,92 @@ export async function clearZonesHeroImage() {
   revalidatePath("/zonen");
 }
 
+export async function getBesonderheitenHeroImageUrl(): Promise<string | null> {
+  if (!isDbConfigured) return null;
+  const [row] = await getDb().select().from(settings).limit(1);
+  return row?.besonderheitenHeroImageUrl ?? null;
+}
+
+export async function setBesonderheitenHeroImage(url: string) {
+  const db = getDb();
+  const [existing] = await db
+    .select({ url: settings.besonderheitenHeroImageUrl })
+    .from(settings)
+    .where(eq(settings.id, 1))
+    .limit(1);
+
+  await db
+    .insert(settings)
+    .values({ id: 1, besonderheitenHeroImageUrl: url })
+    .onConflictDoUpdate({
+      target: settings.id,
+      set: { besonderheitenHeroImageUrl: url, updatedAt: new Date() },
+    });
+
+  if (existing?.url) await del(existing.url).catch(() => {});
+  revalidatePath("/besonderheiten");
+}
+
+export async function clearBesonderheitenHeroImage() {
+  const db = getDb();
+  const [existing] = await db
+    .select({ url: settings.besonderheitenHeroImageUrl })
+    .from(settings)
+    .where(eq(settings.id, 1))
+    .limit(1);
+
+  await db
+    .update(settings)
+    .set({ besonderheitenHeroImageUrl: null, updatedAt: new Date() })
+    .where(eq(settings.id, 1));
+
+  if (existing?.url) await del(existing.url).catch(() => {});
+  revalidatePath("/besonderheiten");
+}
+
+export async function getWetterHeroImageUrl(): Promise<string | null> {
+  if (!isDbConfigured) return null;
+  const [row] = await getDb().select().from(settings).limit(1);
+  return row?.wetterHeroImageUrl ?? null;
+}
+
+export async function setWetterHeroImage(url: string) {
+  const db = getDb();
+  const [existing] = await db
+    .select({ url: settings.wetterHeroImageUrl })
+    .from(settings)
+    .where(eq(settings.id, 1))
+    .limit(1);
+
+  await db
+    .insert(settings)
+    .values({ id: 1, wetterHeroImageUrl: url })
+    .onConflictDoUpdate({
+      target: settings.id,
+      set: { wetterHeroImageUrl: url, updatedAt: new Date() },
+    });
+
+  if (existing?.url) await del(existing.url).catch(() => {});
+  revalidatePath("/wetter");
+}
+
+export async function clearWetterHeroImage() {
+  const db = getDb();
+  const [existing] = await db
+    .select({ url: settings.wetterHeroImageUrl })
+    .from(settings)
+    .where(eq(settings.id, 1))
+    .limit(1);
+
+  await db
+    .update(settings)
+    .set({ wetterHeroImageUrl: null, updatedAt: new Date() })
+    .where(eq(settings.id, 1));
+
+  if (existing?.url) await del(existing.url).catch(() => {});
+  revalidatePath("/wetter");
+}
+
 export async function setLogoImage(url: string) {
   await getDb()
     .insert(settings)
