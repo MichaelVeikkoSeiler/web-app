@@ -5,24 +5,33 @@ import { getDb, isDbConfigured } from "@/lib/db";
 import { plantDocCases, plantDocPhotos, plants } from "@/lib/db/schema";
 import { Plus, Stethoscope } from "lucide-react";
 import { STATUS_META } from "@/lib/plant-doc-status";
+import {
+  getPlantDocHeroImageUrl,
+  setPlantDocHeroImage,
+  clearPlantDocHeroImage,
+} from "@/lib/actions/settings";
+import { HeroBanner } from "@/components/layout/hero-banner";
 
 export default async function PlantDocOverviewPage() {
-  const cases = isDbConfigured
-    ? await getDb()
-        .select({
-          id: plantDocCases.id,
-          status: plantDocCases.status,
-          analysisStatus: plantDocCases.analysisStatus,
-          primaryCause: plantDocCases.primaryCause,
-          createdAt: plantDocCases.createdAt,
-          plantId: plantDocCases.plantId,
-          germanName: plants.germanName,
-          scientificName: plants.scientificName,
-        })
-        .from(plantDocCases)
-        .innerJoin(plants, eq(plantDocCases.plantId, plants.id))
-        .orderBy(desc(plantDocCases.createdAt))
-    : [];
+  const [cases, heroImageUrl] = await Promise.all([
+    isDbConfigured
+      ? getDb()
+          .select({
+            id: plantDocCases.id,
+            status: plantDocCases.status,
+            analysisStatus: plantDocCases.analysisStatus,
+            primaryCause: plantDocCases.primaryCause,
+            createdAt: plantDocCases.createdAt,
+            plantId: plantDocCases.plantId,
+            germanName: plants.germanName,
+            scientificName: plants.scientificName,
+          })
+          .from(plantDocCases)
+          .innerJoin(plants, eq(plantDocCases.plantId, plants.id))
+          .orderBy(desc(plantDocCases.createdAt))
+      : [],
+    getPlantDocHeroImageUrl(),
+  ]);
 
   const photoByCaseId = new Map<number, string>();
   if (cases.length > 0) {
@@ -42,7 +51,15 @@ export default async function PlantDocOverviewPage() {
   }
 
   return (
-    <div className="flex flex-col gap-5">
+    <div className="flex flex-col gap-6">
+      <HeroBanner
+        initialUrl={heroImageUrl}
+        alt="Plant Doc"
+        uploadLabel="Bild hochladen"
+        onUpload={setPlantDocHeroImage}
+        onDelete={clearPlantDocHeroImage}
+      />
+
       <div className="flex items-center justify-between gap-3">
         <h1 className="font-display text-2xl text-forest">Plant Doc</h1>
         <Link

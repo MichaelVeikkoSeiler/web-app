@@ -228,6 +228,49 @@ export async function clearWetterHeroImage() {
   revalidatePath("/wetter");
 }
 
+export async function getPlantDocHeroImageUrl(): Promise<string | null> {
+  if (!isDbConfigured) return null;
+  const [row] = await getDb().select().from(settings).limit(1);
+  return row?.plantDocHeroImageUrl ?? null;
+}
+
+export async function setPlantDocHeroImage(url: string) {
+  const db = getDb();
+  const [existing] = await db
+    .select({ url: settings.plantDocHeroImageUrl })
+    .from(settings)
+    .where(eq(settings.id, 1))
+    .limit(1);
+
+  await db
+    .insert(settings)
+    .values({ id: 1, plantDocHeroImageUrl: url })
+    .onConflictDoUpdate({
+      target: settings.id,
+      set: { plantDocHeroImageUrl: url, updatedAt: new Date() },
+    });
+
+  if (existing?.url) await del(existing.url).catch(() => {});
+  revalidatePath("/plant-doc");
+}
+
+export async function clearPlantDocHeroImage() {
+  const db = getDb();
+  const [existing] = await db
+    .select({ url: settings.plantDocHeroImageUrl })
+    .from(settings)
+    .where(eq(settings.id, 1))
+    .limit(1);
+
+  await db
+    .update(settings)
+    .set({ plantDocHeroImageUrl: null, updatedAt: new Date() })
+    .where(eq(settings.id, 1));
+
+  if (existing?.url) await del(existing.url).catch(() => {});
+  revalidatePath("/plant-doc");
+}
+
 export async function setLogoImage(url: string) {
   await getDb()
     .insert(settings)
