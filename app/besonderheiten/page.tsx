@@ -1,4 +1,3 @@
-import { Sparkles } from "lucide-react";
 import { getPlantHighlights } from "@/lib/plants-query";
 import {
   getBesonderheitenHeroImageUrl,
@@ -24,10 +23,7 @@ export default async function BesonderheitenPage() {
         onDelete={clearBesonderheitenHeroImage}
       />
 
-      <h1 className="flex items-center gap-2 font-display text-2xl text-forest">
-        <Sparkles className="h-6 w-6 text-forest-muted" strokeWidth={1.75} />
-        Speziell
-      </h1>
+      <h1 className="font-display text-2xl text-forest">Speziell</h1>
 
       <HighlightSections highlights={highlights} />
     </div>
