@@ -1,11 +1,12 @@
 import { notFound } from "next/navigation";
-import { eq } from "drizzle-orm";
+import { desc, eq } from "drizzle-orm";
 import { Sun, CloudSun, CloudMoon } from "lucide-react";
 import { getDb, isDbConfigured } from "@/lib/db";
-import { zones, plantZoneAssignments, plants, plantPhotos } from "@/lib/db/schema";
+import { zones, plantZoneAssignments, plants, plantPhotos, zoneSoilChecks } from "@/lib/db/schema";
 import { ZoneImage } from "@/components/zones/zone-image";
 import { ZonePlants } from "@/components/zones/zone-plants";
 import { ZoneDetailActions } from "@/components/zones/zone-detail-actions";
+import { SoilSection } from "@/components/zones/soil-section";
 
 const lightIcon = {
   sonnig: Sun,
@@ -29,7 +30,7 @@ export default async function ZoneDetailPage({
   const [zone] = await db.select().from(zones).where(eq(zones.id, zoneId)).limit(1);
   if (!zone) notFound();
 
-  const [assignments, allPlantRows, primaryPhotos] = await Promise.all([
+  const [assignments, allPlantRows, primaryPhotos, latestSoilCheckRows] = await Promise.all([
     db
       .select({
         plantId: plants.id,
@@ -50,9 +51,20 @@ export default async function ZoneDetailPage({
       .select({ plantId: plantPhotos.plantId, blobUrl: plantPhotos.blobUrl })
       .from(plantPhotos)
       .where(eq(plantPhotos.isPrimary, true)),
+    db
+      .select({
+        soilTexture: zoneSoilChecks.soilTexture,
+        phValue: zoneSoilChecks.phValue,
+        drainageClass: zoneSoilChecks.drainageClass,
+      })
+      .from(zoneSoilChecks)
+      .where(eq(zoneSoilChecks.zoneId, zoneId))
+      .orderBy(desc(zoneSoilChecks.createdAt))
+      .limit(1),
   ]);
 
   const photoByPlant = new Map(primaryPhotos.map((p) => [p.plantId, p.blobUrl]));
+  const latestSoilCheck = latestSoilCheckRows[0] ?? null;
 
   const assignedPlants = assignments.map((a) => ({
     id: a.plantId,
@@ -93,6 +105,8 @@ export default async function ZoneDetailPage({
         </div>
 
         {zone.notes && <p className="text-sm text-forest-muted">{zone.notes}</p>}
+
+        <SoilSection zoneId={zone.id} latestCheck={latestSoilCheck} />
 
         <section className="flex flex-col gap-3">
           <h2 className="font-display text-lg text-forest">Pflanzen</h2>

@@ -8,8 +8,10 @@ import {
   pgEnum,
   unique,
   jsonb,
+  real,
 } from "drizzle-orm/pg-core";
 import type { PlantDocAnswers, PlantDocContext } from "@/lib/plant-doc-types";
+import type { SoilCheckAnswers } from "@/lib/soil-check-types";
 
 export const lightConditionEnum = pgEnum("light_condition", [
   "schattig",
@@ -183,5 +185,33 @@ export const plantDocPhotos = pgTable("plant_doc_photos", {
     .references(() => plantDocCases.id, { onDelete: "cascade" }),
   blobUrl: text("blob_url").notNull(),
   role: text("role"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+/**
+ * Historie der BodenChecks pro Zone. Jeder Durchlauf erzeugt eine neue Zeile
+ * (nie ein Überschreiben) – die Zonen-Detailseite zeigt jeweils die neueste.
+ * Die Auswertung (Bodenart, pH-Klasse, Drainage, ...) erfolgt deterministisch
+ * über lib/soil-check-logic.ts, nicht über OpenAI.
+ */
+export const zoneSoilChecks = pgTable("zone_soil_checks", {
+  id: serial("id").primaryKey(),
+  zoneId: integer("zone_id")
+    .notNull()
+    .references(() => zones.id, { onDelete: "cascade" }),
+
+  /** Vollständige Rohantworten aller Screens – Grundlage, um die Auswertungslogik später zu verbessern, ohne den Check erneut durchführen zu lassen. */
+  answers: jsonb("answers").$type<SoilCheckAnswers>().notNull(),
+
+  soilTexture: text("soil_texture").notNull(),
+  phValue: real("ph_value").notNull(),
+  phClassification: text("ph_classification").notNull(),
+  drainageClass: text("drainage_class").notNull(),
+  infiltrationCmPerHour: real("infiltration_cm_per_hour"),
+  waterRetentionClass: text("water_retention_class").notNull(),
+  stoneContentClass: text("stone_content_class").notNull(),
+  organicMatterIndicator: text("organic_matter_indicator").notNull(),
+  summaryText: text("summary_text").notNull(),
+
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
