@@ -1,19 +1,19 @@
 "use client";
 
-import { useMemo, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-import { Camera, Images, Loader2, Search, Stethoscope, X } from "lucide-react";
+import { Camera, ChevronDown, Images, Loader2, Stethoscope, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { inputClasses } from "@/components/ui/field";
 import { startPlantDocCase } from "@/lib/actions/plant-doc";
 import { uploadPlantDocPhoto } from "@/lib/upload-photo";
 import { PLANT_DOC_MAX_PHOTOS, type PlantDocAnswers } from "@/lib/plant-doc-types";
+import type { ZoneGroup } from "@/lib/plants-query";
 
 type SelectablePlant = {
   id: number;
   name: string;
-  scientificName: string;
   photoUrl: string | null;
 };
 
@@ -43,15 +43,15 @@ const ROLE_OPTIONS: { value: string; label: string }[] = [
 ];
 
 export function PlantDocWizard({
-  plants,
+  plantGroups,
   initialPlant,
 }: {
-  plants: SelectablePlant[];
+  plantGroups: ZoneGroup[];
   initialPlant: SelectablePlant | null;
 }) {
   const router = useRouter();
   const [selectedPlant, setSelectedPlant] = useState<SelectablePlant | null>(initialPlant);
-  const [plantQuery, setPlantQuery] = useState("");
+  const [openZoneIds, setOpenZoneIds] = useState<Set<number | null>>(new Set());
 
   const cameraInputRef = useRef<HTMLInputElement>(null);
   const galleryInputRef = useRef<HTMLInputElement>(null);
@@ -65,13 +65,14 @@ export function PlantDocWizard({
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const filteredPlants = useMemo(() => {
-    const q = plantQuery.trim().toLowerCase();
-    if (!q) return plants;
-    return plants.filter(
-      (p) => p.name.toLowerCase().includes(q) || p.scientificName.toLowerCase().includes(q),
-    );
-  }, [plants, plantQuery]);
+  function toggleZone(zoneId: number | null) {
+    setOpenZoneIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(zoneId)) next.delete(zoneId);
+      else next.add(zoneId);
+      return next;
+    });
+  }
 
   function toggle(set: Set<string>, setSet: (s: Set<string>) => void, value: string) {
     const next = new Set(set);
@@ -137,38 +138,74 @@ export function PlantDocWizard({
         </div>
         <p className="text-sm text-forest-muted">Für welche Pflanze möchtest du einen Fall starten?</p>
 
-        <div className="relative">
-          <Search className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-forest-muted" />
-          <input
-            value={plantQuery}
-            onChange={(e) => setPlantQuery(e.target.value)}
-            placeholder="Pflanze suchen…"
-            className={`${inputClasses} w-full pl-10`}
-          />
-        </div>
-
-        <div className="flex max-h-80 flex-col gap-1 overflow-y-auto">
-          {filteredPlants.map((p) => (
-            <button
-              key={p.id}
-              onClick={() => setSelectedPlant(p)}
-              className="flex items-center gap-3 rounded-xl px-2 py-2 text-left hover:bg-cream"
-            >
-              <span className="relative h-11 w-11 shrink-0 overflow-hidden rounded-lg bg-cream">
-                {p.photoUrl ? (
-                  <Image src={p.photoUrl} alt="" fill sizes="44px" className="object-cover" />
-                ) : (
-                  <span className="flex h-full items-center justify-center text-forest-muted/40">
-                    <Stethoscope className="h-4 w-4" strokeWidth={1.5} />
+        <div className="flex flex-col gap-2">
+          {plantGroups.map((group) => {
+            const open = openZoneIds.has(group.zoneId);
+            return (
+              <div
+                key={group.zoneId ?? "none"}
+                className="overflow-hidden rounded-2xl border border-border bg-warm-white"
+              >
+                <button
+                  onClick={() => toggleZone(group.zoneId)}
+                  aria-expanded={open}
+                  className="flex w-full items-center gap-3 px-4 py-3 text-left"
+                >
+                  <span className="relative h-9 w-9 shrink-0 overflow-hidden rounded-lg bg-cream">
+                    {group.zoneImageUrl ? (
+                      <Image
+                        src={group.zoneImageUrl}
+                        alt=""
+                        fill
+                        sizes="36px"
+                        className="object-cover"
+                      />
+                    ) : (
+                      <span className="flex h-full items-center justify-center text-forest-muted/40">
+                        <Stethoscope className="h-4 w-4" strokeWidth={1.5} />
+                      </span>
+                    )}
                   </span>
+                  <span className="flex-1 font-display text-base text-forest">
+                    {group.zoneName}
+                  </span>
+                  <span className="text-xs text-forest-muted">{group.plants.length}</span>
+                  <ChevronDown
+                    className={`h-4 w-4 shrink-0 text-forest-muted transition-transform ${open ? "rotate-180" : ""}`}
+                  />
+                </button>
+
+                {open && (
+                  <div className="grid grid-cols-3 gap-2 border-t border-border p-3">
+                    {group.plants.map((p) => (
+                      <button
+                        key={p.id}
+                        onClick={() => setSelectedPlant(p)}
+                        className="flex flex-col items-center gap-1.5 rounded-xl p-1.5 text-center hover:bg-cream"
+                      >
+                        <span className="relative aspect-square w-full overflow-hidden rounded-xl bg-cream">
+                          {p.photoUrl ? (
+                            <Image
+                              src={p.photoUrl}
+                              alt=""
+                              fill
+                              sizes="120px"
+                              className="object-cover"
+                            />
+                          ) : (
+                            <span className="flex h-full items-center justify-center text-forest-muted/40">
+                              <Stethoscope className="h-5 w-5" strokeWidth={1.5} />
+                            </span>
+                          )}
+                        </span>
+                        <span className="text-xs text-forest">{p.name}</span>
+                      </button>
+                    ))}
+                  </div>
                 )}
-              </span>
-              <span className="text-sm text-forest">{p.name}</span>
-            </button>
-          ))}
-          {filteredPlants.length === 0 && (
-            <p className="px-2 py-2 text-sm text-forest-muted">Keine Pflanze gefunden.</p>
-          )}
+              </div>
+            );
+          })}
         </div>
 
         <button

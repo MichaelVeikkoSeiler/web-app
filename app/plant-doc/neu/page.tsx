@@ -1,6 +1,7 @@
 import { eq, desc } from "drizzle-orm";
 import { getDb, isDbConfigured } from "@/lib/db";
 import { plants, plantPhotos } from "@/lib/db/schema";
+import { getPlantsGroupedByZone } from "@/lib/plants-query";
 import { PlantDocWizard } from "@/components/plant-doc/plant-doc-wizard";
 
 export default async function PlantDocNeuPage({
@@ -12,7 +13,7 @@ export default async function PlantDocNeuPage({
   const requestedId = plantId ? Number(plantId) : null;
 
   if (!isDbConfigured) {
-    return <PlantDocWizard plants={[]} initialPlant={null} />;
+    return <PlantDocWizard plantGroups={[]} initialPlant={null} />;
   }
 
   const db = getDb();
@@ -34,11 +35,10 @@ export default async function PlantDocNeuPage({
 
       return (
         <PlantDocWizard
-          plants={[]}
+          plantGroups={[]}
           initialPlant={{
             id: plant.id,
             name: plant.germanName ?? plant.scientificName,
-            scientificName: plant.scientificName,
             photoUrl: photo?.blobUrl ?? null,
           }}
         />
@@ -46,31 +46,7 @@ export default async function PlantDocNeuPage({
     }
   }
 
-  const allPlants = await db
-    .select({
-      id: plants.id,
-      germanName: plants.germanName,
-      scientificName: plants.scientificName,
-    })
-    .from(plants)
-    .orderBy(plants.germanName);
+  const { groups } = await getPlantsGroupedByZone();
 
-  const primaryPhotos = await db
-    .select({ plantId: plantPhotos.plantId, blobUrl: plantPhotos.blobUrl })
-    .from(plantPhotos)
-    .where(eq(plantPhotos.isPrimary, true));
-
-  const photoByPlantId = new Map(primaryPhotos.map((p) => [p.plantId, p.blobUrl]));
-
-  return (
-    <PlantDocWizard
-      plants={allPlants.map((p) => ({
-        id: p.id,
-        name: p.germanName ?? p.scientificName,
-        scientificName: p.scientificName,
-        photoUrl: photoByPlantId.get(p.id) ?? null,
-      }))}
-      initialPlant={null}
-    />
-  );
+  return <PlantDocWizard plantGroups={groups} initialPlant={null} />;
 }
