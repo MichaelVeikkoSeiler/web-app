@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { ChevronDown, Leaf } from "lucide-react";
+import { ChevronDown, Leaf, Plus } from "lucide-react";
 import type { ZoneGroup } from "@/lib/plants-query";
 
 export function PlantsOverview({
@@ -26,9 +26,18 @@ export function PlantsOverview({
 
   return (
     <div className="flex flex-col gap-5">
-      <h1 className="font-display text-2xl text-forest">
-        {totalCount} {totalCount === 1 ? "Pflanze" : "Pflanzen"}
-      </h1>
+      <div className="flex items-center justify-between gap-3">
+        <h1 className="font-display text-2xl text-forest">
+          {totalCount} {totalCount === 1 ? "Pflanze" : "Pflanzen"}
+        </h1>
+        <Link
+          href="/pflanzen/neu"
+          aria-label="Pflanze hinzufügen"
+          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-sage text-warm-white shadow-sm transition-transform active:scale-95 sm:hidden"
+        >
+          <Plus className="h-5 w-5" strokeWidth={2.5} />
+        </Link>
+      </div>
 
       {groups.length === 0 ? (
         <div className="flex flex-col items-center gap-2 rounded-2xl border border-dashed border-border bg-warm-white p-10 text-center text-forest-muted">

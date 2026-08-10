@@ -2,32 +2,18 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Plus, type LucideIcon } from "lucide-react";
+import { type LucideIcon } from "lucide-react";
 import { navItems } from "./nav-items";
 
 export function BottomNav() {
   const pathname = usePathname();
-  const pflanzenItem = navItems.find((item) => item.href === "/pflanzen")!;
-  const zonenItem = navItems.find((item) => item.href === "/zonen")!;
-  const wetterItem = navItems.find((item) => item.href === "/wetter")!;
-  const besonderheitenItem = navItems.find((item) => item.href === "/besonderheiten")!;
 
   return (
     <nav className="safe-bottom fixed inset-x-0 bottom-0 z-40 border-t border-border bg-warm-white/95 backdrop-blur sm:hidden">
       <div className="relative mx-auto flex max-w-lg items-center justify-around px-2 pt-2">
-        <NavLink {...pflanzenItem} active={isActive(pathname, pflanzenItem.href)} />
-        <NavLink {...zonenItem} active={isActive(pathname, zonenItem.href)} />
-
-        <Link
-          href="/pflanzen/neu"
-          aria-label="Pflanze hinzufügen"
-          className="-mt-6 flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-sage text-warm-white shadow-lg shadow-forest/20 transition-transform active:scale-95"
-        >
-          <Plus className="h-7 w-7" strokeWidth={2.5} />
-        </Link>
-
-        <NavLink {...wetterItem} active={isActive(pathname, wetterItem.href)} />
-        <NavLink {...besonderheitenItem} active={isActive(pathname, besonderheitenItem.href)} />
+        {navItems.map((item) => (
+          <NavLink key={item.href} {...item} active={isActive(pathname, item.href)} />
+        ))}
       </div>
     </nav>
   );
