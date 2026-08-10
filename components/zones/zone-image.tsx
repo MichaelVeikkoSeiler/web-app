@@ -44,56 +44,58 @@ export function ZoneImage({
   }
 
   return (
-    <div className="relative aspect-[4/3] w-full overflow-hidden rounded-3xl bg-warm-white sm:aspect-video">
-      {imageUrl ? (
-        <Image
-          src={imageUrl}
-          alt={name}
-          fill
-          sizes="(max-width: 672px) 100vw, 672px"
-          className="object-cover"
-          priority
-        />
-      ) : (
-        <div className="flex h-full items-center justify-center text-forest-muted/40">
-          <MapPin className="h-16 w-16" strokeWidth={1.25} />
-        </div>
-      )}
+    <div className="relative left-1/2 -mt-4 w-screen -ml-[50vw] sm:-mt-8 md:static md:left-auto md:ml-0 md:w-full md:max-w-2xl md:mx-auto">
+      <div className="relative aspect-[4/3] w-full overflow-hidden rounded-b-3xl bg-warm-white sm:aspect-video">
+        {imageUrl ? (
+          <Image
+            src={imageUrl}
+            alt={name}
+            fill
+            sizes="(max-width: 672px) 100vw, 672px"
+            className="object-cover"
+            priority
+          />
+        ) : (
+          <div className="flex h-full items-center justify-center text-forest-muted/40">
+            <MapPin className="h-16 w-16" strokeWidth={1.25} />
+          </div>
+        )}
 
-      <input
-        ref={fileInputRef}
-        type="file"
-        accept="image/*"
-        className="hidden"
-        onChange={handleFile}
-      />
-      <div className="absolute bottom-3 right-3 flex gap-2">
-        {imageUrl && (
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="image/*"
+          className="hidden"
+          onChange={handleFile}
+        />
+        <div className="absolute bottom-3 right-3 flex gap-2">
+          {imageUrl && (
+            <button
+              onClick={handleDelete}
+              disabled={uploading || pending}
+              aria-label="Bild löschen"
+              className="flex h-11 w-11 items-center justify-center rounded-full bg-forest/80 text-warm-white backdrop-blur-sm hover:bg-attention disabled:opacity-50"
+            >
+              {deleting ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Trash2 className="h-4 w-4" />
+              )}
+            </button>
+          )}
           <button
-            onClick={handleDelete}
+            onClick={() => fileInputRef.current?.click()}
             disabled={uploading || pending}
-            aria-label="Bild löschen"
-            className="flex h-11 w-11 items-center justify-center rounded-full bg-forest/80 text-warm-white backdrop-blur-sm hover:bg-attention disabled:opacity-50"
+            className="flex h-11 items-center gap-2 rounded-full bg-forest/80 px-4 text-sm font-medium text-warm-white backdrop-blur-sm hover:bg-forest disabled:opacity-50"
           >
-            {deleting ? (
+            {uploading ? (
               <Loader2 className="h-4 w-4 animate-spin" />
             ) : (
-              <Trash2 className="h-4 w-4" />
+              <Camera className="h-4 w-4" />
             )}
+            {imageUrl ? "Bild ändern" : "Bild hinzufügen"}
           </button>
-        )}
-        <button
-          onClick={() => fileInputRef.current?.click()}
-          disabled={uploading || pending}
-          className="flex h-11 items-center gap-2 rounded-full bg-forest/80 px-4 text-sm font-medium text-warm-white backdrop-blur-sm hover:bg-forest disabled:opacity-50"
-        >
-          {uploading ? (
-            <Loader2 className="h-4 w-4 animate-spin" />
-          ) : (
-            <Camera className="h-4 w-4" />
-          )}
-          {imageUrl ? "Bild ändern" : "Bild hinzufügen"}
-        </button>
+        </div>
       </div>
     </div>
   );

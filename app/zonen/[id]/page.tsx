@@ -69,46 +69,48 @@ export default async function ZoneDetailPage({
   const Icon = lightIcon[zone.light];
 
   return (
-    <div className="mx-auto flex max-w-2xl flex-col gap-6">
+    <div className="flex flex-col gap-6">
       <ZoneImage zoneId={zone.id} imageUrl={zone.imageUrl} name={zone.name} />
 
-      <div>
-        <h1 className="font-display text-3xl text-forest">{zone.name}</h1>
-      </div>
+      <div className="mx-auto flex w-full max-w-2xl flex-col gap-6">
+        <div>
+          <h1 className="font-display text-3xl text-forest">{zone.name}</h1>
+        </div>
 
-      <div className="flex flex-wrap gap-2 text-xs">
-        <span className="flex items-center gap-1 rounded-full bg-sun/40 px-2.5 py-1 text-sun-text">
-          <Icon className="h-3.5 w-3.5" />
-          {zone.light}
-        </span>
-        <span className="rounded-full bg-water/40 px-2.5 py-1 text-water-text">
-          {orientationLabel[zone.orientation]}
-        </span>
-        {zone.soilType && (
-          <span className="rounded-full bg-soil/40 px-2.5 py-1 text-soil-text">
-            {zone.soilType}
+        <div className="flex flex-wrap gap-2 text-xs">
+          <span className="flex items-center gap-1 rounded-full bg-sun/40 px-2.5 py-1 text-sun-text">
+            <Icon className="h-3.5 w-3.5" />
+            {zone.light}
           </span>
-        )}
-      </div>
+          <span className="rounded-full bg-water/40 px-2.5 py-1 text-water-text">
+            {orientationLabel[zone.orientation]}
+          </span>
+          {zone.soilType && (
+            <span className="rounded-full bg-soil/40 px-2.5 py-1 text-soil-text">
+              {zone.soilType}
+            </span>
+          )}
+        </div>
 
-      {zone.notes && <p className="text-sm text-forest-muted">{zone.notes}</p>}
+        {zone.notes && <p className="text-sm text-forest-muted">{zone.notes}</p>}
 
-      <section className="flex flex-col gap-3">
-        <h2 className="font-display text-lg text-forest">Pflanzen</h2>
-        <ZonePlants zoneId={zone.id} assignedPlants={assignedPlants} allPlants={allPlants} />
-      </section>
+        <section className="flex flex-col gap-3">
+          <h2 className="font-display text-lg text-forest">Pflanzen</h2>
+          <ZonePlants zoneId={zone.id} assignedPlants={assignedPlants} allPlants={allPlants} />
+        </section>
 
-      <div className="mt-2 border-t border-border pt-4">
-        <ZoneDetailActions
-          zone={{
-            id: zone.id,
-            name: zone.name,
-            light: zone.light,
-            orientation: zone.orientation,
-            soilType: zone.soilType ?? "",
-            notes: zone.notes ?? "",
-          }}
-        />
+        <div className="mt-2 border-t border-border pt-4">
+          <ZoneDetailActions
+            zone={{
+              id: zone.id,
+              name: zone.name,
+              light: zone.light,
+              orientation: zone.orientation,
+              soilType: zone.soilType ?? "",
+              notes: zone.notes ?? "",
+            }}
+          />
+        </div>
       </div>
     </div>
   );
