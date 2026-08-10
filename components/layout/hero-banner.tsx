@@ -54,7 +54,7 @@ export function HeroBanner({
 
   return (
     <div className="flex flex-col gap-2">
-      <div className="relative left-1/2 -mt-4 w-screen -ml-[50vw] sm:-mt-8">
+      <div className="relative left-1/2 -mt-4 w-screen -ml-[50vw] sm:-mt-8 md:static md:left-auto md:ml-0 md:w-full">
         <div className="relative aspect-[4/3] w-full overflow-hidden rounded-b-3xl bg-warm-white sm:aspect-video">
           <input
             ref={fileInputRef}
@@ -70,7 +70,7 @@ export function HeroBanner({
                 src={url}
                 alt={alt}
                 fill
-                sizes="100vw"
+                sizes="(max-width: 767px) 100vw, 1024px"
                 className="object-cover"
                 priority
               />
