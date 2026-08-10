@@ -5,9 +5,9 @@ import { NewPlantWizard } from "@/components/plants/new-plant-wizard";
 export default async function NeuePflanzePage({
   searchParams,
 }: {
-  searchParams: Promise<{ zoneId?: string }>;
+  searchParams: Promise<{ zoneId?: string; returnTo?: string }>;
 }) {
-  const { zoneId } = await searchParams;
+  const { zoneId, returnTo } = await searchParams;
   const allZones = isDbConfigured
     ? await getDb()
         .select({ id: zones.id, name: zones.name })
@@ -21,6 +21,7 @@ export default async function NeuePflanzePage({
     <NewPlantWizard
       zones={allZones}
       initialZoneId={Number.isFinite(initialZoneId) ? initialZoneId : null}
+      returnTo={returnTo ?? null}
     />
   );
 }

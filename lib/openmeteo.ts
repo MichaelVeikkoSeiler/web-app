@@ -93,3 +93,43 @@ export async function getWeatherSnapshot(): Promise<WeatherSnapshot> {
     precipitationLast7Days,
   };
 }
+
+export type DailyWeather = {
+  date: string;
+  weatherCode: number;
+  tempMax: number;
+  tempMin: number;
+  precipitationSum: number;
+};
+
+/**
+ * Wetter-Historie der letzten `days` Tage (inkl. heute), unabhängig von
+ * getWeatherSnapshot() – für Plant Doc, um Hitze-/Frostperioden etc. zu erkennen.
+ */
+export async function getWeatherHistory(days = 14): Promise<DailyWeather[]> {
+  const lat = process.env.GARDEN_LAT || "46.976";
+  const lon = process.env.GARDEN_LON || "7.130";
+
+  const url =
+    `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}` +
+    `&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_sum` +
+    `&past_days=${days}&forecast_days=1&timezone=Europe%2FBerlin`;
+
+  const res = await fetch(url, { next: { revalidate: 1800 } });
+  if (!res.ok) {
+    throw new Error(`Open-Meteo-Anfrage fehlgeschlagen (${res.status})`);
+  }
+  const data = await res.json();
+
+  const todayIso = new Date().toISOString().slice(0, 10);
+
+  return data.daily.time
+    .map((date: string, i: number) => ({
+      date,
+      weatherCode: data.daily.weather_code[i],
+      tempMax: data.daily.temperature_2m_max[i],
+      tempMin: data.daily.temperature_2m_min[i],
+      precipitationSum: data.daily.precipitation_sum[i],
+    }))
+    .filter((d: DailyWeather) => d.date <= todayIso);
+}

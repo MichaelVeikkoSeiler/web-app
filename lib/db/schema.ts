@@ -7,7 +7,9 @@ import {
   timestamp,
   pgEnum,
   unique,
+  jsonb,
 } from "drizzle-orm/pg-core";
+import type { PlantDocAnswers, PlantDocContext } from "@/lib/plant-doc-types";
 
 export const lightConditionEnum = pgEnum("light_condition", [
   "schattig",
@@ -132,5 +134,53 @@ export const plantNotes = pgTable("plant_notes", {
     .notNull()
     .references(() => plants.id, { onDelete: "cascade" }),
   text: text("text").notNull(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+export const plantDocCaseStatusEnum = pgEnum("plant_doc_case_status", [
+  "open",
+  "watching",
+  "improved",
+  "unchanged",
+  "worsened",
+  "resolved",
+]);
+
+export const plantDocCases = pgTable("plant_doc_cases", {
+  id: serial("id").primaryKey(),
+  plantId: integer("plant_id")
+    .notNull()
+    .references(() => plants.id, { onDelete: "cascade" }),
+
+  answers: jsonb("answers").$type<PlantDocAnswers>().notNull(),
+  contextSnapshot: jsonb("context_snapshot").$type<PlantDocContext>(),
+
+  analysisStatus: enrichmentStatusEnum("analysis_status").notNull().default("pending"),
+  analysisError: text("analysis_error"),
+
+  primaryCause: text("primary_cause"),
+  primaryCauseCategory: text("primary_cause_category"),
+  confidence: text("confidence"),
+  reasoning: text("reasoning"),
+  otherCauses: jsonb("other_causes").$type<string[]>(),
+  recommendations: jsonb("recommendations").$type<string[]>(),
+  recheckAfterDays: integer("recheck_after_days"),
+  needsMoreInfo: boolean("needs_more_info").notNull().default(false),
+  missingInfoSuggestions: jsonb("missing_info_suggestions").$type<string[]>(),
+  usedWebSearch: boolean("used_web_search").notNull().default(false),
+
+  status: plantDocCaseStatusEnum("status").notNull().default("open"),
+
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+export const plantDocPhotos = pgTable("plant_doc_photos", {
+  id: serial("id").primaryKey(),
+  caseId: integer("case_id")
+    .notNull()
+    .references(() => plantDocCases.id, { onDelete: "cascade" }),
+  blobUrl: text("blob_url").notNull(),
+  role: text("role"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });

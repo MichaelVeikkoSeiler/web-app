@@ -11,3 +11,4 @@ async function uploadImage(file: File) {
 export const uploadPlantPhoto = uploadImage;
 export const uploadHeroImage = uploadImage;
 export const uploadZoneImage = uploadImage;
+export const uploadPlantDocPhoto = uploadImage;

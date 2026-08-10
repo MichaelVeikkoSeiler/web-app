@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
-import { eq } from "drizzle-orm";
+import { desc, eq } from "drizzle-orm";
 import { getDb, isDbConfigured } from "@/lib/db";
-import { plants, plantPhotos, plantNotes, plantZoneAssignments, zones } from "@/lib/db/schema";
+import { plants, plantPhotos, plantNotes, plantZoneAssignments, zones, plantDocCases } from "@/lib/db/schema";
 import { CareInfoGrid } from "@/components/plants/care-info-grid";
 import { NoteList } from "@/components/plants/note-list";
 import { PhotoGallery } from "@/components/plants/photo-gallery";
@@ -10,6 +10,7 @@ import { EnrichmentStatus } from "@/components/plants/enrichment-status";
 import { ZoneChips } from "@/components/plants/zone-chips";
 import { DeletePlantButton } from "@/components/plants/delete-plant-button";
 import { SpeciesCorrection } from "@/components/plants/species-correction";
+import { PlantDocSection } from "@/components/plant-doc/plant-doc-section";
 
 export default async function PflanzeDetailPage({
   params,
@@ -25,7 +26,7 @@ export default async function PflanzeDetailPage({
   const [plant] = await db.select().from(plants).where(eq(plants.id, plantId)).limit(1);
   if (!plant) notFound();
 
-  const [photos, notes, assignedZones, allZones] = await Promise.all([
+  const [photos, notes, assignedZones, allZones, plantDocCasesForPlant] = await Promise.all([
     db
       .select()
       .from(plantPhotos)
@@ -41,6 +42,17 @@ export default async function PflanzeDetailPage({
       .select({ id: zones.id, name: zones.name, imageUrl: zones.imageUrl })
       .from(zones)
       .orderBy(zones.name),
+    db
+      .select({
+        id: plantDocCases.id,
+        status: plantDocCases.status,
+        analysisStatus: plantDocCases.analysisStatus,
+        primaryCause: plantDocCases.primaryCause,
+        createdAt: plantDocCases.createdAt,
+      })
+      .from(plantDocCases)
+      .where(eq(plantDocCases.plantId, plantId))
+      .orderBy(desc(plantDocCases.createdAt)),
   ]);
 
   return (
@@ -69,6 +81,8 @@ export default async function PflanzeDetailPage({
           status={plant.enrichmentStatus}
           error={plant.enrichmentError}
         />
+
+        <PlantDocSection plantId={plant.id} cases={plantDocCasesForPlant} />
 
         {plant.enrichmentStatus === "done" && (
           <section className="flex flex-col gap-3">

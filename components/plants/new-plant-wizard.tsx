@@ -33,9 +33,11 @@ type Step =
 export function NewPlantWizard({
   zones,
   initialZoneId = null,
+  returnTo = null,
 }: {
   zones: Zone[];
   initialZoneId?: number | null;
+  returnTo?: string | null;
 }) {
   const router = useRouter();
   const cameraInputRef = useRef<HTMLInputElement>(null);
@@ -96,7 +98,11 @@ export function NewPlantWizard({
         // Pflanze ist bereits gespeichert – Foto kann später über die Detailseite ergänzt werden.
       }
     }
-    router.push(`/pflanzen/${plantId}`);
+    if (returnTo === "plant-doc") {
+      router.push(`/plant-doc/neu?plantId=${plantId}`);
+    } else {
+      router.push(`/pflanzen/${plantId}`);
+    }
   }
 
   async function confirmSameZone(plantId: number) {
