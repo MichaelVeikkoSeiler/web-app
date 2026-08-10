@@ -72,7 +72,7 @@ export default async function ZoneDetailPage({
     <div className="flex flex-col gap-6">
       <ZoneImage zoneId={zone.id} imageUrl={zone.imageUrl} name={zone.name} />
 
-      <div className="mx-auto flex w-full max-w-2xl flex-col gap-6">
+      <div className="flex w-full flex-col gap-6">
         <div>
           <h1 className="font-display text-3xl text-forest">{zone.name}</h1>
         </div>

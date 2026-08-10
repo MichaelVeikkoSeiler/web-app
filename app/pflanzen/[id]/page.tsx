@@ -47,7 +47,7 @@ export default async function PflanzeDetailPage({
     <div className="flex flex-col gap-6">
       <PlantHero plantId={plant.id} photos={photos} alt={plant.germanName ?? plant.scientificName} />
 
-      <div className="mx-auto flex w-full max-w-2xl flex-col gap-6">
+      <div className="flex w-full flex-col gap-6">
         <div className="flex items-start justify-between gap-2">
           <div>
             <h1 className="font-display text-3xl text-forest">
