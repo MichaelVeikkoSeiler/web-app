@@ -4,6 +4,7 @@ import { useRef, useState, useTransition } from "react";
 import Image from "next/image";
 import { ChevronLeft, ChevronRight, Leaf, Loader2, Trash2 } from "lucide-react";
 import { deletePlantPhoto } from "@/lib/actions/plants";
+import { ImageLightbox } from "@/components/ui/image-lightbox";
 
 type Photo = { id: number; blobUrl: string; isPrimary: boolean };
 
@@ -19,6 +20,7 @@ export function PlantHero({
   const ordered = [...photos].sort((a, b) => Number(b.isPrimary) - Number(a.isPrimary));
   const [index, setIndex] = useState(0);
   const [pending, startTransition] = useTransition();
+  const [lightboxOpen, setLightboxOpen] = useState(false);
   const touchStartX = useRef<number | null>(null);
 
   const safeIndex = ordered.length > 0 ? Math.min(index, ordered.length - 1) : 0;
@@ -54,15 +56,22 @@ export function PlantHero({
         onTouchEnd={ordered.length > 1 ? onTouchEnd : undefined}
       >
       {current ? (
-        <Image
-          key={current.id}
-          src={current.blobUrl}
-          alt={alt}
-          fill
-          sizes="(max-width: 767px) 100vw, 1024px"
-          className="object-cover"
-          priority
-        />
+        <button
+          type="button"
+          onClick={() => setLightboxOpen(true)}
+          aria-label="Foto vergrössern"
+          className="absolute inset-0"
+        >
+          <Image
+            key={current.id}
+            src={current.blobUrl}
+            alt={alt}
+            fill
+            sizes="(max-width: 767px) 100vw, 1024px"
+            className="object-cover"
+            priority
+          />
+        </button>
       ) : (
         <div className="flex h-full items-center justify-center text-forest-muted/40">
           <Leaf className="h-16 w-16" strokeWidth={1.25} />
@@ -112,6 +121,14 @@ export function PlantHero({
         </>
       )}
       </div>
+
+      <ImageLightbox
+        photos={ordered}
+        initialIndex={safeIndex}
+        open={lightboxOpen}
+        onClose={() => setLightboxOpen(false)}
+        alt={alt}
+      />
     </div>
   );
 }

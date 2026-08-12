@@ -5,6 +5,7 @@ import Image from "next/image";
 import { Camera, Images, Loader2, X } from "lucide-react";
 import { uploadPlantPhoto } from "@/lib/upload-photo";
 import { savePlantPhoto, deletePlantPhoto } from "@/lib/actions/plants";
+import { ImageLightbox } from "@/components/ui/image-lightbox";
 
 type Photo = { id: number; blobUrl: string; isPrimary: boolean };
 
@@ -14,6 +15,7 @@ export function PhotoGallery({ plantId, photos }: { plantId: number; photos: Pho
   const [uploading, setUploading] = useState(false);
   const [pending, startTransition] = useTransition();
   const [deletingId, setDeletingId] = useState<number | null>(null);
+  const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
 
   async function handleFile(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -40,11 +42,21 @@ export function PhotoGallery({ plantId, photos }: { plantId: number; photos: Pho
 
   return (
     <div className="grid grid-cols-3 gap-2 sm:grid-cols-4">
-      {photos.map((p) => (
+      {photos.map((p, i) => (
         <div key={p.id} className="relative aspect-square overflow-hidden rounded-xl bg-cream">
-          <Image src={p.blobUrl} alt="" fill sizes="150px" className="object-cover" />
           <button
-            onClick={() => handleDelete(p.id)}
+            type="button"
+            onClick={() => setLightboxIndex(i)}
+            aria-label="Foto vergrössern"
+            className="absolute inset-0"
+          >
+            <Image src={p.blobUrl} alt="" fill sizes="150px" className="object-cover" />
+          </button>
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              handleDelete(p.id);
+            }}
             disabled={pending && deletingId === p.id}
             aria-label="Foto löschen"
             className="absolute right-1 top-1 flex h-6 w-6 items-center justify-center rounded-full bg-forest/70 text-warm-white hover:bg-attention disabled:opacity-50"
@@ -57,6 +69,14 @@ export function PhotoGallery({ plantId, photos }: { plantId: number; photos: Pho
           </button>
         </div>
       ))}
+
+      <ImageLightbox
+        photos={photos}
+        initialIndex={lightboxIndex ?? 0}
+        open={lightboxIndex !== null}
+        onClose={() => setLightboxIndex(null)}
+        alt=""
+      />
 
       <input
         ref={cameraInputRef}
