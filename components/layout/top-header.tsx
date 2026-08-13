@@ -14,8 +14,9 @@ export function TopHeader({ logoUrl }: { logoUrl: string | null }) {
       <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-3 sm:px-8 sm:py-4">
         <div className="flex items-center gap-3">
           <LogoUpload initialUrl={logoUrl} />
-          <Link href="/" className="font-display text-lg text-forest sm:text-xl">
-            Seilers Garten
+          <Link href="/" className="flex flex-col leading-tight">
+            <span className="font-display text-lg text-forest sm:text-xl">HORTIA</span>
+            <span className="text-[11px] text-forest-muted sm:text-xs">Wenn Gartenwissen wächst</span>
           </Link>
         </div>
 

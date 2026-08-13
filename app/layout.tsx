@@ -10,7 +10,7 @@ const quicksand = Quicksand({
 });
 
 export const metadata: Metadata = {
-  title: "Seilers Garten",
+  title: "HORTIA - Wenn Gartenwissen wächst",
   description: "Das digitale Gartenjournal für unsere Familie",
 };
 
