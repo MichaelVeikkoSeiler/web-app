@@ -80,17 +80,6 @@ export function ImageLightbox({
         />
       </div>
 
-      {current.createdAt && (
-        <span className="absolute left-3 top-3 z-10 rounded-full bg-forest/60 px-3 py-1.5 text-xs text-warm-white backdrop-blur-sm">
-          Hochgeladen am{" "}
-          {current.createdAt.toLocaleDateString("de-CH", {
-            day: "2-digit",
-            month: "2-digit",
-            year: "numeric",
-          })}
-        </span>
-      )}
-
       <button
         onClick={onClose}
         aria-label="Schliessen"
@@ -121,23 +110,39 @@ export function ImageLightbox({
           >
             <ChevronRight className="h-5 w-5" />
           </button>
-
-          <div className="absolute bottom-4 left-1/2 z-10 flex -translate-x-1/2 gap-1.5">
-            {photos.map((p, i) => (
-              <button
-                key={p.id}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  goTo(i);
-                }}
-                aria-label={`Foto ${i + 1} anzeigen`}
-                className={`h-1.5 rounded-full transition-all ${
-                  i === index ? "w-4 bg-warm-white" : "w-1.5 bg-warm-white/50"
-                }`}
-              />
-            ))}
-          </div>
         </>
+      )}
+
+      {(current.createdAt || photos.length > 1) && (
+        <div className="absolute bottom-4 left-1/2 z-10 flex -translate-x-1/2 flex-col items-center gap-2">
+          {current.createdAt && (
+            <span className="rounded-full bg-forest/60 px-3 py-1.5 text-xs text-warm-white backdrop-blur-sm">
+              Hochgeladen am{" "}
+              {current.createdAt.toLocaleDateString("de-CH", {
+                day: "2-digit",
+                month: "2-digit",
+                year: "numeric",
+              })}
+            </span>
+          )}
+          {photos.length > 1 && (
+            <div className="flex gap-1.5">
+              {photos.map((p, i) => (
+                <button
+                  key={p.id}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    goTo(i);
+                  }}
+                  aria-label={`Foto ${i + 1} anzeigen`}
+                  className={`h-1.5 rounded-full transition-all ${
+                    i === index ? "w-4 bg-warm-white" : "w-1.5 bg-warm-white/50"
+                  }`}
+                />
+              ))}
+            </div>
+          )}
+        </div>
       )}
     </div>
   );
