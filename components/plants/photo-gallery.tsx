@@ -7,7 +7,7 @@ import { uploadPlantPhoto } from "@/lib/upload-photo";
 import { savePlantPhoto, deletePlantPhoto } from "@/lib/actions/plants";
 import { ImageLightbox } from "@/components/ui/image-lightbox";
 
-type Photo = { id: number; blobUrl: string; isPrimary: boolean };
+type Photo = { id: number; blobUrl: string; isPrimary: boolean; createdAt: Date };
 
 export function PhotoGallery({ plantId, photos }: { plantId: number; photos: Photo[] }) {
   const cameraInputRef = useRef<HTMLInputElement>(null);

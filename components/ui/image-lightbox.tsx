@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { ChevronLeft, ChevronRight, X } from "lucide-react";
 
-type LightboxPhoto = { id: number; blobUrl: string };
+type LightboxPhoto = { id: number; blobUrl: string; createdAt?: Date };
 
 export function ImageLightbox({
   photos,
@@ -79,6 +79,17 @@ export function ImageLightbox({
           className="object-contain"
         />
       </div>
+
+      {current.createdAt && (
+        <span className="absolute left-3 top-3 z-10 rounded-full bg-forest/60 px-3 py-1.5 text-xs text-warm-white backdrop-blur-sm">
+          Hochgeladen am{" "}
+          {current.createdAt.toLocaleDateString("de-CH", {
+            day: "2-digit",
+            month: "2-digit",
+            year: "numeric",
+          })}
+        </span>
+      )}
 
       <button
         onClick={onClose}

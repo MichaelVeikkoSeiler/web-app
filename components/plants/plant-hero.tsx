@@ -6,7 +6,7 @@ import { ChevronLeft, ChevronRight, Leaf, Loader2, Trash2 } from "lucide-react";
 import { deletePlantPhoto } from "@/lib/actions/plants";
 import { ImageLightbox } from "@/components/ui/image-lightbox";
 
-type Photo = { id: number; blobUrl: string; isPrimary: boolean };
+type Photo = { id: number; blobUrl: string; isPrimary: boolean; createdAt: Date };
 
 export function PlantHero({
   plantId,
