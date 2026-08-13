@@ -31,7 +31,7 @@ export default async function PflanzeDetailPage({
       .select()
       .from(plantPhotos)
       .where(eq(plantPhotos.plantId, plantId))
-      .orderBy(plantPhotos.isPrimary),
+      .orderBy(plantPhotos.id),
     db.select().from(plantNotes).where(eq(plantNotes.plantId, plantId)).orderBy(plantNotes.createdAt),
     db
       .select({ id: zones.id, name: zones.name, imageUrl: zones.imageUrl })
