@@ -7,6 +7,7 @@ import { ZoneHero } from "@/components/zones/zone-hero";
 import { ZonePlants } from "@/components/zones/zone-plants";
 import { ZoneDetailActions } from "@/components/zones/zone-detail-actions";
 import { SoilSection } from "@/components/zones/soil-section";
+import { OtherZonesOverview } from "@/components/zones/other-zones-overview";
 
 const lightIcon = {
   sonnig: Sun,
@@ -30,7 +31,7 @@ export default async function ZoneDetailPage({
   const [zone] = await db.select().from(zones).where(eq(zones.id, zoneId)).limit(1);
   if (!zone) notFound();
 
-  const [assignments, allPlantRows, primaryPhotos, latestSoilCheckRows, zonePhotoRows] = await Promise.all([
+  const [assignments, allPlantRows, primaryPhotos, latestSoilCheckRows, zonePhotoRows, allZoneRows, primaryZonePhotos] = await Promise.all([
     db
       .select({
         plantId: plants.id,
@@ -62,10 +63,19 @@ export default async function ZoneDetailPage({
       .orderBy(desc(zoneSoilChecks.createdAt))
       .limit(1),
     db.select().from(zonePhotos).where(eq(zonePhotos.zoneId, zoneId)),
+    db.select({ id: zones.id, name: zones.name }).from(zones).orderBy(zones.orderIndex),
+    db
+      .select({ zoneId: zonePhotos.zoneId, blobUrl: zonePhotos.blobUrl })
+      .from(zonePhotos)
+      .where(eq(zonePhotos.isPrimary, true)),
   ]);
 
   const photoByPlant = new Map(primaryPhotos.map((p) => [p.plantId, p.blobUrl]));
   const latestSoilCheck = latestSoilCheckRows[0] ?? null;
+  const photoByZone = new Map(primaryZonePhotos.map((p) => [p.zoneId, p.blobUrl]));
+  const otherZones = allZoneRows
+    .filter((z) => z.id !== zoneId)
+    .map((z) => ({ id: z.id, name: z.name, imageUrl: photoByZone.get(z.id) ?? null }));
 
   const assignedPlants = assignments.map((a) => ({
     id: a.plantId,
@@ -126,6 +136,8 @@ export default async function ZoneDetailPage({
             }}
           />
         </div>
+
+        <OtherZonesOverview zones={otherZones} />
       </div>
     </div>
   );
