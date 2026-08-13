@@ -33,7 +33,7 @@ export function LogoUpload({ initialUrl }: { initialUrl: string | null }) {
       onClick={() => fileInputRef.current?.click()}
       disabled={uploading}
       aria-label={url ? "Logo ändern" : "Logo hochladen"}
-      className="relative flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-border bg-warm-white text-forest-muted hover:border-sage disabled:opacity-50 sm:h-10 sm:w-10"
+      className="relative flex h-[46px] w-[46px] shrink-0 items-center justify-center overflow-hidden rounded-xl border border-border bg-warm-white text-forest-muted hover:border-sage disabled:opacity-50 sm:h-[51px] sm:w-[51px]"
     >
       <input
         ref={fileInputRef}
@@ -43,11 +43,11 @@ export function LogoUpload({ initialUrl }: { initialUrl: string | null }) {
         onChange={handleFile}
       />
       {uploading ? (
-        <Loader2 className="h-4 w-4 animate-spin" />
+        <Loader2 className="h-5 w-5 animate-spin" />
       ) : url ? (
-        <Image src={url} alt="Logo" fill sizes="40px" className="object-cover" />
+        <Image src={url} alt="Logo" fill sizes="51px" className="object-cover" />
       ) : (
-        <Plus className="h-4 w-4" strokeWidth={2.25} />
+        <Plus className="h-5 w-5" strokeWidth={2.25} />
       )}
     </button>
   );
