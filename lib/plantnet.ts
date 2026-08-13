@@ -3,9 +3,11 @@ export type PlantNetCandidate = {
   scientificName: string;
   commonNames: string[];
   family: string;
+  /** "ai" markiert Vorschläge aus dem KI-Bilderkennungs-Fallback statt aus PlantNet. */
+  source?: "ai";
 };
 
-const IDENTIFY_TIMEOUT_MS = 12_000;
+const IDENTIFY_TIMEOUT_MS = 10_000;
 
 export async function identifyPlantPhoto(
   file: File,

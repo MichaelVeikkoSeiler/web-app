@@ -204,6 +204,7 @@ export function NewPlantWizard({
             <>
               <h2 className="text-sm font-semibold text-forest-muted">
                 Welche Art ist es?
+                {step.candidates[0]?.source === "ai" && " (KI-Vorschlag, PlantNet ohne Treffer)"}
               </h2>
               {step.candidates.map((c) => (
                 <button
@@ -221,9 +222,15 @@ export function NewPlantWizard({
                       </span>
                     )}
                   </span>
-                  <span className="shrink-0 rounded-full bg-sage/30 px-2.5 py-1 text-xs font-semibold text-forest">
-                    {Math.round(c.score * 100)}%
-                  </span>
+                  {c.source === "ai" ? (
+                    <span className="shrink-0 rounded-full bg-sun/40 px-2.5 py-1 text-xs font-semibold text-sun-text">
+                      KI
+                    </span>
+                  ) : (
+                    <span className="shrink-0 rounded-full bg-sage/30 px-2.5 py-1 text-xs font-semibold text-forest">
+                      {Math.round(c.score * 100)}%
+                    </span>
+                  )}
                 </button>
               ))}
             </>

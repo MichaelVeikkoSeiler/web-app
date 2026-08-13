@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import { desc, eq } from "drizzle-orm";
 import { getDb, isDbConfigured } from "@/lib/db";
-import { plants, plantPhotos, plantNotes, plantZoneAssignments, zones, plantDocCases } from "@/lib/db/schema";
+import { plants, plantPhotos, plantNotes, plantZoneAssignments, zones, plantDocCases, zonePhotos } from "@/lib/db/schema";
 import { CareInfoGrid } from "@/components/plants/care-info-grid";
 import { NoteList } from "@/components/plants/note-list";
 import { PhotoGallery } from "@/components/plants/photo-gallery";
@@ -26,7 +26,7 @@ export default async function PflanzeDetailPage({
   const [plant] = await db.select().from(plants).where(eq(plants.id, plantId)).limit(1);
   if (!plant) notFound();
 
-  const [photos, notes, assignedZones, allZones, plantDocCasesForPlant] = await Promise.all([
+  const [photos, notes, assignedZoneRows, allZoneRows, plantDocCasesForPlant, primaryZonePhotos] = await Promise.all([
     db
       .select()
       .from(plantPhotos)
@@ -34,12 +34,12 @@ export default async function PflanzeDetailPage({
       .orderBy(plantPhotos.id),
     db.select().from(plantNotes).where(eq(plantNotes.plantId, plantId)).orderBy(plantNotes.createdAt),
     db
-      .select({ id: zones.id, name: zones.name, imageUrl: zones.imageUrl })
+      .select({ id: zones.id, name: zones.name })
       .from(plantZoneAssignments)
       .innerJoin(zones, eq(plantZoneAssignments.zoneId, zones.id))
       .where(eq(plantZoneAssignments.plantId, plantId)),
     db
-      .select({ id: zones.id, name: zones.name, imageUrl: zones.imageUrl })
+      .select({ id: zones.id, name: zones.name })
       .from(zones)
       .orderBy(zones.name),
     db
@@ -53,7 +53,15 @@ export default async function PflanzeDetailPage({
       .from(plantDocCases)
       .where(eq(plantDocCases.plantId, plantId))
       .orderBy(desc(plantDocCases.createdAt)),
+    db
+      .select({ zoneId: zonePhotos.zoneId, blobUrl: zonePhotos.blobUrl })
+      .from(zonePhotos)
+      .where(eq(zonePhotos.isPrimary, true)),
   ]);
+
+  const photoByZone = new Map(primaryZonePhotos.map((p) => [p.zoneId, p.blobUrl]));
+  const assignedZones = assignedZoneRows.map((z) => ({ ...z, imageUrl: photoByZone.get(z.id) ?? null }));
+  const allZones = allZoneRows.map((z) => ({ ...z, imageUrl: photoByZone.get(z.id) ?? null }));
 
   return (
     <div className="flex flex-col gap-6">

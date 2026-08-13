@@ -5,7 +5,7 @@ import { del } from "@vercel/blob";
 import { eq, sql } from "drizzle-orm";
 import { z } from "zod";
 import { getDb } from "@/lib/db";
-import { zones } from "@/lib/db/schema";
+import { zones, zonePhotos } from "@/lib/db/schema";
 
 const zoneSchema = z.object({
   name: z.string().trim().min(1, "Name ist erforderlich"),
@@ -61,60 +61,58 @@ export async function updateZone(id: number, input: ZoneInput) {
   return zone;
 }
 
-export async function saveZoneImage(zoneId: number, blobUrl: string) {
+export async function addZonePhoto(zoneId: number, blobUrl: string, isPrimary: boolean) {
   const db = getDb();
-  const [existing] = await db
-    .select({ imageUrl: zones.imageUrl })
-    .from(zones)
-    .where(eq(zones.id, zoneId))
-    .limit(1);
-
-  await db
-    .update(zones)
-    .set({ imageUrl: blobUrl, updatedAt: new Date() })
-    .where(eq(zones.id, zoneId));
-
-  if (existing?.imageUrl) {
-    await del(existing.imageUrl).catch(() => {});
+  if (isPrimary) {
+    await db.update(zonePhotos).set({ isPrimary: false }).where(eq(zonePhotos.zoneId, zoneId));
   }
-
+  await db.insert(zonePhotos).values({ zoneId, blobUrl, isPrimary });
   revalidatePath("/zonen");
   revalidatePath(`/zonen/${zoneId}`);
+  revalidatePath("/pflanzen");
+  revalidatePath("/pflanzen/neu");
 }
 
-export async function clearZoneImage(zoneId: number) {
+export async function deleteZonePhoto(photoId: number, zoneId: number) {
   const db = getDb();
-  const [existing] = await db
-    .select({ imageUrl: zones.imageUrl })
-    .from(zones)
-    .where(eq(zones.id, zoneId))
+  const [photo] = await db
+    .select()
+    .from(zonePhotos)
+    .where(eq(zonePhotos.id, photoId))
     .limit(1);
+  if (!photo) return;
 
-  await db
-    .update(zones)
-    .set({ imageUrl: null, updatedAt: new Date() })
-    .where(eq(zones.id, zoneId));
+  await db.delete(zonePhotos).where(eq(zonePhotos.id, photoId));
+  await del(photo.blobUrl).catch(() => {});
 
-  if (existing?.imageUrl) {
-    await del(existing.imageUrl).catch(() => {});
+  if (photo.isPrimary) {
+    const [next] = await db
+      .select({ id: zonePhotos.id })
+      .from(zonePhotos)
+      .where(eq(zonePhotos.zoneId, zoneId))
+      .limit(1);
+    if (next) {
+      await db.update(zonePhotos).set({ isPrimary: true }).where(eq(zonePhotos.id, next.id));
+    }
   }
 
   revalidatePath("/zonen");
   revalidatePath(`/zonen/${zoneId}`);
+  revalidatePath("/pflanzen");
+  revalidatePath("/pflanzen/neu");
 }
 
 export async function deleteZone(id: number) {
   const db = getDb();
-  const [existing] = await db
-    .select({ imageUrl: zones.imageUrl })
-    .from(zones)
-    .where(eq(zones.id, id))
-    .limit(1);
+  const photos = await db
+    .select({ blobUrl: zonePhotos.blobUrl })
+    .from(zonePhotos)
+    .where(eq(zonePhotos.zoneId, id));
 
   await db.delete(zones).where(eq(zones.id, id));
 
-  if (existing?.imageUrl) {
-    await del(existing.imageUrl).catch(() => {});
+  if (photos.length > 0) {
+    await del(photos.map((p) => p.blobUrl)).catch(() => {});
   }
 
   revalidatePath("/zonen");

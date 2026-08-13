@@ -112,6 +112,21 @@ export const plantPhotos = pgTable("plant_photos", {
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
+/**
+ * Mehrere Bilder pro Zone (Slider im Auftaktbild). `zones.imageUrl` bleibt
+ * als Spalte bestehen, wird aber nicht mehr gelesen/geschrieben – die
+ * bestehenden Werte wurden per Migration hierher übernommen.
+ */
+export const zonePhotos = pgTable("zone_photos", {
+  id: serial("id").primaryKey(),
+  zoneId: integer("zone_id")
+    .notNull()
+    .references(() => zones.id, { onDelete: "cascade" }),
+  blobUrl: text("blob_url").notNull(),
+  isPrimary: boolean("is_primary").notNull().default(false),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
 export const settings = pgTable("settings", {
   id: integer("id").primaryKey().default(1),
   heroImageUrl: text("hero_image_url"),

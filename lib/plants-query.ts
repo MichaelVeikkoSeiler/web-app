@@ -1,6 +1,6 @@
 import { eq } from "drizzle-orm";
 import { getDb, isDbConfigured } from "@/lib/db";
-import { plants, plantPhotos, plantZoneAssignments, zones } from "@/lib/db/schema";
+import { plants, plantPhotos, plantZoneAssignments, zones, zonePhotos } from "@/lib/db/schema";
 import { computeHelpFlags } from "@/lib/help-logic";
 import { getWeatherSnapshot } from "@/lib/openmeteo";
 import { monthRangeDuration } from "@/lib/date-utils";
@@ -27,22 +27,28 @@ export async function getPlantsGroupedByZone(): Promise<PlantsOverviewData> {
   if (!isDbConfigured) return { totalCount: 0, groups: [] };
 
   const db = getDb();
-  const [allPlants, allZones, assignments, photos] = await Promise.all([
+  const [allPlants, allZones, assignments, photos, zonePhotoRows] = await Promise.all([
     db.select().from(plants),
     db
-      .select({ id: zones.id, name: zones.name, imageUrl: zones.imageUrl })
+      .select({ id: zones.id, name: zones.name })
       .from(zones)
       .orderBy(zones.orderIndex),
     db
       .select({ plantId: plantZoneAssignments.plantId, zoneId: plantZoneAssignments.zoneId })
       .from(plantZoneAssignments),
     db.select().from(plantPhotos).where(eq(plantPhotos.isPrimary, true)),
+    db
+      .select({ zoneId: zonePhotos.zoneId, blobUrl: zonePhotos.blobUrl })
+      .from(zonePhotos)
+      .where(eq(zonePhotos.isPrimary, true)),
   ]);
 
   const photoByPlant = new Map<number, string>();
   for (const p of photos) {
     if (!photoByPlant.has(p.plantId)) photoByPlant.set(p.plantId, p.blobUrl);
   }
+
+  const photoByZone = new Map(zonePhotoRows.map((p) => [p.zoneId, p.blobUrl]));
 
   const zoneIdsByPlant = new Map<number, number[]>();
   for (const a of assignments) {
@@ -62,7 +68,7 @@ export async function getPlantsGroupedByZone(): Promise<PlantsOverviewData> {
   const groups: ZoneGroup[] = allZones.map((z) => ({
     zoneId: z.id,
     zoneName: z.name,
-    zoneImageUrl: z.imageUrl,
+    zoneImageUrl: photoByZone.get(z.id) ?? null,
     plants: [],
   }));
   const groupByZoneId = new Map(groups.map((g) => [g.zoneId, g]));

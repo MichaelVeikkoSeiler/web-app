@@ -7,6 +7,7 @@ import { eq, ilike, and, inArray } from "drizzle-orm";
 import { getDb, isDbConfigured } from "@/lib/db";
 import { plants, plantZoneAssignments, plantPhotos, plantNotes, zones } from "@/lib/db/schema";
 import { identifyPlantPhoto, type PlantNetCandidate } from "@/lib/plantnet";
+import { identifyPlantPhotoWithVision } from "@/lib/plant-vision-id";
 import { enrichPlant } from "@/lib/enrichment";
 import { checkZoneConflict } from "@/lib/conflict-analysis";
 
@@ -18,21 +19,28 @@ export async function identifyPlant(formData: FormData): Promise<{
   if (!(file instanceof File) || file.size === 0) {
     return { candidates: [], error: "Kein Foto empfangen." };
   }
+
+  let candidates: PlantNetCandidate[] = [];
+  let plantNetError: string | null = null;
   try {
-    const candidates = await identifyPlantPhoto(file);
-    if (candidates.length === 0) {
-      return {
-        candidates: [],
-        error: "Keine passende Art gefunden. Bitte ein anderes Foto versuchen.",
-      };
-    }
-    return { candidates };
+    candidates = await identifyPlantPhoto(file);
   } catch (e) {
+    plantNetError = e instanceof Error ? e.message : "Unbekannter Fehler bei der Erkennung.";
+  }
+
+  if (candidates.length === 0) {
+    // PlantNet hat nichts gefunden oder ist ausgefallen -> KI-Bilderkennung als Fallback versuchen.
+    const aiCandidates = await identifyPlantPhotoWithVision(file).catch(() => []);
+    if (aiCandidates.length > 0) {
+      return { candidates: aiCandidates };
+    }
     return {
       candidates: [],
-      error: e instanceof Error ? e.message : "Unbekannter Fehler bei der Erkennung.",
+      error: plantNetError ?? "Keine passende Art gefunden. Bitte Art manuell suchen.",
     };
   }
+
+  return { candidates };
 }
 
 export async function findExistingPlant(scientificName: string) {

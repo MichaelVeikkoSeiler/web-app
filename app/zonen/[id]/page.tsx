@@ -2,8 +2,8 @@ import { notFound } from "next/navigation";
 import { desc, eq } from "drizzle-orm";
 import { Sun, CloudSun, CloudMoon } from "lucide-react";
 import { getDb, isDbConfigured } from "@/lib/db";
-import { zones, plantZoneAssignments, plants, plantPhotos, zoneSoilChecks } from "@/lib/db/schema";
-import { ZoneImage } from "@/components/zones/zone-image";
+import { zones, plantZoneAssignments, plants, plantPhotos, zoneSoilChecks, zonePhotos } from "@/lib/db/schema";
+import { ZoneHero } from "@/components/zones/zone-hero";
 import { ZonePlants } from "@/components/zones/zone-plants";
 import { ZoneDetailActions } from "@/components/zones/zone-detail-actions";
 import { SoilSection } from "@/components/zones/soil-section";
@@ -30,7 +30,7 @@ export default async function ZoneDetailPage({
   const [zone] = await db.select().from(zones).where(eq(zones.id, zoneId)).limit(1);
   if (!zone) notFound();
 
-  const [assignments, allPlantRows, primaryPhotos, latestSoilCheckRows] = await Promise.all([
+  const [assignments, allPlantRows, primaryPhotos, latestSoilCheckRows, zonePhotoRows] = await Promise.all([
     db
       .select({
         plantId: plants.id,
@@ -61,6 +61,7 @@ export default async function ZoneDetailPage({
       .where(eq(zoneSoilChecks.zoneId, zoneId))
       .orderBy(desc(zoneSoilChecks.createdAt))
       .limit(1),
+    db.select().from(zonePhotos).where(eq(zonePhotos.zoneId, zoneId)),
   ]);
 
   const photoByPlant = new Map(primaryPhotos.map((p) => [p.plantId, p.blobUrl]));
@@ -82,7 +83,7 @@ export default async function ZoneDetailPage({
 
   return (
     <div className="flex flex-col gap-6">
-      <ZoneImage zoneId={zone.id} imageUrl={zone.imageUrl} name={zone.name} />
+      <ZoneHero zoneId={zone.id} photos={zonePhotoRows} name={zone.name} />
 
       <div className="flex w-full flex-col gap-6">
         <div>
