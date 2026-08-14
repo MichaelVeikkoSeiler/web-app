@@ -196,11 +196,13 @@ export async function addNote(plantId: number, text: string) {
   if (!trimmed) return;
   await getDb().insert(plantNotes).values({ plantId, text: trimmed });
   revalidatePath(`/pflanzen/${plantId}`);
+  revalidatePath("/");
 }
 
-export async function deleteNote(noteId: number, plantId: number) {
+export async function deleteNote(plantId: number, noteId: number) {
   await getDb().delete(plantNotes).where(eq(plantNotes.id, noteId));
   revalidatePath(`/pflanzen/${plantId}`);
+  revalidatePath("/");
 }
 
 export async function waterPlant(plantId: number) {

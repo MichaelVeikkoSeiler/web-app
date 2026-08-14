@@ -5,7 +5,7 @@ import { del } from "@vercel/blob";
 import { eq, sql } from "drizzle-orm";
 import { z } from "zod";
 import { getDb } from "@/lib/db";
-import { zones, zonePhotos } from "@/lib/db/schema";
+import { zones, zonePhotos, zoneNotes } from "@/lib/db/schema";
 
 const zoneSchema = z.object({
   name: z.string().trim().min(1, "Name ist erforderlich"),
@@ -117,6 +117,20 @@ export async function deleteZone(id: number) {
 
   revalidatePath("/zonen");
   revalidatePath("/pflanzen");
+}
+
+export async function addZoneNote(zoneId: number, text: string) {
+  const trimmed = text.trim();
+  if (!trimmed) return;
+  await getDb().insert(zoneNotes).values({ zoneId, text: trimmed });
+  revalidatePath(`/zonen/${zoneId}`);
+  revalidatePath("/");
+}
+
+export async function deleteZoneNote(zoneId: number, noteId: number) {
+  await getDb().delete(zoneNotes).where(eq(zoneNotes.id, noteId));
+  revalidatePath(`/zonen/${zoneId}`);
+  revalidatePath("/");
 }
 
 export async function reorderZones(orderedIds: number[]) {

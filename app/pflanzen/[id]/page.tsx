@@ -3,7 +3,7 @@ import { desc, eq } from "drizzle-orm";
 import { getDb, isDbConfigured } from "@/lib/db";
 import { plants, plantPhotos, plantNotes, plantZoneAssignments, zones, plantDocCases, zonePhotos } from "@/lib/db/schema";
 import { CareInfoGrid } from "@/components/plants/care-info-grid";
-import { NoteList } from "@/components/plants/note-list";
+import { NoteList } from "@/components/ui/note-list";
 import { PhotoGallery } from "@/components/plants/photo-gallery";
 import { PlantHero } from "@/components/plants/plant-hero";
 import { EnrichmentStatus } from "@/components/plants/enrichment-status";
@@ -11,6 +11,7 @@ import { ZoneChips } from "@/components/plants/zone-chips";
 import { DeletePlantButton } from "@/components/plants/delete-plant-button";
 import { SpeciesCorrection } from "@/components/plants/species-correction";
 import { PlantDocSection } from "@/components/plant-doc/plant-doc-section";
+import { addNote, deleteNote } from "@/lib/actions/plants";
 
 export default async function PflanzeDetailPage({
   params,
@@ -106,7 +107,11 @@ export default async function PflanzeDetailPage({
 
         <section className="flex flex-col gap-3">
           <h2 className="font-display text-lg text-forest">Notizen</h2>
-          <NoteList plantId={plant.id} notes={notes} />
+          <NoteList
+            notes={notes}
+            onAdd={addNote.bind(null, plant.id)}
+            onDelete={deleteNote.bind(null, plant.id)}
+          />
         </section>
 
         <div className="mt-2 border-t border-border pt-4">

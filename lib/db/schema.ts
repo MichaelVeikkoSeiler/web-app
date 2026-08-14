@@ -156,6 +156,15 @@ export const plantNotes = pgTable("plant_notes", {
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
+export const zoneNotes = pgTable("zone_notes", {
+  id: serial("id").primaryKey(),
+  zoneId: integer("zone_id")
+    .notNull()
+    .references(() => zones.id, { onDelete: "cascade" }),
+  text: text("text").notNull(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
 export const plantDocCaseStatusEnum = pgEnum("plant_doc_case_status", [
   "open",
   "watching",

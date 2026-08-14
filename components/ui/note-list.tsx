@@ -2,12 +2,19 @@
 
 import { useState, useTransition } from "react";
 import { Plus, Trash2 } from "lucide-react";
-import { addNote, deleteNote } from "@/lib/actions/plants";
 import { Button } from "@/components/ui/button";
 
 type Note = { id: number; text: string; createdAt: Date | string };
 
-export function NoteList({ plantId, notes }: { plantId: number; notes: Note[] }) {
+export function NoteList({
+  notes,
+  onAdd,
+  onDelete,
+}: {
+  notes: Note[];
+  onAdd: (text: string) => Promise<void>;
+  onDelete: (noteId: number) => Promise<void>;
+}) {
   const [adding, setAdding] = useState(false);
   const [text, setText] = useState("");
   const [pending, startTransition] = useTransition();
@@ -15,7 +22,7 @@ export function NoteList({ plantId, notes }: { plantId: number; notes: Note[] })
   function submit() {
     if (!text.trim()) return;
     startTransition(async () => {
-      await addNote(plantId, text);
+      await onAdd(text);
       setText("");
       setAdding(false);
     });
@@ -31,7 +38,7 @@ export function NoteList({ plantId, notes }: { plantId: number; notes: Note[] })
           <p className="text-sm text-forest">{n.text}</p>
           <button
             aria-label="Notiz löschen"
-            onClick={() => startTransition(() => deleteNote(n.id, plantId))}
+            onClick={() => startTransition(() => onDelete(n.id))}
             className="shrink-0 text-forest-muted hover:text-attention-text"
           >
             <Trash2 className="h-4 w-4" />

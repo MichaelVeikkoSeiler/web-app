@@ -6,10 +6,11 @@ import { getTodoItems } from "@/lib/plants-query";
 import { HeroImage } from "@/components/home/hero-image";
 import { getHeroImages } from "@/lib/actions/settings";
 import { getDb, isDbConfigured } from "@/lib/db";
-import { zones, plantNotes, plants } from "@/lib/db/schema";
+import { zones, plantNotes, plants, zoneNotes } from "@/lib/db/schema";
+import type { HomeNote } from "@/components/home/notes-section";
 
 export default async function Home() {
-  const [todoItems, heroPhotos, conflictRows, noteRows] = await Promise.all([
+  const [todoItems, heroPhotos, conflictRows, plantNoteRows, zoneNoteRows] = await Promise.all([
     getTodoItems(),
     getHeroImages(),
     isDbConfigured
@@ -28,13 +29,25 @@ export default async function Home() {
           .select({
             id: plantNotes.id,
             text: plantNotes.text,
+            createdAt: plantNotes.createdAt,
             plantId: plantNotes.plantId,
             germanName: plants.germanName,
             scientificName: plants.scientificName,
           })
           .from(plantNotes)
           .innerJoin(plants, eq(plantNotes.plantId, plants.id))
-          .orderBy(desc(plantNotes.createdAt))
+      : Promise.resolve([]),
+    isDbConfigured
+      ? getDb()
+          .select({
+            id: zoneNotes.id,
+            text: zoneNotes.text,
+            createdAt: zoneNotes.createdAt,
+            zoneId: zoneNotes.zoneId,
+            zoneName: zones.name,
+          })
+          .from(zoneNotes)
+          .innerJoin(zones, eq(zoneNotes.zoneId, zones.id))
       : Promise.resolve([]),
   ]);
 
@@ -45,12 +58,24 @@ export default async function Home() {
     text: c.text,
   }));
 
-  const notes = noteRows.map((n) => ({
-    id: n.id,
-    text: n.text,
-    plantId: n.plantId,
-    plantName: n.germanName ?? n.scientificName,
-  }));
+  const notes: HomeNote[] = [
+    ...plantNoteRows.map((n) => ({
+      id: n.id,
+      kind: "plant" as const,
+      text: n.text,
+      createdAt: n.createdAt,
+      href: `/pflanzen/${n.plantId}`,
+      label: n.germanName ?? n.scientificName,
+    })),
+    ...zoneNoteRows.map((n) => ({
+      id: n.id,
+      kind: "zone" as const,
+      text: n.text,
+      createdAt: n.createdAt,
+      href: `/zonen/${n.zoneId}`,
+      label: n.zoneName,
+    })),
+  ].sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
 
   return (
     <div className="flex flex-col gap-6">

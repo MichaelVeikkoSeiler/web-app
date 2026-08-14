@@ -2,12 +2,14 @@ import { notFound } from "next/navigation";
 import { desc, eq } from "drizzle-orm";
 import { Sun, CloudSun, CloudMoon } from "lucide-react";
 import { getDb, isDbConfigured } from "@/lib/db";
-import { zones, plantZoneAssignments, plants, plantPhotos, zoneSoilChecks, zonePhotos } from "@/lib/db/schema";
+import { zones, plantZoneAssignments, plants, plantPhotos, zoneSoilChecks, zonePhotos, zoneNotes } from "@/lib/db/schema";
 import { ZoneHero } from "@/components/zones/zone-hero";
 import { ZonePlants } from "@/components/zones/zone-plants";
 import { ZoneDetailActions } from "@/components/zones/zone-detail-actions";
 import { SoilSection } from "@/components/zones/soil-section";
 import { OtherZonesOverview } from "@/components/zones/other-zones-overview";
+import { NoteList } from "@/components/ui/note-list";
+import { addZoneNote, deleteZoneNote } from "@/lib/actions/zones";
 
 const lightIcon = {
   sonnig: Sun,
@@ -31,7 +33,7 @@ export default async function ZoneDetailPage({
   const [zone] = await db.select().from(zones).where(eq(zones.id, zoneId)).limit(1);
   if (!zone) notFound();
 
-  const [assignments, allPlantRows, primaryPhotos, latestSoilCheckRows, zonePhotoRows, allZoneRows, primaryZonePhotos] = await Promise.all([
+  const [assignments, allPlantRows, primaryPhotos, latestSoilCheckRows, zonePhotoRows, allZoneRows, primaryZonePhotos, notes] = await Promise.all([
     db
       .select({
         plantId: plants.id,
@@ -68,6 +70,7 @@ export default async function ZoneDetailPage({
       .select({ zoneId: zonePhotos.zoneId, blobUrl: zonePhotos.blobUrl })
       .from(zonePhotos)
       .where(eq(zonePhotos.isPrimary, true)),
+    db.select().from(zoneNotes).where(eq(zoneNotes.zoneId, zoneId)).orderBy(zoneNotes.createdAt),
   ]);
 
   const photoByPlant = new Map(primaryPhotos.map((p) => [p.plantId, p.blobUrl]));
@@ -122,6 +125,15 @@ export default async function ZoneDetailPage({
         <section className="flex flex-col gap-3">
           <h2 className="font-display text-lg text-forest">Pflanzen</h2>
           <ZonePlants zoneId={zone.id} assignedPlants={assignedPlants} allPlants={allPlants} />
+        </section>
+
+        <section className="flex flex-col gap-3">
+          <h2 className="font-display text-lg text-forest">Notizen</h2>
+          <NoteList
+            notes={notes}
+            onAdd={addZoneNote.bind(null, zone.id)}
+            onDelete={deleteZoneNote.bind(null, zone.id)}
+          />
         </section>
 
         <div className="mt-2 border-t border-border pt-4">
