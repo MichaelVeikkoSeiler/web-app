@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ChevronRight, CloudSun, Sparkles } from "lucide-react";
+import { ChevronRight, CloudSun, HelpCircle, Sparkles } from "lucide-react";
 import {
   getDiversHeroImageUrl,
   setDiversHeroImage,
@@ -10,6 +10,7 @@ import { HeroBanner } from "@/components/layout/hero-banner";
 const themes = [
   { href: "/wetter", label: "Wetter", icon: CloudSun },
   { href: "/besonderheiten", label: "Speziell", icon: Sparkles },
+  { href: "/quiz", label: "Quiz", icon: HelpCircle },
 ];
 
 export default async function DiversPage() {
