@@ -136,6 +136,7 @@ export const settings = pgTable("settings", {
   besonderheitenHeroImageUrl: text("besonderheiten_hero_image_url"),
   wetterHeroImageUrl: text("wetter_hero_image_url"),
   plantDocHeroImageUrl: text("plant_doc_hero_image_url"),
+  diversHeroImageUrl: text("divers_hero_image_url"),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
 

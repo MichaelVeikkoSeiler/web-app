@@ -271,6 +271,49 @@ export async function clearPlantDocHeroImage() {
   revalidatePath("/plant-doc");
 }
 
+export async function getDiversHeroImageUrl(): Promise<string | null> {
+  if (!isDbConfigured) return null;
+  const [row] = await getDb().select().from(settings).limit(1);
+  return row?.diversHeroImageUrl ?? null;
+}
+
+export async function setDiversHeroImage(url: string) {
+  const db = getDb();
+  const [existing] = await db
+    .select({ url: settings.diversHeroImageUrl })
+    .from(settings)
+    .where(eq(settings.id, 1))
+    .limit(1);
+
+  await db
+    .insert(settings)
+    .values({ id: 1, diversHeroImageUrl: url })
+    .onConflictDoUpdate({
+      target: settings.id,
+      set: { diversHeroImageUrl: url, updatedAt: new Date() },
+    });
+
+  if (existing?.url) await del(existing.url).catch(() => {});
+  revalidatePath("/divers");
+}
+
+export async function clearDiversHeroImage() {
+  const db = getDb();
+  const [existing] = await db
+    .select({ url: settings.diversHeroImageUrl })
+    .from(settings)
+    .where(eq(settings.id, 1))
+    .limit(1);
+
+  await db
+    .update(settings)
+    .set({ diversHeroImageUrl: null, updatedAt: new Date() })
+    .where(eq(settings.id, 1));
+
+  if (existing?.url) await del(existing.url).catch(() => {});
+  revalidatePath("/divers");
+}
+
 export async function setLogoImage(url: string) {
   await getDb()
     .insert(settings)
