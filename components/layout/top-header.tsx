@@ -15,8 +15,8 @@ export function TopHeader({ logoUrl }: { logoUrl: string | null }) {
         <div className="flex items-center gap-3">
           <LogoUpload initialUrl={logoUrl} />
           <Link href="/" className="flex items-baseline gap-1.5">
-            <span className="font-display text-[23px] text-forest sm:text-[25px]">HORTIA</span>
-            <span className="hidden text-[18px] text-forest-muted md:inline">– lässt Wissen wachsen</span>
+            <span className="font-display text-[23px] text-forest sm:text-[25px]">HORTTIA</span>
+            <span className="hidden text-[18px] text-forest-muted md:inline">– by Veikko</span>
           </Link>
         </div>
 
