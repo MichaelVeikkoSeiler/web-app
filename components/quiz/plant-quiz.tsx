@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import { Leaf, Loader2 } from "lucide-react";
+import { playCorrectSound, playWrongSound } from "@/lib/quiz-sounds";
 
 type QuizPlant = { id: number; name: string; imageUrl: string };
 type Question = { plant: QuizPlant; options: QuizPlant[] };
@@ -89,7 +90,12 @@ export function PlantQuiz({ pool }: { pool: QuizPlant[] }) {
   function handleSelect(optionId: number) {
     if (selectedId !== null) return;
     setSelectedId(optionId);
-    if (optionId === current.plant.id) setScore((s) => s + 1);
+    if (optionId === current.plant.id) {
+      setScore((s) => s + 1);
+      playCorrectSound();
+    } else {
+      playWrongSound();
+    }
   }
 
   function handleNext() {
