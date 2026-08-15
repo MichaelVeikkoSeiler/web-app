@@ -6,11 +6,11 @@ import { getTodoItems } from "@/lib/plants-query";
 import { HeroImage } from "@/components/home/hero-image";
 import { getHeroImages } from "@/lib/actions/settings";
 import { getDb, isDbConfigured } from "@/lib/db";
-import { zones, plantNotes, plants, zoneNotes } from "@/lib/db/schema";
+import { zones, plantNotes, plants, zoneNotes, animalNotes, animals } from "@/lib/db/schema";
 import type { HomeNote } from "@/components/home/notes-section";
 
 export default async function Home() {
-  const [todoItems, heroPhotos, conflictRows, plantNoteRows, zoneNoteRows] = await Promise.all([
+  const [todoItems, heroPhotos, conflictRows, plantNoteRows, zoneNoteRows, animalNoteRows] = await Promise.all([
     getTodoItems(),
     getHeroImages(),
     isDbConfigured
@@ -49,6 +49,19 @@ export default async function Home() {
           .from(zoneNotes)
           .innerJoin(zones, eq(zoneNotes.zoneId, zones.id))
       : Promise.resolve([]),
+    isDbConfigured
+      ? getDb()
+          .select({
+            id: animalNotes.id,
+            text: animalNotes.text,
+            createdAt: animalNotes.createdAt,
+            animalId: animalNotes.animalId,
+            germanName: animals.germanName,
+            scientificName: animals.scientificName,
+          })
+          .from(animalNotes)
+          .innerJoin(animals, eq(animalNotes.animalId, animals.id))
+      : Promise.resolve([]),
   ]);
 
   const conflicts = conflictRows.map((c) => ({
@@ -74,6 +87,14 @@ export default async function Home() {
       createdAt: n.createdAt,
       href: `/zonen/${n.zoneId}`,
       label: n.zoneName,
+    })),
+    ...animalNoteRows.map((n) => ({
+      id: n.id,
+      kind: "animal" as const,
+      text: n.text,
+      createdAt: n.createdAt,
+      href: `/tiere/${n.animalId}`,
+      label: n.germanName ?? n.scientificName,
     })),
   ].sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
 

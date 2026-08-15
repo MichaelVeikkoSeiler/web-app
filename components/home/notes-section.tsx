@@ -1,16 +1,16 @@
 import Link from "next/link";
-import { Leaf, MapPinned } from "lucide-react";
+import { Leaf, PawPrint, MapPinned } from "lucide-react";
 
 export type HomeNote = {
   id: number;
-  kind: "plant" | "zone";
+  kind: "plant" | "animal" | "zone";
   text: string;
   createdAt: Date;
   href: string;
   label: string;
 };
 
-const kindIcon = { plant: Leaf, zone: MapPinned };
+const kindIcon = { plant: Leaf, animal: PawPrint, zone: MapPinned };
 
 export function NotesSection({ notes }: { notes: HomeNote[] }) {
   if (notes.length === 0) {

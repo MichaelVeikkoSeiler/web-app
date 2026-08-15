@@ -87,6 +87,56 @@ export const plants = pgTable("plants", {
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
 
+export const animals = pgTable("animals", {
+  id: serial("id").primaryKey(),
+  scientificName: text("scientific_name").notNull().unique(),
+  germanName: text("german_name"),
+  commonName: text("common_name"),
+  factsText: text("facts_text"),
+
+  enrichmentStatus: enrichmentStatusEnum("enrichment_status")
+    .notNull()
+    .default("pending"),
+  enrichmentError: text("enrichment_error"),
+
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+export const animalZoneAssignments = pgTable(
+  "animal_zone_assignments",
+  {
+    id: serial("id").primaryKey(),
+    animalId: integer("animal_id")
+      .notNull()
+      .references(() => animals.id, { onDelete: "cascade" }),
+    zoneId: integer("zone_id")
+      .notNull()
+      .references(() => zones.id, { onDelete: "cascade" }),
+    createdAt: timestamp("created_at").notNull().defaultNow(),
+  },
+  (table) => [unique().on(table.animalId, table.zoneId)],
+);
+
+export const animalPhotos = pgTable("animal_photos", {
+  id: serial("id").primaryKey(),
+  animalId: integer("animal_id")
+    .notNull()
+    .references(() => animals.id, { onDelete: "cascade" }),
+  blobUrl: text("blob_url").notNull(),
+  isPrimary: boolean("is_primary").notNull().default(false),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+export const animalNotes = pgTable("animal_notes", {
+  id: serial("id").primaryKey(),
+  animalId: integer("animal_id")
+    .notNull()
+    .references(() => animals.id, { onDelete: "cascade" }),
+  text: text("text").notNull(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
 export const plantZoneAssignments = pgTable(
   "plant_zone_assignments",
   {
@@ -132,6 +182,7 @@ export const settings = pgTable("settings", {
   heroImageUrl: text("hero_image_url"),
   logoUrl: text("logo_url"),
   plantsHeroImageUrl: text("plants_hero_image_url"),
+  animalsHeroImageUrl: text("animals_hero_image_url"),
   zonesHeroImageUrl: text("zones_hero_image_url"),
   besonderheitenHeroImageUrl: text("besonderheiten_hero_image_url"),
   wetterHeroImageUrl: text("wetter_hero_image_url"),

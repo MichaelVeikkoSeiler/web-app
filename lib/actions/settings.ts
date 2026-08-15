@@ -99,6 +99,49 @@ export async function clearPlantsHeroImage() {
   revalidatePath("/pflanzen");
 }
 
+export async function getAnimalsHeroImageUrl(): Promise<string | null> {
+  if (!isDbConfigured) return null;
+  const [row] = await getDb().select().from(settings).limit(1);
+  return row?.animalsHeroImageUrl ?? null;
+}
+
+export async function setAnimalsHeroImage(url: string) {
+  const db = getDb();
+  const [existing] = await db
+    .select({ url: settings.animalsHeroImageUrl })
+    .from(settings)
+    .where(eq(settings.id, 1))
+    .limit(1);
+
+  await db
+    .insert(settings)
+    .values({ id: 1, animalsHeroImageUrl: url })
+    .onConflictDoUpdate({
+      target: settings.id,
+      set: { animalsHeroImageUrl: url, updatedAt: new Date() },
+    });
+
+  if (existing?.url) await del(existing.url).catch(() => {});
+  revalidatePath("/tiere");
+}
+
+export async function clearAnimalsHeroImage() {
+  const db = getDb();
+  const [existing] = await db
+    .select({ url: settings.animalsHeroImageUrl })
+    .from(settings)
+    .where(eq(settings.id, 1))
+    .limit(1);
+
+  await db
+    .update(settings)
+    .set({ animalsHeroImageUrl: null, updatedAt: new Date() })
+    .where(eq(settings.id, 1));
+
+  if (existing?.url) await del(existing.url).catch(() => {});
+  revalidatePath("/tiere");
+}
+
 export async function getZonesHeroImageUrl(): Promise<string | null> {
   if (!isDbConfigured) return null;
   const [row] = await getDb().select().from(settings).limit(1);
@@ -325,6 +368,8 @@ export async function setLogoImage(url: string) {
   revalidatePath("/");
   revalidatePath("/pflanzen");
   revalidatePath("/pflanzen/neu");
+  revalidatePath("/tiere");
+  revalidatePath("/tiere/neu");
   revalidatePath("/zonen");
   revalidatePath("/wetter");
 }
