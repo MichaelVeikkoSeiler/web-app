@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { after } from "next/server";
 import { del } from "@vercel/blob";
-import { eq, ilike, and } from "drizzle-orm";
+import { eq, ilike, and, sql } from "drizzle-orm";
 import { getDb, isDbConfigured } from "@/lib/db";
 import { animals, animalZoneAssignments, animalPhotos, animalNotes, zones } from "@/lib/db/schema";
 import { identifyAnimalPhotoWithVision, type AnimalCandidate } from "@/lib/animal-vision-id";
@@ -108,7 +108,11 @@ export async function saveAnimalPhoto(animalId: number, blobUrl: string, isPrima
   if (isPrimary) {
     await db.update(animalPhotos).set({ isPrimary: false }).where(eq(animalPhotos.animalId, animalId));
   }
-  await db.insert(animalPhotos).values({ animalId, blobUrl, isPrimary });
+  const [{ maxOrder }] = await db
+    .select({ maxOrder: sql<number>`coalesce(max(${animalPhotos.orderIndex}), -1)` })
+    .from(animalPhotos)
+    .where(eq(animalPhotos.animalId, animalId));
+  await db.insert(animalPhotos).values({ animalId, blobUrl, isPrimary, orderIndex: maxOrder + 1 });
   revalidatePath(`/tiere/${animalId}`);
   revalidatePath("/tiere");
 }
@@ -130,12 +134,28 @@ export async function deleteAnimalPhoto(photoId: number, animalId: number) {
       .select({ id: animalPhotos.id })
       .from(animalPhotos)
       .where(eq(animalPhotos.animalId, animalId))
+      .orderBy(animalPhotos.orderIndex)
       .limit(1);
     if (next) {
       await db.update(animalPhotos).set({ isPrimary: true }).where(eq(animalPhotos.id, next.id));
     }
   }
 
+  revalidatePath(`/tiere/${animalId}`);
+  revalidatePath("/tiere");
+  revalidatePath("/");
+}
+
+export async function reorderAnimalPhotos(animalId: number, orderedPhotoIds: number[]) {
+  const db = getDb();
+  await Promise.all(
+    orderedPhotoIds.map((photoId, index) =>
+      db
+        .update(animalPhotos)
+        .set({ orderIndex: index, isPrimary: index === 0 })
+        .where(eq(animalPhotos.id, photoId)),
+    ),
+  );
   revalidatePath(`/tiere/${animalId}`);
   revalidatePath("/tiere");
   revalidatePath("/");

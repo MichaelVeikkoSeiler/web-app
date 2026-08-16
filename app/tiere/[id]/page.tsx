@@ -30,7 +30,7 @@ export default async function TierDetailPage({
       .select()
       .from(animalPhotos)
       .where(eq(animalPhotos.animalId, animalId))
-      .orderBy(animalPhotos.id),
+      .orderBy(animalPhotos.orderIndex),
     db.select().from(animalNotes).where(eq(animalNotes.animalId, animalId)).orderBy(animalNotes.createdAt),
     db
       .select({ id: zones.id, name: zones.name })

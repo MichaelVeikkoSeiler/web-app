@@ -6,7 +6,7 @@ import { ChevronLeft, ChevronRight, PawPrint, Loader2, Trash2 } from "lucide-rea
 import { deleteAnimalPhoto } from "@/lib/actions/animals";
 import { ImageLightbox } from "@/components/ui/image-lightbox";
 
-type Photo = { id: number; blobUrl: string; isPrimary: boolean; createdAt: Date };
+type Photo = { id: number; blobUrl: string; isPrimary: boolean; orderIndex: number; createdAt: Date };
 
 export function AnimalHero({
   animalId,
@@ -17,7 +17,7 @@ export function AnimalHero({
   photos: Photo[];
   alt: string;
 }) {
-  const ordered = [...photos].sort((a, b) => Number(b.isPrimary) - Number(a.isPrimary));
+  const ordered = [...photos].sort((a, b) => a.orderIndex - b.orderIndex);
   const [index, setIndex] = useState(0);
   const [pending, startTransition] = useTransition();
   const [lightboxOpen, setLightboxOpen] = useState(false);

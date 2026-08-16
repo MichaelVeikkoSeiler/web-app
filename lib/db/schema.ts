@@ -125,6 +125,7 @@ export const animalPhotos = pgTable("animal_photos", {
     .references(() => animals.id, { onDelete: "cascade" }),
   blobUrl: text("blob_url").notNull(),
   isPrimary: boolean("is_primary").notNull().default(false),
+  orderIndex: integer("order_index").notNull().default(0),
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
