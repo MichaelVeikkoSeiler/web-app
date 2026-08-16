@@ -111,13 +111,17 @@ export function ZoneGrid({ zones }: { zones: ZoneTile[] }) {
             onPointerMove={handlePointerMove}
             onPointerUp={endDrag}
             onPointerCancel={endDrag}
+            onContextMenu={(e) => e.preventDefault()}
             onClick={(e) => {
               if (draggedRef.current || movedRef.current) {
                 e.preventDefault();
               }
               draggedRef.current = false;
             }}
-            style={isDragging ? { touchAction: "none" } : undefined}
+            style={{
+              WebkitTouchCallout: "none",
+              ...(isDragging ? { touchAction: "none" } : null),
+            }}
             className={`flex select-none flex-col gap-2 rounded-2xl p-1 transition-shadow ${
               isDragging ? "relative z-20 opacity-70 shadow-lg" : "hover:shadow-md"
             }`}
@@ -130,6 +134,7 @@ export function ZoneGrid({ zones }: { zones: ZoneTile[] }) {
                   fill
                   sizes="(max-width: 640px) 45vw, 220px"
                   className="object-cover"
+                  draggable={false}
                 />
               ) : (
                 <div className="flex h-full items-center justify-center text-forest-muted/40">

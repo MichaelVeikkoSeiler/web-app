@@ -142,7 +142,11 @@ export function AnimalPhotoGallery({ animalId, photos }: { animalId: number; pho
               onPointerMove={handlePointerMove}
               onPointerUp={endDrag}
               onPointerCancel={endDrag}
-              style={isDragging ? { touchAction: "none" } : undefined}
+              onContextMenu={(e) => e.preventDefault()}
+              style={{
+                WebkitTouchCallout: "none",
+                ...(isDragging ? { touchAction: "none" } : null),
+              }}
               className={`relative aspect-square select-none overflow-hidden rounded-xl bg-cream transition-shadow ${
                 isDragging ? "relative z-20 opacity-70 shadow-lg" : ""
               }`}
@@ -160,7 +164,7 @@ export function AnimalPhotoGallery({ animalId, photos }: { animalId: number; pho
                 aria-label="Foto vergrössern"
                 className="absolute inset-0"
               >
-                <Image src={p.blobUrl} alt="" fill sizes="150px" className="object-cover" />
+                <Image src={p.blobUrl} alt="" fill sizes="150px" className="object-cover" draggable={false} />
               </button>
               <button
                 onClick={(e) => {
