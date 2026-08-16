@@ -117,6 +117,14 @@ export async function saveAnimalPhoto(animalId: number, blobUrl: string, isPrima
   revalidatePath("/tiere");
 }
 
+export async function setAnimalPhotoTakenAt(animalId: number, photoId: number, takenAt: Date) {
+  await getDb()
+    .update(animalPhotos)
+    .set({ takenAt })
+    .where(eq(animalPhotos.id, photoId));
+  revalidatePath(`/tiere/${animalId}`);
+}
+
 export async function deleteAnimalPhoto(photoId: number, animalId: number) {
   const db = getDb();
   const [photo] = await db

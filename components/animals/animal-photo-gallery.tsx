@@ -4,10 +4,17 @@ import { useRef, useState, useTransition } from "react";
 import Image from "next/image";
 import { Camera, Images, Loader2, X } from "lucide-react";
 import { uploadAnimalPhoto } from "@/lib/upload-photo";
-import { saveAnimalPhoto, deleteAnimalPhoto, reorderAnimalPhotos } from "@/lib/actions/animals";
+import { saveAnimalPhoto, deleteAnimalPhoto, reorderAnimalPhotos, setAnimalPhotoTakenAt } from "@/lib/actions/animals";
 import { ImageLightbox } from "@/components/ui/image-lightbox";
 
-type Photo = { id: number; blobUrl: string; isPrimary: boolean; orderIndex: number; createdAt: Date };
+type Photo = {
+  id: number;
+  blobUrl: string;
+  isPrimary: boolean;
+  orderIndex: number;
+  takenAt: Date | null;
+  createdAt: Date;
+};
 
 const LONG_PRESS_MS = 350;
 const MOVE_CANCEL_PX = 8;
@@ -143,10 +150,7 @@ export function AnimalPhotoGallery({ animalId, photos }: { animalId: number; pho
               onPointerUp={endDrag}
               onPointerCancel={endDrag}
               onContextMenu={(e) => e.preventDefault()}
-              style={{
-                WebkitTouchCallout: "none",
-                ...(isDragging ? { touchAction: "none" } : null),
-              }}
+              style={{ WebkitTouchCallout: "none", touchAction: "none" }}
               className={`relative aspect-square select-none overflow-hidden rounded-xl bg-cream transition-shadow ${
                 isDragging ? "relative z-20 opacity-70 shadow-lg" : ""
               }`}
@@ -191,6 +195,7 @@ export function AnimalPhotoGallery({ animalId, photos }: { animalId: number; pho
           open={lightboxIndex !== null}
           onClose={() => setLightboxIndex(null)}
           alt=""
+          onSetTakenAt={setAnimalPhotoTakenAt.bind(null, animalId)}
         />
 
         <input

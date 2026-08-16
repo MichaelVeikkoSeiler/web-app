@@ -118,10 +118,7 @@ export function ZoneGrid({ zones }: { zones: ZoneTile[] }) {
               }
               draggedRef.current = false;
             }}
-            style={{
-              WebkitTouchCallout: "none",
-              ...(isDragging ? { touchAction: "none" } : null),
-            }}
+            style={{ WebkitTouchCallout: "none", touchAction: "none" }}
             className={`flex select-none flex-col gap-2 rounded-2xl p-1 transition-shadow ${
               isDragging ? "relative z-20 opacity-70 shadow-lg" : "hover:shadow-md"
             }`}

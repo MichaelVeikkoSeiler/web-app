@@ -4,10 +4,10 @@ import { useRef, useState, useTransition } from "react";
 import Image from "next/image";
 import { Camera, Images, Loader2, X } from "lucide-react";
 import { uploadPlantPhoto } from "@/lib/upload-photo";
-import { savePlantPhoto, deletePlantPhoto } from "@/lib/actions/plants";
+import { savePlantPhoto, deletePlantPhoto, setPlantPhotoTakenAt } from "@/lib/actions/plants";
 import { ImageLightbox } from "@/components/ui/image-lightbox";
 
-type Photo = { id: number; blobUrl: string; isPrimary: boolean; createdAt: Date };
+type Photo = { id: number; blobUrl: string; isPrimary: boolean; takenAt: Date | null; createdAt: Date };
 
 export function PhotoGallery({ plantId, photos }: { plantId: number; photos: Photo[] }) {
   const cameraInputRef = useRef<HTMLInputElement>(null);
@@ -76,6 +76,7 @@ export function PhotoGallery({ plantId, photos }: { plantId: number; photos: Pho
         open={lightboxIndex !== null}
         onClose={() => setLightboxIndex(null)}
         alt=""
+        onSetTakenAt={setPlantPhotoTakenAt.bind(null, plantId)}
       />
 
       <input

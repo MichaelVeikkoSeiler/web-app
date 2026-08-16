@@ -126,6 +126,8 @@ export const animalPhotos = pgTable("animal_photos", {
   blobUrl: text("blob_url").notNull(),
   isPrimary: boolean("is_primary").notNull().default(false),
   orderIndex: integer("order_index").notNull().default(0),
+  /** Vom Nutzer manuell gesetztes Aufnahmedatum, z.B. bei nachträglich hochgeladenen alten Fotos. */
+  takenAt: timestamp("taken_at"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
@@ -160,6 +162,8 @@ export const plantPhotos = pgTable("plant_photos", {
     .references(() => plants.id, { onDelete: "cascade" }),
   blobUrl: text("blob_url").notNull(),
   isPrimary: boolean("is_primary").notNull().default(false),
+  /** Vom Nutzer manuell gesetztes Aufnahmedatum, z.B. bei nachträglich hochgeladenen alten Fotos. */
+  takenAt: timestamp("taken_at"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 

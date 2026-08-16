@@ -3,10 +3,10 @@
 import { useRef, useState, useTransition } from "react";
 import Image from "next/image";
 import { ChevronLeft, ChevronRight, Leaf, Loader2, Trash2 } from "lucide-react";
-import { deletePlantPhoto } from "@/lib/actions/plants";
+import { deletePlantPhoto, setPlantPhotoTakenAt } from "@/lib/actions/plants";
 import { ImageLightbox } from "@/components/ui/image-lightbox";
 
-type Photo = { id: number; blobUrl: string; isPrimary: boolean; createdAt: Date };
+type Photo = { id: number; blobUrl: string; isPrimary: boolean; takenAt: Date | null; createdAt: Date };
 
 export function PlantHero({
   plantId,
@@ -128,6 +128,7 @@ export function PlantHero({
         open={lightboxOpen}
         onClose={() => setLightboxOpen(false)}
         alt={alt}
+        onSetTakenAt={setPlantPhotoTakenAt.bind(null, plantId)}
       />
     </div>
   );

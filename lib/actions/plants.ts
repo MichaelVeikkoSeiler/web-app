@@ -163,6 +163,14 @@ export async function savePlantPhoto(
   revalidatePath("/pflanzen");
 }
 
+export async function setPlantPhotoTakenAt(plantId: number, photoId: number, takenAt: Date) {
+  await getDb()
+    .update(plantPhotos)
+    .set({ takenAt })
+    .where(eq(plantPhotos.id, photoId));
+  revalidatePath(`/pflanzen/${plantId}`);
+}
+
 export async function deletePlantPhoto(photoId: number, plantId: number) {
   const db = getDb();
   const [photo] = await db

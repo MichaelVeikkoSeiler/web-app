@@ -3,10 +3,17 @@
 import { useRef, useState, useTransition } from "react";
 import Image from "next/image";
 import { ChevronLeft, ChevronRight, PawPrint, Loader2, Trash2 } from "lucide-react";
-import { deleteAnimalPhoto } from "@/lib/actions/animals";
+import { deleteAnimalPhoto, setAnimalPhotoTakenAt } from "@/lib/actions/animals";
 import { ImageLightbox } from "@/components/ui/image-lightbox";
 
-type Photo = { id: number; blobUrl: string; isPrimary: boolean; orderIndex: number; createdAt: Date };
+type Photo = {
+  id: number;
+  blobUrl: string;
+  isPrimary: boolean;
+  orderIndex: number;
+  takenAt: Date | null;
+  createdAt: Date;
+};
 
 export function AnimalHero({
   animalId,
@@ -128,6 +135,7 @@ export function AnimalHero({
         open={lightboxOpen}
         onClose={() => setLightboxOpen(false)}
         alt={alt}
+        onSetTakenAt={setAnimalPhotoTakenAt.bind(null, animalId)}
       />
     </div>
   );
