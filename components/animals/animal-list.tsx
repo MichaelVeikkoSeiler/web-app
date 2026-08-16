@@ -6,7 +6,9 @@ export function AnimalList({ animals }: { animals: AnimalTile[] }) {
   return (
     <div className="flex flex-col gap-4">
       <div className="flex items-center justify-between gap-3">
-        <h1 className="font-display text-2xl text-forest">Tiere</h1>
+        <h1 className="font-display text-2xl text-forest">
+          {animals.length} {animals.length === 1 ? "Tier" : "Tiere"}
+        </h1>
         <Link
           href="/tiere/neu"
           aria-label="Tier hinzufügen"

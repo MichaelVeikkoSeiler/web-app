@@ -10,7 +10,7 @@ export type AnimalTile = {
 
 export function AnimalGrid({ animals }: { animals: AnimalTile[] }) {
   return (
-    <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4">
+    <div className="grid grid-cols-3 gap-3 sm:grid-cols-4 md:grid-cols-5">
       {animals.map((animal) => (
         <Link
           key={animal.id}
@@ -23,7 +23,7 @@ export function AnimalGrid({ animals }: { animals: AnimalTile[] }) {
                 src={animal.imageUrl}
                 alt={animal.name}
                 fill
-                sizes="(max-width: 640px) 45vw, 220px"
+                sizes="(max-width: 640px) 30vw, 180px"
                 className="object-cover"
               />
             ) : (
@@ -33,7 +33,7 @@ export function AnimalGrid({ animals }: { animals: AnimalTile[] }) {
             )}
           </div>
           <div className="px-1 text-center">
-            <h3 className="truncate text-base font-semibold text-forest">{animal.name}</h3>
+            <h3 className="line-clamp-2 text-sm font-semibold text-forest">{animal.name}</h3>
           </div>
         </Link>
       ))}
