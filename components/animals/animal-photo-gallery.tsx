@@ -150,7 +150,7 @@ export function AnimalPhotoGallery({ animalId, photos }: { animalId: number; pho
               onPointerUp={endDrag}
               onPointerCancel={endDrag}
               onContextMenu={(e) => e.preventDefault()}
-              style={{ WebkitTouchCallout: "none", touchAction: "none" }}
+              style={{ WebkitTouchCallout: "none", touchAction: "pinch-zoom" }}
               className={`relative aspect-square select-none overflow-hidden rounded-xl bg-cream transition-shadow ${
                 isDragging ? "relative z-20 opacity-70 shadow-lg" : ""
               }`}
