@@ -47,7 +47,10 @@ export function ZoneGrid({ zones }: { zones: ZoneTile[] }) {
   }
 
   function handlePointerDown(e: React.PointerEvent, zoneId: number) {
-    if (e.pointerType === "mouse" && e.button !== 0) return;
+    // Umsortieren nur per Maus (Desktop) – auf Touch-Geräten würde der dafür
+    // nötige Long-Press mit dem normalen Scrollen kollidieren.
+    if (e.pointerType !== "mouse") return;
+    if (e.button !== 0) return;
     startPosRef.current = { x: e.clientX, y: e.clientY };
     movedRef.current = false;
     const target = e.currentTarget;
@@ -118,7 +121,7 @@ export function ZoneGrid({ zones }: { zones: ZoneTile[] }) {
               }
               draggedRef.current = false;
             }}
-            style={{ WebkitTouchCallout: "none", touchAction: "pinch-zoom" }}
+            style={{ WebkitTouchCallout: "none" }}
             className={`flex select-none flex-col gap-2 rounded-2xl p-1 transition-shadow ${
               isDragging ? "relative z-20 opacity-70 shadow-lg" : "hover:shadow-md"
             }`}

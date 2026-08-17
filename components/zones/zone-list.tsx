@@ -28,12 +28,7 @@ export function ZoneList({ zones }: { zones: ZoneTile[] }) {
           zuordnen zu können.
         </p>
       ) : (
-        <>
-          <p className="text-xs text-forest-muted">
-            Zone antippen für Details, kurz gedrückt halten zum Umsortieren.
-          </p>
-          <ZoneGrid zones={zones} />
-        </>
+        <ZoneGrid zones={zones} />
       )}
 
       <Sheet open={addOpen} onClose={() => setAddOpen(false)} title="Zone anlegen">
