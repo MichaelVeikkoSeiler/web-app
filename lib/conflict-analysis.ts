@@ -19,7 +19,7 @@ Ein Konflikt liegt vor, wenn:
 - oder eine Pflanze nicht zu den Licht-/Ausrichtungsbedingungen der Zone passt.
 
 Nutze die Websuche, um das zu prüfen.
-Antworte ausschliesslich auf Deutsch und am Ende AUSSCHLIESSLICH mit einem einzigen JSON-Objekt (keine Markdown-Codeblöcke, kein Fliesstext davor oder danach) exakt in diesem Format:
+Antworte ausschliesslich auf Deutsch in Schweizer Rechtschreibung (kein ß, immer "ss") und am Ende AUSSCHLIESSLICH mit einem einzigen JSON-Objekt (keine Markdown-Codeblöcke, kein Fliesstext davor oder danach) exakt in diesem Format:
 
 {
   "hasConflict": boolean,

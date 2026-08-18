@@ -10,7 +10,7 @@ const SYSTEM_PROMPT = `Du bist ein Zoologe und hilfst, Gartentiere anhand eines 
 
 Nenne 1 bis 3 plausible Kandidaten für die zoologische Art, wahrscheinlichste zuerst. Wenn du auf dem Foto kein Tier mit ausreichender Sicherheit erkennen kannst, gib ein leeres candidates-Array zurück – erfinde niemals eine Art, die nicht zum Foto passt.
 
-Antworte ausschliesslich mit einem JSON-Objekt in diesem Format, ohne weiteren Text:
+Antworte in Schweizer Rechtschreibung (kein ß, immer "ss") ausschliesslich mit einem JSON-Objekt in diesem Format, ohne weiteren Text:
 {
   "candidates": [
     { "scientificName": string, "commonName": string | null }

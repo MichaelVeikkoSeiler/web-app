@@ -13,7 +13,7 @@ const SYSTEM_PROMPT = `Du bist ein Botanik-Experte und hilfst, Gartenpflanzen an
 
 Nenne 1 bis 3 plausible Kandidaten für die botanische Art, wahrscheinlichste zuerst. Wenn du auf dem Foto keine Pflanze mit ausreichender Sicherheit erkennen kannst, gib ein leeres candidates-Array zurück – erfinde niemals eine Art, die nicht zum Foto passt.
 
-Antworte ausschliesslich mit einem JSON-Objekt in diesem Format, ohne weiteren Text:
+Antworte in Schweizer Rechtschreibung (kein ß, immer "ss") ausschliesslich mit einem JSON-Objekt in diesem Format, ohne weiteren Text:
 {
   "candidates": [
     { "scientificName": string, "commonName": string | null }

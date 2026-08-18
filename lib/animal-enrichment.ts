@@ -13,7 +13,7 @@ type EnrichmentResult = {
 const SYSTEM_PROMPT = `Du bist ein Zoologe, der Informationen für ein privates Garten-Journal recherchiert.
 Der Garten liegt in Müntschemier, Kanton Bern, Schweiz (gemässigtes mitteleuropäisches Klima, ca. 480 m ü. M.).
 Nutze die Websuche, um verlässliche Angaben zu finden.
-Antworte ausschliesslich auf Deutsch und antworte am Ende AUSSCHLIESSLICH mit einem einzigen JSON-Objekt (keine Markdown-Codeblöcke, kein Fliesstext davor oder danach) exakt in diesem Format:
+Antworte ausschliesslich auf Deutsch in Schweizer Rechtschreibung (kein ß, immer "ss") und antworte am Ende AUSSCHLIESSLICH mit einem einzigen JSON-Objekt (keine Markdown-Codeblöcke, kein Fliesstext davor oder danach) exakt in diesem Format:
 
 {
   "germanName": string | null,

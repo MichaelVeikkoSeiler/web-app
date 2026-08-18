@@ -28,7 +28,7 @@ const OBSERVATION_OPTIONS = [
   "gelbe Blätter",
   "braune Stellen",
   "Flecken",
-  "Löcher/Fraßspuren",
+  "Löcher/Frassspuren",
   "eingerollte Blätter",
   "welk",
   "trockene Triebe",

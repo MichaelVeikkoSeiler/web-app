@@ -3,7 +3,7 @@ export const PLANT_DOC_MAX_PHOTOS = 3;
 export type PlantDocAnswers = {
   /** Blätter | Blüten | Stamm/Äste | gesamte Pflanze | Schädlinge sichtbar */
   location: string[];
-  /** gelbe Blätter | braune Stellen | Flecken | Löcher/Fraßspuren | eingerollte Blätter | welk | trockene Triebe | Belag | unbekannt */
+  /** gelbe Blätter | braune Stellen | Flecken | Löcher/Frassspuren | eingerollte Blätter | welk | trockene Triebe | Belag | unbekannt */
   observations: string[];
   /** heute entdeckt | wenige Tage | 1–2 Wochen | länger */
   sinceWhen: string;
