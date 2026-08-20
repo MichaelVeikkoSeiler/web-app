@@ -36,7 +36,7 @@ Das ist bewusst kein generisches SaaS-Produkt, sondern ein konkreter, persönlic
 - **Plant Doc:** Foto-basierte Diagnose bei Pflanzenproblemen unter Einbezug von Wetterdaten und Pflegehistorie
 - **Wetter-Integration:** Giess-/Pflegeerinnerungen berücksichtigen echte Niederschlagsdaten (Open-Meteo)
 - **Notizen:** Für Pflanzen, Tiere und Zonen, zentral auf der Startseite zusammengeführt
-- **Quiz:** Kleines Lernspiel mit den eigenen Pflanzenfotos
+- **Quiz:** Lernspiel mit den eigenen Pflanzen- und Tierdaten — 10 zufällig gemischte Fragen zu Foto-Erkennung, lateinischen Namen und Zonen-Zugehörigkeit
 - **Divers:** Sammelbereich für Wetter, Besonderheiten-Auswertungen und das Quiz
 
 ## "Spec"-Dokumentation
