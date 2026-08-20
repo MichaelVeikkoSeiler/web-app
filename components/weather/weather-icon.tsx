@@ -5,6 +5,7 @@ import {
   CloudFog,
   CloudDrizzle,
   CloudRain,
+  CloudSunRain,
   CloudSnow,
   CloudLightning,
 } from "lucide-react";
@@ -15,7 +16,10 @@ export function WeatherIcon({ code, className }: { code: number; className?: str
   if (code === 3) return <Cloud className={className} />;
   if (code === 45 || code === 48) return <CloudFog className={className} />;
   if (code === 51 || code === 53 || code === 55) return <CloudDrizzle className={className} />;
-  if ([61, 63, 65, 66, 67, 80, 81, 82].includes(code)) return <CloudRain className={className} />;
+  if ([61, 63, 65, 66, 67].includes(code)) return <CloudRain className={className} />;
+  // Schauer (80–82) sind konvektiv und laut WMO-Definition typischerweise mit
+  // Sonnenphasen durchmischt, im Unterschied zu durchgehendem Regen (61–67).
+  if ([80, 81, 82].includes(code)) return <CloudSunRain className={className} />;
   if ([71, 73, 75, 77, 85, 86].includes(code)) return <CloudSnow className={className} />;
   if (code === 95 || code === 96 || code === 99) return <CloudLightning className={className} />;
   return <Cloud className={className} />;
