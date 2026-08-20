@@ -38,6 +38,7 @@ export type WeatherSnapshot = {
     weatherCode: number;
     windSpeed: number;
   };
+  /** Vergangene Tage (inkl. heute und Vorhersage), chronologisch sortiert. */
   daily: {
     date: string;
     weatherCode: number;
@@ -45,6 +46,8 @@ export type WeatherSnapshot = {
     tempMin: number;
     precipitationSum: number;
   }[];
+  /** Index des heutigen Tags innerhalb von `daily`. */
+  todayIndex: number;
   /** Niederschlagssumme (mm) der letzten 7 Tage, für die Hilfe-Logik */
   precipitationLast7Days: number;
 };
@@ -89,7 +92,8 @@ export async function getWeatherSnapshot(): Promise<WeatherSnapshot> {
       weatherCode: data.current.weather_code,
       windSpeed: data.current.wind_speed_10m,
     },
-    daily: daily.filter((d: { date: string }) => d.date >= todayIso),
+    daily,
+    todayIndex: todayIndex >= 0 ? todayIndex : PAST_DAYS,
     precipitationLast7Days,
   };
 }

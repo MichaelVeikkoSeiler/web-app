@@ -76,6 +76,7 @@ Der grösste Aha-Moment war zu sehen, wie sauber Claude mit Testdaten umgeht: F�
 - **Konkret statt abstrakt:** Prompts, die den gewünschten Endzustand exemplarisch beschreiben («Layout wie Zonen, Text zentriert, 2-zeilig möglich») führen zu deutlich präziseren Ergebnissen als allgemeine Wünsche.
 - **Bestehende Muster explizit referenzieren:** Formulierungen wie «gleiche Methodik wie bei X» sorgen dafür, dass neue Funktionen die Architektur bestehender Funktionen übernehmen, statt eine parallele, inkonsistente Lösung zu erzeugen.
 - **Mein Workflow:** Ich prompte in Claude Code, Claude setzt um, ich beobachte den Prozess laufend mit. Danach committe und pushe ich selbst auf GitHub und kontrolliere die publizierte Seite. Dieser Ablauf hat sich für mich als sehr angenehm und nachvollziehbar erwiesen.
+- **Marketing-Texte gegen den echten Code gegenprüfen:** Bei Formulierungen auf der Marketing-Seite, die mir zu konkret oder zu gut vorkamen (z.B. «Plant Doc vergleicht die Symptome mit dem Wetter der letzten Tage», «Ein Foto vom Untergrund genügt» beim Bodencheck), habe ich gezielt nachgefragt, ob das wirklich stimmt, statt es unhinterfragt stehen zu lassen. Claude hat das jeweils direkt im Quellcode verifiziert — einmal bestätigt (Wetterhistorie ist real implementiert), einmal widerlegt (Bodencheck ist kein Foto-, sondern ein geführter haptischer Test) und den Marketingtext entsprechend korrigiert. Diese Gegenprüfung würde ich für jedes Vibe-Coding-Projekt empfehlen, bevor Marketing-Texte online gehen.
 
 **Ergänzende technische Erkenntnisse aus dem Entwicklungsprozess:**
 
@@ -106,6 +107,28 @@ Basierend auf der FHGR-Security-Checkliste für vibe-coded Apps (Stack: Claude C
 **Offen / bewusst zurückgestellt:**
 - Keine vollständige Content-Security-Policy — Risiko, damit unter Zeitdruck etwas an der laufenden App zu beschädigen, wurde höher eingeschätzt als der Sicherheitsgewinn in diesem Rahmen.
 - Kein serverseitiges Rate-Limiting auf den KI-Aufrufen — durch das harte Ausgabenlimit bei OpenAI abgefedert.
+
+## GEO-Checkliste (Marketing-Seite)
+
+Basierend auf der FHGR-GEO-Checkliste. Umgesetzt auf https://marketing-page-navy.vercel.app:
+
+- [x] 3 echte Unterseiten (`/`, `/features`, `/faq`) statt Anker-Links auf einer Seite
+- [x] Genau eine H1 pro Seite, eigene Meta-Title/-Description pro Seite
+- [x] Schema.org JSON-LD: `WebApplication` auf der Startseite, `FAQPage` auf `/faq` (validiert)
+- [x] Semantisches HTML (`header`, `nav`, `main`, `section`, `footer`)
+- [x] robots.txt erlaubt alle Crawler explizit, inkl. KI-Crawler (GPTBot, PerplexityBot etc.)
+- [x] Produktname überall identisch («HORTTIA by Veikko», vorher fälschlich noch «Seilers GartenApp» an mehreren Stellen)
+- [x] Keine unbelegten Behauptungen (Testimonials klar als Konzept-Beispiel gekennzeichnet, falsche Aussage zu geplanten Store-Apps entfernt)
+
+### Erkenntnis aus dem Praxistest
+
+Der von der Checkliste empfohlene KI-Test («Frag ChatGPT: Was ist [deine URL]?») lieferte zunächst ein besonders lehrreiches Ergebnis: ChatGPT beantwortete die Frage im ersten Versuch mit erfundenen Detailinhalten (u.a. einer falschen E-Mail-Adresse) und widerrief das auf Nachfrage selbst als unzuverlässig — es hatte die Seite gar nicht wirklich geladen.
+
+Um zu klären, ob das an unserer Seite lag, habe ich einen direkten HTTP-Request mit einem GPTBot-User-Agent gegen die Live-URL abgesetzt. Ergebnis: sauberes `HTTP 200`, keine Sperre, keine Weiterleitung — die Seite ist technisch uneingeschränkt erreichbar. Die Ursache liegt also nicht bei uns, sondern vermutlich daran, dass generische `*.vercel.app`-Subdomains (statt einer eigenen Domain) von KI-Such-Tools zurückhaltender behandelt bzw. noch nicht indexiert werden. Das deckt sich mit dem Hinweis der Checkliste selbst, dass KI-Antworten nicht deterministisch sind und mehrfach/mit unterschiedlichen Tools getestet werden sollten.
+
+**Learning:** Ein KI-Tool, das eine plausible, aber falsche Antwort gibt, ist nicht dasselbe wie ein technisches Problem — bevor man an der eigenen Seite herumschraubt, lohnt sich ein direkter, tool-unabhängiger Test (z.B. `curl` mit dem passenden User-Agent).
+
+Zur Bestätigung derselbe Test mit einem zweiten, unabhängigen Tool (Gemini): Diesmal keine erfundenen Fakten, aber auch kein echter Seiteninhalt — Gemini erkannte korrekt nur das URL-Muster («typische Vercel-Deployment-Adresse, vermutlich ein Landingpage-Template») und äusserte sich explizit unsicher, statt wie ChatGPT konkrete (falsche) Details zu erfinden. Zwei unterschiedliche Tools, zwei unterschiedliche Umgangsformen mit fehlendem Wissen — aber in beiden Fällen wurde der tatsächliche Seiteninhalt nicht gelesen. Das erhärtet den Befund: Eine frische, generische `*.vercel.app`-Subdomain ist aktuell noch nicht in den Wissensstand dieser Tools vorgedrungen, unabhängig von der technischen Korrektheit der Seite selbst.
 
 ## Persönliche Reflexion
 

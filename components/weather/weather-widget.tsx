@@ -1,28 +1,7 @@
-import {
-  Sun,
-  CloudSun,
-  Cloud,
-  CloudFog,
-  CloudDrizzle,
-  CloudRain,
-  CloudSnow,
-  CloudLightning,
-  Droplets,
-  Wind,
-} from "lucide-react";
+import { Droplets, Wind } from "lucide-react";
 import { getWeatherSnapshot, weatherLabel } from "@/lib/openmeteo";
-
-function WeatherIcon({ code, className }: { code: number; className?: string }) {
-  if (code === 0) return <Sun className={className} />;
-  if (code === 1 || code === 2) return <CloudSun className={className} />;
-  if (code === 3) return <Cloud className={className} />;
-  if (code === 45 || code === 48) return <CloudFog className={className} />;
-  if (code === 51 || code === 53 || code === 55) return <CloudDrizzle className={className} />;
-  if ([61, 63, 65, 66, 67, 80, 81, 82].includes(code)) return <CloudRain className={className} />;
-  if ([71, 73, 75, 77, 85, 86].includes(code)) return <CloudSnow className={className} />;
-  if (code === 95 || code === 96 || code === 99) return <CloudLightning className={className} />;
-  return <Cloud className={className} />;
-}
+import { WeatherIcon } from "@/components/weather/weather-icon";
+import { DailyForecastStrip } from "@/components/weather/daily-forecast-strip";
 
 export async function WeatherWidget() {
   let snapshot;
@@ -68,32 +47,7 @@ export async function WeatherWidget() {
         </div>
       </div>
 
-      <div className="grid grid-cols-3 gap-3 sm:grid-cols-6">
-        {snapshot.daily.map((d, i) => {
-          const date = new Date(d.date);
-          return (
-            <div
-              key={d.date}
-              className="flex flex-col items-center gap-2.5 rounded-2xl border border-border bg-warm-white px-3 py-6"
-            >
-              <span className="text-sm font-semibold text-forest">
-                {i === 0 ? "Heute" : date.toLocaleDateString("de-CH", { weekday: "short" })}
-              </span>
-              <WeatherIcon code={d.weatherCode} className="h-9 w-9 text-sage" />
-              <span className="text-lg font-semibold text-forest">
-                {Math.round(d.tempMax)}°
-              </span>
-              <span className="text-sm text-forest-muted">{Math.round(d.tempMin)}°</span>
-              {d.precipitationSum > 0 && (
-                <span className="flex items-center gap-1 text-xs text-water-text">
-                  <Droplets className="h-3 w-3" />
-                  {d.precipitationSum.toFixed(1)}mm
-                </span>
-              )}
-            </div>
-          );
-        })}
-      </div>
+      <DailyForecastStrip days={snapshot.daily} todayIndex={snapshot.todayIndex} />
     </div>
   );
 }
