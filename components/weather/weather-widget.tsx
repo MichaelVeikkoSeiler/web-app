@@ -36,9 +36,14 @@ export async function WeatherWidget() {
         />
 
         <div className="flex flex-col items-end gap-1.5 sm:flex-col sm:items-end sm:gap-3">
-          <div className="flex items-center gap-1 rounded-full bg-water/40 px-2 py-1 text-[10px] text-water-text sm:gap-1.5 sm:px-3.5 sm:py-2 sm:text-sm">
+          <div
+            className="flex items-center gap-1 rounded-full bg-water/40 px-2 py-1 text-[10px] text-water-text sm:gap-1.5 sm:px-3.5 sm:py-2 sm:text-sm"
+            title="Regenmenge der 7 Tage vor heute, ohne den heutigen Tag"
+          >
             <Droplets className="h-3 w-3 sm:h-4 sm:w-4" />
-            {snapshot.precipitationLast7Days.toFixed(0)}mm/7T
+            <span>{snapshot.precipitationLast7Days.toFixed(0)}mm</span>
+            <span className="sm:hidden">/7T vor heute</span>
+            <span className="hidden sm:inline">· 7 Tage vor heute</span>
           </div>
           <div className="flex items-center gap-1 rounded-full bg-cream px-2 py-1 text-[10px] text-forest-muted sm:gap-1.5 sm:px-3.5 sm:py-2 sm:text-sm">
             <Wind className="h-3 w-3 sm:h-4 sm:w-4" />

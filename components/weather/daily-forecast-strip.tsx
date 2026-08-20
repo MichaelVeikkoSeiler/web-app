@@ -38,11 +38,15 @@ export function DailyForecastStrip({
         return (
           <div
             key={d.date}
-            className={`flex flex-col items-center gap-0.5 rounded-xl border border-border bg-warm-white px-1.5 py-2 sm:gap-1.5 sm:rounded-2xl sm:px-3 sm:py-5 ${
-              isPast ? "opacity-70" : ""
+            className={`flex flex-col items-center gap-0.5 rounded-xl border px-1.5 py-2 sm:gap-1.5 sm:rounded-2xl sm:px-3 sm:py-5 ${
+              isToday
+                ? "border-care bg-care/40"
+                : `border-border bg-warm-white ${isPast ? "opacity-70" : ""}`
             }`}
           >
-            <span className="text-[11px] font-semibold text-forest sm:text-sm">
+            <span
+              className={`text-[11px] font-semibold sm:text-sm ${isToday ? "text-care-text" : "text-forest"}`}
+            >
               {isToday ? "Heute" : date.toLocaleDateString("de-CH", { weekday: "short" })}
             </span>
             <span className="text-[9px] text-forest-muted sm:text-xs">
