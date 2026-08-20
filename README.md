@@ -130,9 +130,27 @@ Um zu klären, ob das an unserer Seite lag, habe ich einen direkten HTTP-Request
 
 Zur Bestätigung derselbe Test mit einem zweiten, unabhängigen Tool (Gemini): Diesmal keine erfundenen Fakten, aber auch kein echter Seiteninhalt — Gemini erkannte korrekt nur das URL-Muster («typische Vercel-Deployment-Adresse, vermutlich ein Landingpage-Template») und äusserte sich explizit unsicher, statt wie ChatGPT konkrete (falsche) Details zu erfinden. Zwei unterschiedliche Tools, zwei unterschiedliche Umgangsformen mit fehlendem Wissen — aber in beiden Fällen wurde der tatsächliche Seiteninhalt nicht gelesen. Das erhärtet den Befund: Eine frische, generische `*.vercel.app`-Subdomain ist aktuell noch nicht in den Wissensstand dieser Tools vorgedrungen, unabhängig von der technischen Korrektheit der Seite selbst.
 
+### Follow-up-Test: gleiche Frage, einige Tage später
+
+Derselbe Test («Was ist [URL]? Was bietet dieses Produkt?»), erneut mit ChatGPT und Gemini, in separaten, frischen Chats: Diesmal lasen **beide** Tools die Seite tatsächlich und fassten das Produkt inhaltlich korrekt zusammen (Zonen, Giesserinnerungen nach Wetter, Plant Doc, Foto-Journal). Das bestätigt die ursprüngliche These — die anfängliche Zurückhaltung lag an der frischen, generischen Subdomain, nicht an einem technischen Problem der Seite.
+
+Interessanter als die reine Lesbarkeit war aber die inhaltliche Gewichtung: Beide Tools beschrieben HORTTIA primär als «Giess-/Pflege-Erinnerungs-App» und erwähnten Kernfunktionen wie die Zonen-Konfliktanalyse, die Tier-Erfassung oder das Quiz kaum bis gar nicht. ChatGPT benannte das sogar explizit selbst: *„Die Seite vermittelt HORTTIA stärker als Pflege-/Giessmanagement-App, als das Produkt tatsächlich angelegt ist.“*
+
+**Learning:** GEO ist nicht nur «wird die Seite gelesen», sondern auch «kommt beim Lesen die richtige Gewichtung an». Die Startseiten-Auswahl (3 Feature-Teaser) und die Hero-Beschreibung haben bisher unbeabsichtigt nur einen Teil der App abgebildet (v.a. Giessen) und die eigentliche Differenzierung (Diagnose, Zonenkonflikte, Tiere) an den Rand gedrängt. Darauf hin wurden Hero-Text, Feature-Teaser-Auswahl und die vollständige Funktionsliste überarbeitet, um die Breite der App bereits im ersten Eindruck sichtbar zu machen.
+
 ## Persönliche Reflexion
 
-_[In eigenen Worten ergänzen — z.B.: Was hat überrascht? Was würdest du beim nächsten Projekt anders machen? Wie hat sich dein Vertrauen ins Vibe-Coding über das Projekt hinweg verändert?]_
+Zu Beginn des Projekts faszinierte mich vor allem, dass ich mit Vibe Coding eine Web-App entwickeln kann, obwohl ich selbst kein Webentwickler bin. Im Verlauf der Arbeit wurde mir jedoch klar, dass die eigentliche Herausforderung nicht das Erzeugen von Code ist, sondern die KI richtig zu führen und ihre Ergebnisse beurteilen zu können.
+
+Ein erster Aha-Moment entstand bereits beim Erstellen der PRD. Dabei erhielt ich rund 70 Rückfragen. Bei einigen technischen Entscheidungen konnte ich die Konsequenzen zunächst nicht einschätzen und holte deshalb zusätzliche Erklärungen ein. Mir wurde dabei bewusst, dass ich Entscheidungen nicht einfach bestätigen sollte, nur weil mir die KI eine plausible Lösung vorschlägt. Eine gute Spezifikation, genügend Kontext und klare Anforderungen sind entscheidend.
+
+Beeindruckt hat mich, wie selbstständig Claude bei der Entwicklung vorging: Änderungen wurden umgesetzt und getestet, Fehler teilweise eigenständig erkannt und behoben. Gleichzeitig bemerkte ich eine interessante Veränderung bei mir selbst: **Je mehr Zeit ich bereits in die App investiert hatte, desto vorsichtiger wurde ich.** Bei grösseren Änderungen schrieb ich teilweise ausdrücklich: «Mach noch nichts – sag mir zuerst, ob dies risikofrei umsetzbar ist.» Aus anfänglichem Ausprobieren wurde zunehmend ein kontrollierter Entwicklungsprozess.
+
+Auch mein Prompting wurde differenzierter. Ich lernte beispielsweise, Anforderungen für Mobile und Desktop teilweise getrennt zu formulieren. Zudem wurde mir bewusst, wie wichtig logisch aufgebaute und verständlich bezeichnete Commits sind. Dadurch lassen sich Änderungen später besser nachvollziehen und bei Problemen rekonstruieren.
+
+Die Geschwindigkeit von Vibe Coding sehe ich gleichzeitig als Chance und Risiko. Funktionen können sehr schnell ergänzt werden, genauso können aber Inkonsistenzen und ein «Vibe Code Hangover» entstehen. Die KI nimmt mir zwar einen grossen Teil des Programmierens ab, **nicht aber das Denken, Kontrollieren und die Verantwortung für das Ergebnis.**
+
+Nach der intensiven Arbeit würde mich deshalb besonders interessieren, wie ich ein zweites Projekt heute von Grund auf anders aufbauen würde: von Spezifikation und Architektur über eine saubere Entwicklungsstrategie bis zur definitiven Publikation unter einer eigenen Domain sowie der anschliessenden Vermarktung mit SEO und GEO. Genau darin sehe ich für mich den nächsten Lernschritt.
 
 ## Quellen
 
