@@ -47,7 +47,7 @@ export function DailyForecastStrip({
             <span
               className={`text-[11px] font-semibold sm:text-sm ${isToday ? "text-care-text" : "text-forest"}`}
             >
-              {isToday ? "Heute" : date.toLocaleDateString("de-CH", { weekday: "short" })}
+              {isToday ? "Heute" : date.toLocaleDateString("de-CH", { weekday: "long" })}
             </span>
             <span className="text-[9px] text-forest-muted sm:text-xs">
               {formatDayDate(date)}
