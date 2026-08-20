@@ -62,7 +62,7 @@ export async function getWeatherSnapshot(): Promise<WeatherSnapshot> {
     `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}` +
     `&current=temperature_2m,precipitation,weather_code,wind_speed_10m` +
     `&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_sum` +
-    `&past_days=${PAST_DAYS}&forecast_days=6&timezone=Europe%2FBerlin`;
+    `&past_days=${PAST_DAYS}&forecast_days=7&timezone=Europe%2FBerlin`;
 
   const res = await fetch(url, { next: { revalidate: 1800 } });
   if (!res.ok) {
