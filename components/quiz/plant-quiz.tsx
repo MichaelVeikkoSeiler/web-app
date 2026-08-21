@@ -4,7 +4,7 @@ import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Leaf, Sparkles } from "lucide-react";
-import { playCorrectSound, playWrongSound } from "@/lib/sounds";
+import { playCorrectSound, playWrongSound, playQuizEndSound } from "@/lib/sounds";
 
 export type QuizSubject = {
   id: string;
@@ -199,7 +199,11 @@ export function PlantQuiz({ pool, zones }: { pool: QuizSubject[]; zones: QuizZon
 
   function handleNext() {
     setSelectedId(null);
-    setIndex((i) => i + 1);
+    setIndex((i) => {
+      const next = i + 1;
+      if (next >= questions!.length) playQuizEndSound();
+      return next;
+    });
   }
 
   return (
