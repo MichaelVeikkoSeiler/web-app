@@ -212,7 +212,7 @@ export function PlantQuiz({ pool, zones }: { pool: QuizSubject[]; zones: QuizZon
         Frage {index + 1} von {questions.length}
       </p>
 
-      <div className="relative aspect-[4/3] w-full overflow-hidden rounded-2xl bg-warm-white sm:aspect-video">
+      <div className="relative aspect-[5/3] w-full overflow-hidden rounded-2xl bg-warm-white sm:aspect-video">
         <Image
           key={current.subject.id}
           src={current.subject.imageUrl}
