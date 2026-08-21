@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { Leaf, Sparkles } from "lucide-react";
 import { playCorrectSound, playWrongSound } from "@/lib/quiz-sounds";
 
@@ -164,12 +165,21 @@ export function PlantQuiz({ pool, zones }: { pool: QuizSubject[]; zones: QuizZon
         <p className="font-display text-4xl text-forest">
           {score} / {questions.length}
         </p>
-        <button
-          onClick={handleRestart}
-          className="mt-2 flex min-h-11 items-center justify-center rounded-full bg-sage px-6 text-sm font-medium text-warm-white active:scale-95"
-        >
-          Nochmal spielen
-        </button>
+        <p className="text-sm text-forest-muted">Nochmal spielen oder beenden?</p>
+        <div className="mt-2 flex flex-col gap-2 sm:flex-row">
+          <button
+            onClick={handleRestart}
+            className="flex min-h-11 items-center justify-center rounded-full bg-sage px-6 text-sm font-medium text-warm-white active:scale-95"
+          >
+            Nochmal spielen
+          </button>
+          <Link
+            href="/"
+            className="flex min-h-11 items-center justify-center rounded-full border border-border bg-warm-white px-6 text-sm font-medium text-forest active:scale-95"
+          >
+            Beenden
+          </Link>
+        </div>
       </div>
     );
   }
