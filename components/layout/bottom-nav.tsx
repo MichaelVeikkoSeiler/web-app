@@ -4,7 +4,13 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { type LucideIcon } from "lucide-react";
 import { navItems } from "./nav-items";
-import { playNavTapSound } from "@/lib/sounds";
+import { playNavTapSound, playPlantDocSound, playZonenSound, playTiereSound } from "@/lib/sounds";
+
+const tabSounds: Record<string, () => void> = {
+  "/plant-doc": playPlantDocSound,
+  "/zonen": playZonenSound,
+  "/tiere": playTiereSound,
+};
 
 export function BottomNav() {
   const pathname = usePathname();
@@ -39,7 +45,7 @@ function NavLink({
   return (
     <Link
       href={href}
-      onClick={() => playNavTapSound()}
+      onClick={() => (tabSounds[href] ?? playNavTapSound)()}
       className={`flex min-w-16 flex-col items-center gap-1 rounded-xl px-3 py-1.5 text-xs font-medium transition-colors ${
         active ? "text-forest" : "text-forest-muted"
       }`}

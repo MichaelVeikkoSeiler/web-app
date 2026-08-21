@@ -27,3 +27,18 @@ export function playQuizEndSound() {
 export function playNavTapSound() {
   playFile("/sounds/nav-tap.wav");
 }
+
+/** Ton für Plant Doc: Tab-Tap und "Neuer Fall". */
+export function playPlantDocSound() {
+  playFile("/sounds/plant-doc.wav");
+}
+
+/** Ton für den Zonen-Tab. */
+export function playZonenSound() {
+  playFile("/sounds/zonen.wav");
+}
+
+/** Ton für den Tiere-Tab. */
+export function playTiereSound() {
+  playFile("/sounds/tiere.wav");
+}

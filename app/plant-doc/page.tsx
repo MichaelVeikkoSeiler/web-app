@@ -3,7 +3,7 @@ import Image from "next/image";
 import { desc, eq, inArray } from "drizzle-orm";
 import { getDb, isDbConfigured } from "@/lib/db";
 import { plantDocCases, plantDocPhotos, plants } from "@/lib/db/schema";
-import { Plus, Stethoscope } from "lucide-react";
+import { Stethoscope } from "lucide-react";
 import { STATUS_META } from "@/lib/plant-doc-status";
 import {
   getPlantDocHeroImageUrl,
@@ -11,6 +11,7 @@ import {
   clearPlantDocHeroImage,
 } from "@/lib/actions/settings";
 import { HeroBanner } from "@/components/layout/hero-banner";
+import { NewCaseLink } from "@/components/plant-doc/new-case-link";
 
 export default async function PlantDocOverviewPage() {
   const [cases, heroImageUrl] = await Promise.all([
@@ -62,12 +63,7 @@ export default async function PlantDocOverviewPage() {
 
       <div className="flex items-center justify-between gap-3">
         <h1 className="font-display text-2xl text-forest">Plant Doc</h1>
-        <Link
-          href="/plant-doc/neu"
-          className="flex min-h-11 items-center gap-2 rounded-full bg-sage px-5 text-sm font-semibold text-forest shadow-sm hover:bg-sage-dark hover:text-warm-white"
-        >
-          <Plus className="h-4 w-4" strokeWidth={2.5} /> Neuer Fall
-        </Link>
+        <NewCaseLink />
       </div>
 
       {cases.length === 0 ? (
