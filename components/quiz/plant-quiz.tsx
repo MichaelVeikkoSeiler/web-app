@@ -4,7 +4,7 @@ import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Leaf, Sparkles } from "lucide-react";
-import { playCorrectSound, playWrongSound } from "@/lib/quiz-sounds";
+import { playCorrectSound, playWrongSound } from "@/lib/sounds";
 
 export type QuizSubject = {
   id: string;
