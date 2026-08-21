@@ -47,51 +47,14 @@ export function playWrongSound() {
   playTone(ctx, 174.61, now + 0.12, 0.25, 0.12); // F3
 }
 
-function createNoiseBuffer(ctx: AudioContext, duration: number): AudioBuffer {
-  const length = Math.max(1, Math.floor(ctx.sampleRate * duration));
-  const buffer = ctx.createBuffer(1, length, ctx.sampleRate);
-  const data = buffer.getChannelData(0);
-  for (let i = 0; i < length; i++) data[i] = Math.random() * 2 - 1;
-  return buffer;
-}
+let navTapAudio: HTMLAudioElement | null = null;
 
-/**
- * Kurzes "Grab"-Geräusch (~0.8s) für Tab-Taps: ein Rausch-Swoosh mit fallender
- * Filterfrequenz, gefolgt von einem dumpfen "Zupacken"-Ton.
- */
+/** Kurzes "Grab"-Geräusch für Tab-Taps, aus einer eigenen Audiodatei. */
 export function playNavTapSound() {
-  const ctx = getAudioContext();
-  if (!ctx) return;
-  if (ctx.state === "suspended") ctx.resume();
-  const now = ctx.currentTime;
-
-  const swooshDuration = 0.45;
-  const noise = ctx.createBufferSource();
-  noise.buffer = createNoiseBuffer(ctx, swooshDuration);
-  const filter = ctx.createBiquadFilter();
-  filter.type = "bandpass";
-  filter.Q.value = 0.7;
-  filter.frequency.setValueAtTime(2600, now);
-  filter.frequency.exponentialRampToValueAtTime(300, now + swooshDuration);
-  const swooshGain = ctx.createGain();
-  swooshGain.gain.setValueAtTime(0, now);
-  swooshGain.gain.linearRampToValueAtTime(0.2, now + 0.03);
-  swooshGain.gain.exponentialRampToValueAtTime(0.0001, now + swooshDuration);
-  noise.connect(filter).connect(swooshGain).connect(ctx.destination);
-  noise.start(now);
-  noise.stop(now + swooshDuration + 0.02);
-
-  const grabStart = now + swooshDuration * 0.6;
-  const grabDuration = 0.5;
-  const osc = ctx.createOscillator();
-  osc.type = "triangle";
-  osc.frequency.setValueAtTime(180, grabStart);
-  osc.frequency.exponentialRampToValueAtTime(90, grabStart + grabDuration);
-  const grabGain = ctx.createGain();
-  grabGain.gain.setValueAtTime(0, grabStart);
-  grabGain.gain.linearRampToValueAtTime(0.25, grabStart + 0.02);
-  grabGain.gain.exponentialRampToValueAtTime(0.0001, grabStart + grabDuration);
-  osc.connect(grabGain).connect(ctx.destination);
-  osc.start(grabStart);
-  osc.stop(grabStart + grabDuration + 0.02);
+  if (typeof window === "undefined") return;
+  if (!navTapAudio) {
+    navTapAudio = new Audio("/sounds/nav-tap.wav");
+  }
+  navTapAudio.currentTime = 0;
+  navTapAudio.play().catch(() => {});
 }
