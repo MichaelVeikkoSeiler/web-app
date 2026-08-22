@@ -6,7 +6,7 @@ export default async function BesonderheitenPage() {
 
   return (
     <div className="flex flex-col gap-6">
-      <h1 className="font-display text-2xl text-forest">Speziell</h1>
+      <h1 className="font-display text-2xl text-forest">Besonderes</h1>
 
       <HighlightSections highlights={highlights} />
     </div>

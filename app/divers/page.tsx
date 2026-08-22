@@ -9,7 +9,7 @@ import { HeroBanner } from "@/components/layout/hero-banner";
 
 const themes = [
   { href: "/wetter", label: "Wetter", icon: CloudSun },
-  { href: "/besonderheiten", label: "Speziell", icon: Sparkles },
+  { href: "/besonderheiten", label: "Besonderes", icon: Sparkles },
   { href: "/quiz", label: "Quiz", icon: HelpCircle },
 ];
 

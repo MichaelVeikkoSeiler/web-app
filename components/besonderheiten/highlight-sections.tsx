@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { ChevronDown, Droplets, Flower2, Flame, Feather, type LucideIcon } from "lucide-react";
+import { ChevronDown, Droplets, Flower2, Sparkles, Flame, Feather, type LucideIcon } from "lucide-react";
 import type { PlantHighlights } from "@/lib/plants-query";
 
 const sectionDefs: {
@@ -10,48 +10,63 @@ const sectionDefs: {
   icon: LucideIcon;
   colorClass: string;
   title: string;
+  subtitle: string;
   emptyText: string;
 }[] = [
+  {
+    key: "nowBlooming",
+    icon: Sparkles,
+    colorClass: "bg-care/40 text-care-text",
+    title: "Jetzt blüht's",
+    subtitle: "Diese Pflanzen stehen gerade in Blüte.",
+    emptyText: "Aktuell blüht keine deiner Pflanzen.",
+  },
   {
     key: "mostWater",
     icon: Droplets,
     colorClass: "bg-water/40 text-water-text",
-    title: "Braucht am meisten Wasser",
+    title: "Durstkünstler",
+    subtitle: "Diese Pflanzen möchten regelmässig trinken.",
     emptyText: "Keine Angabe zum Giessrhythmus vorhanden.",
   },
   {
     key: "leastWater",
     icon: Droplets,
     colorClass: "bg-water/40 text-water-text",
-    title: "Braucht am wenigsten Wasser",
+    title: "Trockenheitshelden",
+    subtitle: "Diese Pflanzen kommen mit wenig Wasser aus.",
     emptyText: "Keine Angabe zum Giessrhythmus vorhanden.",
   },
   {
     key: "longestBloom",
     icon: Flower2,
     colorClass: "bg-bloom/40 text-bloom-text",
-    title: "Blüht am längsten",
+    title: "Dauerblüher",
+    subtitle: "Diese Pflanzen sorgen besonders lange für Farbe.",
     emptyText: "Keine Angabe zur Blütezeit vorhanden.",
   },
   {
     key: "shortestBloom",
     icon: Flower2,
     colorClass: "bg-bloom/40 text-bloom-text",
-    title: "Blüht am wenigsten lang",
+    title: "Kompaktblüher",
+    subtitle: "Kurze, aber intensive Blütezeit.",
     emptyText: "Keine Angabe zur Blütezeit vorhanden.",
   },
   {
     key: "mostDemanding",
     icon: Flame,
     colorClass: "bg-sun/40 text-sun-text",
-    title: "Allgemein am anspruchsvollsten",
+    title: "Anspruchsvolle Lieblinge",
+    subtitle: "Diese Pflanzen brauchen etwas mehr Zuwendung.",
     emptyText: "Keine Angabe zum Pflegeaufwand vorhanden.",
   },
   {
     key: "leastDemanding",
     icon: Feather,
     colorClass: "bg-soil/40 text-soil-text",
-    title: "Allgemein am pflegeleichtesten",
+    title: "Pflegeleichte",
+    subtitle: "Viel Gartenfreude mit wenig Aufwand.",
     emptyText: "Keine Angabe zum Pflegeaufwand vorhanden.",
   },
 ];
@@ -84,11 +99,14 @@ export function HighlightSections({ highlights }: { highlights: PlantHighlights 
               className="flex w-full items-center gap-3 px-4 py-3 text-left"
             >
               <span
-                className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full ${def.colorClass}`}
+                className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full ${def.colorClass}`}
               >
                 <def.icon className="h-4 w-4" strokeWidth={2} />
               </span>
-              <span className="flex-1 font-display text-base text-forest">{def.title}</span>
+              <span className="flex-1">
+                <span className="block font-display text-base text-forest">{def.title}</span>
+                <span className="block text-xs text-forest-muted">{def.subtitle}</span>
+              </span>
               <span className="text-xs text-forest-muted">{items.length}</span>
               <ChevronDown
                 className={`h-4 w-4 shrink-0 text-forest-muted transition-transform ${open ? "rotate-180" : ""}`}

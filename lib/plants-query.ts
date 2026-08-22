@@ -3,7 +3,7 @@ import { getDb, isDbConfigured } from "@/lib/db";
 import { plants, plantPhotos, plantZoneAssignments, zones, zonePhotos } from "@/lib/db/schema";
 import { computeHelpFlags } from "@/lib/help-logic";
 import { getWeatherSnapshot } from "@/lib/openmeteo";
-import { monthRangeDuration } from "@/lib/date-utils";
+import { monthRangeDuration, isMonthInRange, monthName } from "@/lib/date-utils";
 
 export type PlantListItem = {
   id: number;
@@ -141,6 +141,7 @@ export async function getTodoItems(): Promise<TodoItem[]> {
 export type RankedHighlight = { plantId: number; plantName: string; display: string };
 
 export type PlantHighlights = {
+  nowBlooming: RankedHighlight[];
   mostWater: RankedHighlight[];
   leastWater: RankedHighlight[];
   longestBloom: RankedHighlight[];
@@ -153,6 +154,7 @@ const TOP_N = 10;
 
 export async function getPlantHighlights(): Promise<PlantHighlights> {
   const empty: PlantHighlights = {
+    nowBlooming: [],
     mostWater: [],
     leastWater: [],
     longestBloom: [],
@@ -203,5 +205,26 @@ export async function getPlantHighlights(): Promise<PlantHighlights> {
   const mostDemanding = ranked(allPlants, byDifficulty, (a, b) => b - a, difficultyDisplay);
   const leastDemanding = ranked(allPlants, byDifficulty, (a, b) => a - b, difficultyDisplay);
 
-  return { mostWater, leastWater, longestBloom, shortestBloom, mostDemanding, leastDemanding };
+  const currentMonth = new Date().getMonth() + 1;
+  const nowBlooming: RankedHighlight[] = allPlants
+    .filter((p) => isMonthInRange(currentMonth, p.bloomStartMonth, p.bloomEndMonth))
+    .sort((a, b) => name(a).localeCompare(name(b), "de"))
+    .map((p) => ({
+      plantId: p.id,
+      plantName: name(p),
+      display:
+        p.bloomStartMonth && p.bloomEndMonth
+          ? `${monthName(p.bloomStartMonth)}–${monthName(p.bloomEndMonth)}`
+          : "",
+    }));
+
+  return {
+    nowBlooming,
+    mostWater,
+    leastWater,
+    longestBloom,
+    shortestBloom,
+    mostDemanding,
+    leastDemanding,
+  };
 }
