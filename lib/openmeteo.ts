@@ -36,6 +36,7 @@ export type HourlyWeather = {
   temp: number;
   weatherCode: number;
   precipitation: number;
+  isDay: boolean;
 };
 
 export type WeatherSnapshot = {
@@ -71,7 +72,7 @@ export async function getWeatherSnapshot(): Promise<WeatherSnapshot> {
     `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}` +
     `&current=temperature_2m,precipitation,weather_code,wind_speed_10m` +
     `&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_sum` +
-    `&hourly=temperature_2m,weather_code,precipitation` +
+    `&hourly=temperature_2m,weather_code,precipitation,is_day` +
     `&past_days=${PAST_DAYS}&forecast_days=7&timezone=Europe%2FBerlin`;
 
   const res = await fetch(url, { next: { revalidate: 1800 } });
@@ -104,6 +105,7 @@ export async function getWeatherSnapshot(): Promise<WeatherSnapshot> {
       temp: data.hourly.temperature_2m[i],
       weatherCode: data.hourly.weather_code[i],
       precipitation: data.hourly.precipitation[i],
+      isDay: data.hourly.is_day[i] === 1,
     });
   }
 

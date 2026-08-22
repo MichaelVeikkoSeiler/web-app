@@ -108,7 +108,11 @@ export function DailyForecastStrip({
                 className="flex flex-col items-center gap-1 rounded-xl border border-border bg-warm-white px-1 py-3 sm:px-0.5 sm:py-2"
               >
                 <span className="text-xs font-semibold text-forest sm:text-[10px]">{h.hour}:00</span>
-                <WeatherIcon code={h.weatherCode} className="h-6 w-6 text-sage sm:h-5 sm:w-5" />
+                <WeatherIcon
+                  code={h.weatherCode}
+                  isDay={h.isDay}
+                  className="h-6 w-6 text-sage sm:h-5 sm:w-5"
+                />
                 <span className="text-sm font-semibold text-forest sm:text-xs">{Math.round(h.temp)}°</span>
                 {h.precipitation > 0 && (
                   <span className="flex items-center gap-0.5 text-[10px] text-water-text sm:text-[9px]">
