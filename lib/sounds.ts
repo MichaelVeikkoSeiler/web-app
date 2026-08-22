@@ -51,22 +51,12 @@ export function playQuizEndSound() {
   playFile("/sounds/quiz-end.wav");
 }
 
-/** Kurzes "Grab"-Geräusch für Tab-Taps. */
+/** Ton für Tab-Taps in der unteren Navigation. */
 export function playNavTapSound() {
-  playFile("/sounds/nav-tap.wav");
+  playFile("/sounds/click.wav");
 }
 
-/** Ton für Plant Doc: Tab-Tap und "Neuer Fall". */
+/** Ton für "Neuer Fall" bei Plant Doc. */
 export function playPlantDocSound() {
   playFile("/sounds/plant-doc.wav", 2.4);
-}
-
-/** Ton für den Zonen-Tab. */
-export function playZonenSound() {
-  playFile("/sounds/zonen.wav");
-}
-
-/** Ton für den Tiere-Tab. */
-export function playTiereSound() {
-  playFile("/sounds/tiere.wav", 1.8);
 }

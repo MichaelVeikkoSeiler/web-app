@@ -52,7 +52,11 @@ export async function WeatherWidget() {
         </div>
       </div>
 
-      <DailyForecastStrip days={snapshot.daily} todayIndex={snapshot.todayIndex} />
+      <DailyForecastStrip
+        days={snapshot.daily}
+        todayIndex={snapshot.todayIndex}
+        hourlyByDate={snapshot.hourlyByDate}
+      />
     </div>
   );
 }

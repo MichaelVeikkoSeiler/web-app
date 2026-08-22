@@ -31,6 +31,13 @@ export function weatherLabel(code: number): string {
   return WEATHER_CODE_LABELS[code] ?? "Unbekannt";
 }
 
+export type HourlyWeather = {
+  hour: number;
+  temp: number;
+  weatherCode: number;
+  precipitation: number;
+};
+
 export type WeatherSnapshot = {
   current: {
     temperature: number;
@@ -50,6 +57,8 @@ export type WeatherSnapshot = {
   todayIndex: number;
   /** Niederschlagssumme (mm) der letzten 7 Tage, für die Hilfe-Logik */
   precipitationLast7Days: number;
+  /** Stundenwerte 8–19 Uhr je Datum (yyyy-mm-dd), für die Tages-Detailansicht. */
+  hourlyByDate: Record<string, HourlyWeather[]>;
 };
 
 const PAST_DAYS = 7;
@@ -62,6 +71,7 @@ export async function getWeatherSnapshot(): Promise<WeatherSnapshot> {
     `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}` +
     `&current=temperature_2m,precipitation,weather_code,wind_speed_10m` +
     `&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_sum` +
+    `&hourly=temperature_2m,weather_code,precipitation` +
     `&past_days=${PAST_DAYS}&forecast_days=7&timezone=Europe%2FBerlin`;
 
   const res = await fetch(url, { next: { revalidate: 1800 } });
@@ -85,6 +95,19 @@ export async function getWeatherSnapshot(): Promise<WeatherSnapshot> {
     precipitationSum: data.daily.precipitation_sum[i],
   }));
 
+  const hourlyByDate: Record<string, HourlyWeather[]> = {};
+  for (let i = 0; i < data.hourly.time.length; i++) {
+    const [date, timePart] = data.hourly.time[i].split("T");
+    const hour = Number(timePart.slice(0, 2));
+    if (hour < 8 || hour > 19) continue;
+    (hourlyByDate[date] ??= []).push({
+      hour,
+      temp: data.hourly.temperature_2m[i],
+      weatherCode: data.hourly.weather_code[i],
+      precipitation: data.hourly.precipitation[i],
+    });
+  }
+
   return {
     current: {
       temperature: data.current.temperature_2m,
@@ -95,6 +118,7 @@ export async function getWeatherSnapshot(): Promise<WeatherSnapshot> {
     daily,
     todayIndex: todayIndex >= 0 ? todayIndex : PAST_DAYS,
     precipitationLast7Days,
+    hourlyByDate,
   };
 }
 
