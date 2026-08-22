@@ -8,11 +8,13 @@ export function Sheet({
   onClose,
   title,
   children,
+  maxWidthClassName = "sm:max-w-md",
 }: {
   open: boolean;
   onClose: () => void;
   title: string;
   children: React.ReactNode;
+  maxWidthClassName?: string;
 }) {
   useEffect(() => {
     if (!open) return;
@@ -30,7 +32,9 @@ export function Sheet({
         className="absolute inset-0 bg-forest/40 backdrop-blur-sm"
         onClick={onClose}
       />
-      <div className="relative max-h-[90vh] w-full overflow-y-auto rounded-t-3xl bg-warm-white p-6 shadow-xl sm:max-w-md sm:rounded-3xl">
+      <div
+        className={`relative max-h-[90vh] w-full overflow-y-auto rounded-t-3xl bg-warm-white p-6 shadow-xl sm:rounded-3xl ${maxWidthClassName}`}
+      >
         <div className="mb-4 flex items-center justify-between">
           <h2 className="font-display text-lg text-forest">{title}</h2>
           <button

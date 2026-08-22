@@ -99,7 +99,6 @@ export async function getWeatherSnapshot(): Promise<WeatherSnapshot> {
   for (let i = 0; i < data.hourly.time.length; i++) {
     const [date, timePart] = data.hourly.time[i].split("T");
     const hour = Number(timePart.slice(0, 2));
-    if (hour < 8 || hour > 19) continue;
     (hourlyByDate[date] ??= []).push({
       hour,
       temp: data.hourly.temperature_2m[i],

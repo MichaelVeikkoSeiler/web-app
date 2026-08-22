@@ -60,7 +60,7 @@ export function DailyForecastStrip({
               <span
                 className={`text-[11px] font-semibold sm:text-sm ${isToday ? "text-care-text" : "text-forest"}`}
               >
-                {isToday ? "Heute" : date.toLocaleDateString("de-CH", { weekday: "short" })}
+                {isToday ? "Heute" : date.toLocaleDateString("de-CH", { weekday: "long" })}
               </span>
               <span className="text-[9px] text-forest-muted sm:text-xs">
                 {formatDayDate(date)}
@@ -86,28 +86,34 @@ export function DailyForecastStrip({
       <Sheet
         open={selectedDay !== null}
         onClose={() => setSelectedDate(null)}
+        maxWidthClassName="sm:max-w-4xl"
         title={
           selectedDay
-            ? `${selectedDay.date === days[todayIndex]?.date ? "Heute" : new Date(selectedDay.date).toLocaleDateString("de-CH", { weekday: "long" })}, ${formatDayDate(new Date(selectedDay.date))}`
+            ? new Date(selectedDay.date).toLocaleDateString("de-CH", {
+                weekday: "long",
+                day: "numeric",
+                month: "long",
+                year: "numeric",
+              })
             : ""
         }
       >
         {selectedHours.length === 0 ? (
           <p className="text-sm text-forest-muted">Für diesen Tag liegen keine Stundenwerte vor.</p>
         ) : (
-          <div className="grid grid-cols-3 gap-2 sm:grid-cols-4">
+          <div className="grid grid-cols-4 gap-2 sm:grid-cols-12">
             {selectedHours.map((h) => (
               <div
                 key={h.hour}
-                className="flex flex-col items-center gap-1 rounded-xl border border-border bg-warm-white px-1.5 py-3"
+                className="flex flex-col items-center gap-1 rounded-xl border border-border bg-warm-white px-1 py-3 sm:px-0.5 sm:py-2"
               >
-                <span className="text-xs font-semibold text-forest">{h.hour}:00</span>
-                <WeatherIcon code={h.weatherCode} className="h-6 w-6 text-sage" />
-                <span className="text-sm font-semibold text-forest">{Math.round(h.temp)}°</span>
+                <span className="text-xs font-semibold text-forest sm:text-[10px]">{h.hour}:00</span>
+                <WeatherIcon code={h.weatherCode} className="h-6 w-6 text-sage sm:h-5 sm:w-5" />
+                <span className="text-sm font-semibold text-forest sm:text-xs">{Math.round(h.temp)}°</span>
                 {h.precipitation > 0 && (
-                  <span className="flex items-center gap-0.5 text-[10px] text-water-text">
-                    <Droplets className="h-2.5 w-2.5" />
-                    {h.precipitation.toFixed(1)}mm
+                  <span className="flex items-center gap-0.5 text-[10px] text-water-text sm:text-[9px]">
+                    <Droplets className="h-2.5 w-2.5 sm:h-2 sm:w-2" />
+                    {h.precipitation.toFixed(1)}
                   </span>
                 )}
               </div>
