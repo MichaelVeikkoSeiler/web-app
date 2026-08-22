@@ -67,6 +67,10 @@ export function ZoneGrid({ zones }: { zones: ZoneTile[] }) {
   }
 
   function handlePointerMove(e: React.PointerEvent) {
+    // Wie bei handlePointerDown: nur Maus löst die Umsortier-/Abbruchlogik aus,
+    // sonst wird bei Touch schon die winzige Fingerbewegung eines Taps
+    // fälschlich als "bewegt" gewertet und blockiert den Klick/die Navigation.
+    if (e.pointerType !== "mouse") return;
     if (draggingIdRef.current == null) {
       const dx = Math.abs(e.clientX - startPosRef.current.x);
       const dy = Math.abs(e.clientY - startPosRef.current.y);
