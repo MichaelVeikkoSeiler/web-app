@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { AlertCircle, StickyNote } from "lucide-react";
 import { eq, and, isNotNull, desc } from "drizzle-orm";
 import { AttentionList } from "@/components/home/attention-list";
@@ -123,6 +124,14 @@ export default async function Home() {
         </h2>
         <NotesSection notes={notes} />
       </section>
+
+      <Image
+        src="/images/soil-mound.png"
+        alt=""
+        width={1536}
+        height={289}
+        className="h-auto w-full"
+      />
     </div>
   );
 }
