@@ -33,7 +33,7 @@ export function LogoUpload({ initialUrl }: { initialUrl: string | null }) {
       onClick={() => fileInputRef.current?.click()}
       disabled={uploading}
       aria-label={url ? "Logo ändern" : "Logo hochladen"}
-      className="relative flex h-[46px] w-[46px] shrink-0 items-center justify-center overflow-hidden rounded-xl border border-border bg-warm-white text-forest-muted hover:border-sage disabled:opacity-50 sm:h-[51px] sm:w-[51px]"
+      className="relative flex h-[46px] w-[46px] shrink-0 items-center justify-center overflow-hidden rounded-xl border border-transparent bg-warm-white text-forest-muted hover:border-sage disabled:opacity-50 sm:h-[51px] sm:w-[51px]"
     >
       <input
         ref={fileInputRef}
