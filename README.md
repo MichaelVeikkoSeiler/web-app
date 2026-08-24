@@ -32,16 +32,39 @@ Das ist bewusst kein generisches SaaS-Produkt, sondern ein konkreter, persönlic
 
 - **Pflanzen & Tiere:** Anlegen per Foto (automatische Arterkennung) oder manuelle Suche, mehrere Fotos mit manuell korrigierbarem Aufnahmedatum und per Drag-Reorder sortierbar, automatisch recherchierter Steckbrief (Herkunft, Pflege, Besonderheiten)
 - **Zonen:** Gartenbereiche mit Lichtverhältnissen, Ausrichtung, Bodenart; Pflanzen/Tiere lassen sich zuordnen
+- **Zonen-Konfliktanalyse:** Prüft automatisch, ob sich Pflanzen einer Zone um Licht, Wasser oder Platz konkurrenzieren oder der Boden nicht passt — Treffer erscheinen auf der Startseite
 - **Bodencheck:** Geführter Fragebogen pro Zone, deterministisch ausgewertet (Bodenart, pH-Klasse, Drainage)
 - **Plant Doc:** Foto-basierte Diagnose bei Pflanzenproblemen unter Einbezug von Wetterdaten und Pflegehistorie
-- **Wetter-Integration:** Giess-/Pflegeerinnerungen berücksichtigen echte Niederschlagsdaten (Open-Meteo)
+- **Wetter-Integration:** Giess-/Pflegeerinnerungen berücksichtigen echte Niederschlagsdaten (Open-Meteo); 12-Tage-Übersicht mit Detailansicht pro Stunde
 - **Notizen:** Für Pflanzen, Tiere und Zonen, zentral auf der Startseite zusammengeführt
-- **Quiz:** Lernspiel mit den eigenen Pflanzen- und Tierdaten — 10 zufällig gemischte Fragen zu Foto-Erkennung, lateinischen Namen und Zonen-Zugehörigkeit
-- **Divers:** Sammelbereich für Wetter, Besonderheiten-Auswertungen und das Quiz
+- **Spiele:** Quiz (10 gemischte Fragen zu Foto-Erkennung, lateinischen Namen und Zonen-Zugehörigkeit), Pflanzen-Match (zwei Pflanzen im direkten Vergleich) und Detektiv (Multiple-Choice zum eigenen Garten) — alle auf Basis der eigenen Daten
+- **Besonderes:** Automatisch zusammengestellte Sammlungen wie «Jetzt blüht's», «Dauerblüher» oder «Trockenheitshelden»
+- **Divers:** Sammelbereich für Wetter, «Besonderes» und die Spiele
 
-## "Spec"-Dokumentation
+## Spec-Dokumentation
 
-Es gab keine einzelne, vorab fixierte Spezifikationsdatei. Stattdessen wurde jede Funktion in einer eigenen, meist sehr präzisen Nachricht spezifiziert — das hat sich in der Praxis als robusterer Ansatz erwiesen als ein starres Lastenheft, weil sich Anforderungen beim Bauen weiterentwickelt haben (z.B. wurde der Bereich «Divers» erst nachträglich eingeführt, um «Wetter» und «Speziell» sinnvoll zusammenzufassen).
+### Wie die Spezifikation entstanden ist
+
+Die Spezifikation für HORTTIA wurde **im Dialog erarbeitet, nicht als separates Dokument abgelegt**: Zu Beginn habe ich meine Projektidee beschrieben und bin anschliessend rund 70 Rückfragen von Claude durchgegangen — zu Zielgruppe, Datenmodell, Funktionsumfang, Abgrenzung und technischen Entscheidungen. Diese strukturierte Befragung hat dieselbe Funktion erfüllt wie ein klassisches PRD: Am Ende stand ein klares, gemeinsames Bild davon, was gebaut wird und was nicht.
+
+Rückblickend war genau dieser Schritt der wertvollste des ganzen Projekts (siehe Abschnitt «Persönliche Reflexion») — aber auch der Punkt, an dem ich heute anders vorgehen würde: Das Ergebnis dieses Dialogs hätte ich als Datei im Repository ablegen sollen, statt es nur im Chatverlauf zu haben.
+
+### Das Ergebnis dieser Spezifikation
+
+Nachträglich zusammengefasst — dies ist die Spezifikation, die aus dem Dialog hervorging und an der sich die Umsetzung orientiert hat:
+
+| | |
+|---|---|
+| **Produkt in einem Satz** | HORTTIA hilft unserer Familie, den gemeinsamen Garten im Blick zu behalten, indem Pflanzen, Tiere und Zonen an einem Ort erfasst werden und Pflege-Erinnerungen sich am echten Wetter orientieren. |
+| **Zielgruppe & Kontext** | Ein einzelner Haushalt (unsere Familie), Nutzung überwiegend am Handy, direkt im Garten. |
+| **Kernfeatures** | Pflanzen & Tiere per Foto erfassen (automatische Arterkennung, KI-Steckbrief) · Zonen mit Standorteigenschaften · wetterabhängige Giess-/Pflegeerinnerungen · Plant Doc (Foto-Diagnose bei Problemen) · Notizen |
+| **Out of Scope** | Kein Login/Mehrbenutzer-System · keine native App (läuft im Browser) · kein «Tier Doc» als Gegenstück zu Plant Doc · keine Pflegeplanung für Tiere |
+| **Design-Richtung** | Ruhig und natürlich statt technisch: warme Erd- und Grüntöne, abgerundete Kacheln, grosse Fotos, Mobile-First. |
+| **Technische Vorgaben** | Next.js + TypeScript auf Vercel, Postgres für Daten, Blob-Storage für Fotos, KI nur für Erkennung/Recherche/Diagnose — nicht für Pflegeentscheide. |
+
+### Wie es danach weiterging
+
+Ab dem ersten Prototyp wurde jede weitere Funktion in einer eigenen, meist sehr präzisen Nachricht spezifiziert statt in einem starren Gesamt-Lastenheft. Das hat sich als robuster erwiesen, weil sich Anforderungen beim Bauen weiterentwickelt haben (z.B. wurde der Bereich «Divers» erst nachträglich eingeführt, um «Wetter», «Besonderes» und die Spiele sinnvoll zusammenzufassen).
 
 ### Repräsentativer, effektiv genutzter Prompt
 
