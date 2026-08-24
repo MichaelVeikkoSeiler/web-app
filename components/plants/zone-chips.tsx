@@ -43,74 +43,79 @@ export function ZoneChips({
   }
 
   return (
-    <div className="flex flex-wrap items-center gap-2">
-      {assignedZones.map((z) => (
-        <span
-          key={z.id}
-          className="flex items-center gap-2 rounded-xl border border-border bg-warm-white py-1.5 pl-1.5 pr-2"
-        >
-          <Link href={`/zonen/${z.id}`} className="flex items-center gap-2">
-            <span className="relative h-9 w-9 shrink-0 overflow-hidden rounded-lg bg-cream">
-              {z.imageUrl ? (
-                <Image src={z.imageUrl} alt="" fill sizes="36px" className="object-cover" />
-              ) : (
-                <span className="flex h-full items-center justify-center text-forest-muted/40">
-                  <MapPin className="h-4 w-4" strokeWidth={1.5} />
-                </span>
-              )}
-            </span>
-            <span className="text-sm text-forest hover:underline">{z.name}</span>
-          </Link>
-          <button
-            aria-label={`Zone ${z.name} entfernen`}
-            disabled={pending && removingId === z.id}
-            onClick={() => handleRemove(z.id)}
-            className="flex h-6 w-6 items-center justify-center rounded-full text-forest-muted hover:bg-cream disabled:opacity-50"
-          >
-            <X className="h-3.5 w-3.5" />
-          </button>
-        </span>
-      ))}
-
-      {available.length > 0 &&
-        (adding ? (
-          <div className="flex w-full flex-col gap-2">
-            <ZoneMultiSelect zones={available} selected={selectedIds} onToggle={toggleZone} />
-            <div className="flex gap-2">
-              <Button
-                variant="secondary"
-                className="flex-1"
-                onClick={() => {
-                  setSelectedIds(new Set());
-                  setAdding(false);
-                }}
-              >
-                Abbrechen
-              </Button>
-              <Button
-                className="flex-1"
-                disabled={pending || selectedIds.size === 0}
-                onClick={() =>
-                  startTransition(async () => {
-                    await addZoneAssignments(plantId, [...selectedIds]);
-                    setSelectedIds(new Set());
-                    setAdding(false);
-                  })
-                }
-              >
-                Hinzufügen
-              </Button>
-            </div>
+    <div className="flex flex-col gap-2">
+      <div className="grid grid-cols-5 gap-2 sm:grid-cols-8">
+        {assignedZones.map((z) => (
+          <div key={z.id} className="relative">
+            <button
+              aria-label={`Zone ${z.name} entfernen`}
+              disabled={pending && removingId === z.id}
+              onClick={() => handleRemove(z.id)}
+              className="absolute right-0.5 top-0.5 z-10 flex h-4 w-4 items-center justify-center rounded-full bg-warm-white/90 text-forest-muted shadow-sm hover:bg-warm-white disabled:opacity-50"
+            >
+              <X className="h-2.5 w-2.5" />
+            </button>
+            <Link href={`/zonen/${z.id}`} aria-label={z.name} title={z.name}>
+              <span className="relative block aspect-square overflow-hidden rounded-lg border border-border bg-cream">
+                {z.imageUrl ? (
+                  <Image
+                    src={z.imageUrl}
+                    alt=""
+                    fill
+                    sizes="(max-width: 640px) 20vw, 90px"
+                    className="object-cover"
+                  />
+                ) : (
+                  <span className="flex h-full items-center justify-center text-forest-muted/40">
+                    <MapPin className="h-4 w-4" strokeWidth={1.5} />
+                  </span>
+                )}
+              </span>
+            </Link>
           </div>
-        ) : (
+        ))}
+
+        {!adding && available.length > 0 && (
           <button
             onClick={() => setAdding(true)}
-            className="flex h-8 w-8 items-center justify-center rounded-full border border-dashed border-border text-forest-muted hover:border-sage hover:text-forest"
             aria-label="Weitere Zone zuordnen"
+            className="flex aspect-square items-center justify-center rounded-lg border border-dashed border-border text-forest-muted hover:border-sage hover:text-forest"
           >
             <Plus className="h-4 w-4" />
           </button>
-        ))}
+        )}
+      </div>
+
+      {adding && (
+        <div className="flex flex-col gap-2">
+          <ZoneMultiSelect zones={available} selected={selectedIds} onToggle={toggleZone} />
+          <div className="flex gap-2">
+            <Button
+              variant="secondary"
+              className="flex-1"
+              onClick={() => {
+                setSelectedIds(new Set());
+                setAdding(false);
+              }}
+            >
+              Abbrechen
+            </Button>
+            <Button
+              className="flex-1"
+              disabled={pending || selectedIds.size === 0}
+              onClick={() =>
+                startTransition(async () => {
+                  await addZoneAssignments(plantId, [...selectedIds]);
+                  setSelectedIds(new Set());
+                  setAdding(false);
+                })
+              }
+            >
+              Hinzufügen
+            </Button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
