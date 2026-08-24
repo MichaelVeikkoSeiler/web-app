@@ -24,7 +24,7 @@ export async function AppShell({ children }: { children: React.ReactNode }) {
             src="/images/soil-mound-desktop.png"
             alt=""
             width={2172}
-            height={724}
+            height={310}
             className="mt-6 hidden h-auto w-full sm:block"
           />
         </div>
