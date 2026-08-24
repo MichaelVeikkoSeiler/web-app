@@ -46,6 +46,15 @@ export function NewPlantWizard({
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
   const [step, setStep] = useState<Step>({ name: "capture" });
   const [saveError, setSaveError] = useState<string | null>(null);
+  const [showManualEscape, setShowManualEscape] = useState(false);
+  const bypassedIdentifyRef = useRef(false);
+
+  useEffect(() => {
+    if (step.name !== "identifying") return;
+    setShowManualEscape(false);
+    const timer = setTimeout(() => setShowManualEscape(true), 7000);
+    return () => clearTimeout(timer);
+  }, [step.name]);
 
   function handlePhotoChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -57,11 +66,20 @@ export function NewPlantWizard({
 
   async function runIdentify() {
     if (!photoFile) return;
+    bypassedIdentifyRef.current = false;
     setStep({ name: "identifying" });
     const formData = new FormData();
     formData.append("photo", photoFile);
     const result = await identifyPlant(formData);
+    // Falls der Nutzer während des Wartens schon manuell weitergegangen ist,
+    // das inzwischen veraltete Ergebnis nicht mehr über den aktuellen Schritt bügeln.
+    if (bypassedIdentifyRef.current) return;
     setStep({ name: "candidates", candidates: result.candidates, error: result.error });
+  }
+
+  function bypassIdentify(candidate: PlantNetCandidate) {
+    bypassedIdentifyRef.current = true;
+    pickCandidate(candidate);
   }
 
   async function pickCandidate(candidate: PlantNetCandidate) {
@@ -190,7 +208,16 @@ export function NewPlantWizard({
       </div>
 
       {step.name === "identifying" && (
-        <StatusBox icon={<Loader2 className="h-5 w-5 animate-spin" />} text="Pflanze wird erkannt…" />
+        <div className="flex flex-col gap-3">
+          <StatusBox icon={<Loader2 className="h-5 w-5 animate-spin" />} text="Pflanze wird erkannt…" />
+          {showManualEscape && (
+            <ManualSpeciesSearch
+              autoOpen
+              label="Dauert es zu lange? Jetzt manuell eingeben"
+              onSelect={(scientificName) => bypassIdentify(makeManualCandidate(scientificName))}
+            />
+          )}
+        </div>
       )}
 
       {step.name === "candidates" && (
@@ -284,8 +311,16 @@ function makeManualCandidate(scientificName: string): PlantNetCandidate {
   return { scientificName, commonNames: [], family: "", score: 0 };
 }
 
-function ManualSpeciesSearch({ onSelect }: { onSelect: (scientificName: string) => void }) {
-  const [open, setOpen] = useState(false);
+function ManualSpeciesSearch({
+  onSelect,
+  autoOpen = false,
+  label = "Art nicht dabei? Manuell eingeben",
+}: {
+  onSelect: (scientificName: string) => void;
+  autoOpen?: boolean;
+  label?: string;
+}) {
+  const [open, setOpen] = useState(autoOpen);
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<{ scientificName: string }[]>([]);
   const [searching, setSearching] = useState(false);
@@ -319,7 +354,7 @@ function ManualSpeciesSearch({ onSelect }: { onSelect: (scientificName: string) 
         className="flex items-center gap-2 self-start text-sm font-medium text-forest-muted hover:text-forest"
       >
         <Search className="h-4 w-4" />
-        Art nicht dabei? Manuell eingeben
+        {label}
       </button>
     );
   }

@@ -22,7 +22,7 @@ Antworte ausschliesslich auf Deutsch in Schweizer Rechtschreibung (kein ß, imme
 }
 
 Regeln:
-- "factsText": 2-5 kurze, interessante Sätze über das Tier (Lebensraum, Verhalten, Besonderheiten, ob es für den Garten nützlich oder ein Schädling ist).
+- "factsText": 2-5 kurze, interessante Sätze über das Tier (Lebensraum, Verhalten, Besonderheiten, ob es für den Garten nützlich oder ein Schädling ist). Reiner Fliesstext ohne Quellenangaben, Links, URLs oder Klammer-Zitate (auch nicht in Markdown-Form wie "([Quelle](URL))") — die Websuche dient nur der Recherche, ihre Ergebnisse erscheinen nicht im Text.
 - Wenn eine Angabe nicht ermittelbar ist, setze das Feld auf null.`;
 
 async function researchAnimal(scientificName: string): Promise<EnrichmentResult> {

@@ -37,7 +37,7 @@ Antworte ausschliesslich auf Deutsch in Schweizer Rechtschreibung (kein ß, imme
 }
 
 Regeln:
-- "factsText": 2-5 kurze, interessante Sätze über die Pflanze (Herkunft, Besonderheiten). Die genaue Anzahl richtet sich danach, wie viel Wissenswertes es zu dieser Pflanze gibt.
+- "factsText": 2-5 kurze, interessante Sätze über die Pflanze (Herkunft, Besonderheiten). Die genaue Anzahl richtet sich danach, wie viel Wissenswertes es zu dieser Pflanze gibt. Reiner Fliesstext ohne Quellenangaben, Links, URLs oder Klammer-Zitate (auch nicht in Markdown-Form wie "([Quelle](URL))") — die Websuche dient nur der Recherche, ihre Ergebnisse erscheinen nicht im Text.
 - "isFruitOrBerry": true nur bei Frucht- oder Beerenpflanzen. Wenn false, setze "harvest" auf { "text": null, "startMonth": null, "endMonth": null }.
 - Monate als Zahlen 1-12. Wenn ein Zeitraum den Jahreswechsel überschreitet (z.B. November bis Februar), ist startMonth > endMonth erlaubt.
 - "watering.rhythmDays": typischer Giessrhythmus in Tagen unter normalen Bedingungen (Richtwert als Zahl, z.B. 3 für alle 3 Tage, 7 für wöchentlich).
