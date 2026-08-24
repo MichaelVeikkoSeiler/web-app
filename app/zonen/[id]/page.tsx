@@ -2,9 +2,21 @@ import { notFound } from "next/navigation";
 import { desc, eq } from "drizzle-orm";
 import { Sun, CloudSun, CloudMoon } from "lucide-react";
 import { getDb, isDbConfigured } from "@/lib/db";
-import { zones, plantZoneAssignments, plants, plantPhotos, zoneSoilChecks, zonePhotos, zoneNotes } from "@/lib/db/schema";
+import {
+  zones,
+  plantZoneAssignments,
+  plants,
+  plantPhotos,
+  animalZoneAssignments,
+  animals,
+  animalPhotos,
+  zoneSoilChecks,
+  zonePhotos,
+  zoneNotes,
+} from "@/lib/db/schema";
 import { ZoneHero } from "@/components/zones/zone-hero";
 import { ZonePlants } from "@/components/zones/zone-plants";
+import { ZoneAnimals } from "@/components/zones/zone-animals";
 import { ZoneDetailActions } from "@/components/zones/zone-detail-actions";
 import { SoilSection } from "@/components/zones/soil-section";
 import { OtherZonesOverview } from "@/components/zones/other-zones-overview";
@@ -33,7 +45,19 @@ export default async function ZoneDetailPage({
   const [zone] = await db.select().from(zones).where(eq(zones.id, zoneId)).limit(1);
   if (!zone) notFound();
 
-  const [assignments, allPlantRows, primaryPhotos, latestSoilCheckRows, zonePhotoRows, allZoneRows, primaryZonePhotos, notes] = await Promise.all([
+  const [
+    assignments,
+    allPlantRows,
+    primaryPhotos,
+    animalAssignments,
+    allAnimalRows,
+    primaryAnimalPhotos,
+    latestSoilCheckRows,
+    zonePhotoRows,
+    allZoneRows,
+    primaryZonePhotos,
+    notes,
+  ] = await Promise.all([
     db
       .select({
         plantId: plants.id,
@@ -56,6 +80,28 @@ export default async function ZoneDetailPage({
       .where(eq(plantPhotos.isPrimary, true)),
     db
       .select({
+        animalId: animals.id,
+        germanName: animals.germanName,
+        commonName: animals.commonName,
+        scientificName: animals.scientificName,
+      })
+      .from(animalZoneAssignments)
+      .innerJoin(animals, eq(animalZoneAssignments.animalId, animals.id))
+      .where(eq(animalZoneAssignments.zoneId, zoneId)),
+    db
+      .select({
+        id: animals.id,
+        germanName: animals.germanName,
+        commonName: animals.commonName,
+        scientificName: animals.scientificName,
+      })
+      .from(animals),
+    db
+      .select({ animalId: animalPhotos.animalId, blobUrl: animalPhotos.blobUrl })
+      .from(animalPhotos)
+      .where(eq(animalPhotos.isPrimary, true)),
+    db
+      .select({
         soilTexture: zoneSoilChecks.soilTexture,
         phValue: zoneSoilChecks.phValue,
         drainageClass: zoneSoilChecks.drainageClass,
@@ -74,6 +120,7 @@ export default async function ZoneDetailPage({
   ]);
 
   const photoByPlant = new Map(primaryPhotos.map((p) => [p.plantId, p.blobUrl]));
+  const photoByAnimal = new Map(primaryAnimalPhotos.map((a) => [a.animalId, a.blobUrl]));
   const latestSoilCheck = latestSoilCheckRows[0] ?? null;
   const photoByZone = new Map(primaryZonePhotos.map((p) => [p.zoneId, p.blobUrl]));
   const otherZones = allZoneRows
@@ -90,6 +137,18 @@ export default async function ZoneDetailPage({
     id: p.id,
     name: p.germanName ?? p.scientificName,
     photoUrl: photoByPlant.get(p.id) ?? null,
+  }));
+
+  const assignedAnimals = animalAssignments.map((a) => ({
+    id: a.animalId,
+    name: a.germanName ?? a.commonName ?? a.scientificName,
+    photoUrl: photoByAnimal.get(a.animalId) ?? null,
+  }));
+
+  const allAnimals = allAnimalRows.map((a) => ({
+    id: a.id,
+    name: a.germanName ?? a.commonName ?? a.scientificName,
+    photoUrl: photoByAnimal.get(a.id) ?? null,
   }));
 
   const Icon = lightIcon[zone.light];
@@ -125,6 +184,11 @@ export default async function ZoneDetailPage({
         <section className="flex flex-col gap-3">
           <h2 className="font-display text-lg text-forest">Pflanzen</h2>
           <ZonePlants zoneId={zone.id} assignedPlants={assignedPlants} allPlants={allPlants} />
+        </section>
+
+        <section className="flex flex-col gap-3">
+          <h2 className="font-display text-lg text-forest">Tiere</h2>
+          <ZoneAnimals zoneId={zone.id} assignedAnimals={assignedAnimals} allAnimals={allAnimals} />
         </section>
 
         <section className="flex flex-col gap-3">
