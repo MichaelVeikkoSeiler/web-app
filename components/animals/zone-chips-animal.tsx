@@ -44,7 +44,7 @@ export function ZoneChipsAnimal({
 
   return (
     <div className="flex flex-col gap-2">
-      <div className="grid grid-cols-5 gap-2 sm:grid-cols-8">
+      <div className="grid grid-cols-4 gap-2 sm:grid-cols-6">
         {assignedZones.map((z) => (
           <div key={z.id} className="relative">
             <button
