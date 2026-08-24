@@ -12,7 +12,9 @@ export function ZoneList({ zones }: { zones: ZoneTile[] }) {
   return (
     <div className="flex flex-col gap-4">
       <div className="flex items-center justify-between gap-3">
-        <h1 className="font-display text-2xl text-forest">Zonen</h1>
+        <h1 className="font-display text-2xl text-forest">
+          {zones.length} {zones.length === 1 ? "Zone" : "Zonen"}
+        </h1>
         <button
           onClick={() => setAddOpen(true)}
           aria-label="Zone hinzufügen"
