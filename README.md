@@ -120,6 +120,8 @@ Basierend auf der FHGR-Security-Checkliste für vibe-coded Apps (Stack: Claude C
 - [x] Geheimnisse gelangen nicht ins Client-Bundle — nach `npm run build` alle 16 Werte aus `.env.local` gegen `.next/static/` geprüft, kein einziger Treffer
 - [x] Foto-Upload-Endpunkt begrenzt: nur Bildformate (JPEG/PNG/WebP/HEIC), max. 30 MB, zufälliger Dateiname, Ablage im Blob-Storage statt im Public-Ordner
 - [x] Alle Abhängigkeiten sind reale, etablierte Pakete (kein Slopsquatting-Verdacht)
+- [x] GitHub Secret Scanning und Push Protection aktiviert — verhindert das versehentliche Pushen eines Schlüssels, statt ihn erst hinterher zu finden
+- [x] Dependabot Alerts und Security Updates aktiviert (inkl. Dependency Graph als Voraussetzung)
 - [x] Next.js auf aktueller Version (16.3), keine Middleware-basierte Auth-Logik (CVE-2025-29927 nicht relevant)
 - [x] Security-Headers gesetzt (`X-Content-Type-Options`, `X-Frame-Options`, `Referrer-Policy`, `Strict-Transport-Security`) — in **beiden** Projekten, an den Live-URLs mit `curl -I` gegengeprüft
 - [x] Publizierte URL im Inkognito-Fenster geprüft
