@@ -116,10 +116,12 @@ Basierend auf der FHGR-Security-Checkliste für vibe-coded Apps (Stack: Claude C
 - [x] Keine `NEXT_PUBLIC_`-Variable enthält ein Geheimnis (es existiert keine)
 - [x] API-Keys liegen ausschliesslich in den Vercel Environment Variables
 - [x] Kein `dangerouslySetInnerHTML` im Code
-- [x] Lockfile committed, `npm audit` — 0 Vulnerabilities
+- [x] Lockfile committed, `npm audit` ohne High/Critical (Stand Abgabe: 4 × «moderate», alle über `drizzle-kit` → `esbuild`; betrifft ausschliesslich den lokalen Entwicklungsserver, nicht die publizierte App)
+- [x] Geheimnisse gelangen nicht ins Client-Bundle — nach `npm run build` alle 16 Werte aus `.env.local` gegen `.next/static/` geprüft, kein einziger Treffer
+- [x] Foto-Upload-Endpunkt begrenzt: nur Bildformate (JPEG/PNG/WebP/HEIC), max. 30 MB, zufälliger Dateiname, Ablage im Blob-Storage statt im Public-Ordner
 - [x] Alle Abhängigkeiten sind reale, etablierte Pakete (kein Slopsquatting-Verdacht)
 - [x] Next.js auf aktueller Version (16.3), keine Middleware-basierte Auth-Logik (CVE-2025-29927 nicht relevant)
-- [x] Security-Headers gesetzt (`X-Content-Type-Options`, `X-Frame-Options`, `Referrer-Policy`, `Strict-Transport-Security`)
+- [x] Security-Headers gesetzt (`X-Content-Type-Options`, `X-Frame-Options`, `Referrer-Policy`, `Strict-Transport-Security`) — in **beiden** Projekten, an den Live-URLs mit `curl -I` gegengeprüft
 - [x] Publizierte URL im Inkognito-Fenster geprüft
 - [x] Hartes Ausgabenlimit (50$/Monat) plus Spend-Alerts bei 80%/100% auf OpenAI gesetzt
 
@@ -130,6 +132,7 @@ Basierend auf der FHGR-Security-Checkliste für vibe-coded Apps (Stack: Claude C
 **Offen / bewusst zurückgestellt:**
 - Keine vollständige Content-Security-Policy — Risiko, damit unter Zeitdruck etwas an der laufenden App zu beschädigen, wurde höher eingeschätzt als der Sicherheitsgewinn in diesem Rahmen.
 - Kein serverseitiges Rate-Limiting auf den KI-Aufrufen — durch das harte Ausgabenlimit bei OpenAI abgefedert.
+- Der Foto-Upload-Endpunkt ist ohne Login erreichbar. Das ist die direkte Folge der bewussten Entscheidung gegen ein Benutzerkonto-System: Ohne Sessions gibt es nichts zu prüfen. Begrenzt wird das Risiko über Dateityp, Grössenlimit und die Tatsache, dass die URL nirgends beworben wird. Bei einer öffentlichen App wäre das der erste Punkt, den ich nachrüsten würde.
 
 ## GEO-Checkliste (Marketing-Seite)
 
