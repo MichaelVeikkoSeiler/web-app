@@ -12,7 +12,7 @@ Das ist bewusst kein generisches SaaS-Produkt, sondern ein konkreter, persönlic
 
 - **Live-App:** https://veikkosgarten.vercel.app
 - **Marketing-Seite:** https://marketing-page-navy.vercel.app
-- **Video-Walkthrough:** _[wird ergänzt]_
+- **Video-Walkthrough:** https://youtu.be/8od_EIsDFX8
 - **Marketing-Seite Repository:** https://github.com/MichaelVeikkoSeiler/marketing-page
 
 ## Tech-Stack
