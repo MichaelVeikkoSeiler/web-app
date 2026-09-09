@@ -9,6 +9,7 @@ export async function AppShell({ children }: { children: React.ReactNode }) {
 
   return (
     <>
+      {isDemoMode() && <div data-demo-mode hidden />}
       {isDemoMode() && (
         <div className="bg-sage/30 px-4 py-2 text-center text-xs text-forest">
           Schaufenster-Ansicht — zum Stöbern gedacht, Änderungen sind
