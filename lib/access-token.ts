@@ -25,6 +25,16 @@ function equalsSecurely(a: string, b: string): boolean {
   return timingSafeEqual(ha, hb);
 }
 
+/**
+ * Ist diese Bereitstellung das oeffentliche Schaufenster?
+ *
+ * Wird ausschliesslich im Demo-Projekt gesetzt. Fehlt die Variable — und in der
+ * echten App fehlt sie —, verhaelt sich der gesamte Code exakt wie zuvor.
+ */
+export function isDemoMode(): boolean {
+  return process.env.DEMO_MODE === "1";
+}
+
 export function accessCodeConfigured(): boolean {
   return Boolean(process.env.APP_ACCESS_CODE);
 }

@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import { ACCESS_COOKIE, accessTokenIsValid } from "@/lib/access-token";
+import { ACCESS_COOKIE, accessTokenIsValid, isDemoMode } from "@/lib/access-token";
 
 /**
  * Erste Verteidigungslinie: Ohne gültiges Zugangs-Cookie kommt keine Anfrage
@@ -13,6 +13,12 @@ import { ACCESS_COOKIE, accessTokenIsValid } from "@/lib/access-token";
  * Die zweite Linie sitzt in den Server Actions selbst (`requireAccess()`).
  */
 export function proxy(request: NextRequest) {
+  // Das Schaufenster ist bewusst ohne Zugangscode erreichbar. Geschrieben werden
+  // kann dort trotzdem nichts: Das verhindert requireAccess() in jeder Action.
+  if (isDemoMode()) {
+    return NextResponse.next();
+  }
+
   if (accessTokenIsValid(request.cookies.get(ACCESS_COOKIE)?.value)) {
     return NextResponse.next();
   }

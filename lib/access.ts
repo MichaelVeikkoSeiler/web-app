@@ -10,14 +10,35 @@
  */
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import { ACCESS_COOKIE, accessTokenIsValid } from "@/lib/access-token";
+import { ACCESS_COOKIE, accessTokenIsValid, isDemoMode } from "@/lib/access-token";
 
 export async function hasAccess(): Promise<boolean> {
   const store = await cookies();
   return accessTokenIsValid(store.get(ACCESS_COOKIE)?.value);
 }
 
-/** Bricht ab und leitet zur Zugangsseite, wenn kein gültiges Cookie vorliegt. */
+/**
+ * Bricht ab, wenn kein gültiges Cookie vorliegt — oder wenn diese Bereitstellung
+ * das Schaufenster ist.
+ *
+ * Steht am Anfang jeder verändernden Server Action. Weil `hasAccess()` selbst
+ * NICHT auf den Demo-Modus schaut, bleibt der Upload-Endpunkt im Schaufenster
+ * ebenfalls verschlossen: Dort gibt es kein Cookie, also kommt dort nichts an.
+ */
 export async function requireAccess(): Promise<void> {
+  if (isDemoMode()) redirect("/demo-hinweis");
+  if (!(await hasAccess())) redirect("/zugang");
+}
+
+/**
+ * Für rein lesende Actions, die auch im Schaufenster laufen dürfen.
+ *
+ * Der Unterschied zu `requireAccess()`: Im Demo-Modus wird durchgelassen statt
+ * abgewiesen. Bewusst sparsam eingesetzt — nur dort, wo nichts geschrieben wird
+ * UND kein kostenpflichtiger Dienst angerufen wird. Die Arterkennung etwa bleibt
+ * gesperrt, obwohl sie nichts schreibt: Sie kostet Geld.
+ */
+export async function requireReadAccess(): Promise<void> {
+  if (isDemoMode()) return;
   if (!(await hasAccess())) redirect("/zugang");
 }
