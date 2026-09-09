@@ -10,11 +10,13 @@ import { identifyPlantPhoto, type PlantNetCandidate } from "@/lib/plantnet";
 import { identifyPlantPhotoWithVision } from "@/lib/plant-vision-id";
 import { enrichPlant } from "@/lib/enrichment";
 import { checkZoneConflict } from "@/lib/conflict-analysis";
+import { requireAccess } from "@/lib/access";
 
 export async function identifyPlant(formData: FormData): Promise<{
   candidates: PlantNetCandidate[];
   error?: string;
 }> {
+  await requireAccess();
   const file = formData.get("photo");
   if (!(file instanceof File) || file.size === 0) {
     return { candidates: [], error: "Kein Foto empfangen." };
@@ -44,6 +46,7 @@ export async function identifyPlant(formData: FormData): Promise<{
 }
 
 export async function findExistingPlant(scientificName: string) {
+  await requireAccess();
   if (!isDbConfigured) return null;
   const db = getDb();
   const [plant] = await db
@@ -68,6 +71,7 @@ export async function createPlantAndAssign(input: {
   commonName?: string;
   zoneIds: number[];
 }) {
+  await requireAccess();
   const db = getDb();
   const [plant] = await db
     .insert(plants)
@@ -100,6 +104,7 @@ export async function createPlantAndAssign(input: {
 }
 
 export async function addZoneAssignment(plantId: number, zoneId: number) {
+  await requireAccess();
   const db = getDb();
   await db
     .insert(plantZoneAssignments)
@@ -114,6 +119,7 @@ export async function addZoneAssignment(plantId: number, zoneId: number) {
 }
 
 export async function addZoneAssignments(plantId: number, zoneIds: number[]) {
+  await requireAccess();
   if (zoneIds.length === 0) return;
   const db = getDb();
   await db
@@ -133,6 +139,7 @@ export async function addZoneAssignments(plantId: number, zoneIds: number[]) {
 }
 
 export async function removeZoneAssignment(plantId: number, zoneId: number) {
+  await requireAccess();
   const db = getDb();
   await db
     .delete(plantZoneAssignments)
@@ -151,6 +158,7 @@ export async function savePlantPhoto(
   blobUrl: string,
   isPrimary: boolean,
 ) {
+  await requireAccess();
   const db = getDb();
   if (isPrimary) {
     await db
@@ -164,6 +172,7 @@ export async function savePlantPhoto(
 }
 
 export async function setPlantPhotoTakenAt(plantId: number, photoId: number, takenAt: Date) {
+  await requireAccess();
   await getDb()
     .update(plantPhotos)
     .set({ takenAt })
@@ -172,6 +181,7 @@ export async function setPlantPhotoTakenAt(plantId: number, photoId: number, tak
 }
 
 export async function deletePlantPhoto(photoId: number, plantId: number) {
+  await requireAccess();
   const db = getDb();
   const [photo] = await db
     .select()
@@ -200,6 +210,7 @@ export async function deletePlantPhoto(photoId: number, plantId: number) {
 }
 
 export async function addNote(plantId: number, text: string) {
+  await requireAccess();
   const trimmed = text.trim();
   if (!trimmed) return;
   await getDb().insert(plantNotes).values({ plantId, text: trimmed });
@@ -208,12 +219,14 @@ export async function addNote(plantId: number, text: string) {
 }
 
 export async function deleteNote(plantId: number, noteId: number) {
+  await requireAccess();
   await getDb().delete(plantNotes).where(eq(plantNotes.id, noteId));
   revalidatePath(`/pflanzen/${plantId}`);
   revalidatePath("/");
 }
 
 export async function waterPlant(plantId: number) {
+  await requireAccess();
   const db = getDb();
   await db
     .update(plants)
@@ -225,6 +238,7 @@ export async function waterPlant(plantId: number) {
 }
 
 export async function markPruned(plantId: number) {
+  await requireAccess();
   const db = getDb();
   await db
     .update(plants)
@@ -236,6 +250,7 @@ export async function markPruned(plantId: number) {
 }
 
 export async function markFertilized(plantId: number) {
+  await requireAccess();
   const db = getDb();
   await db
     .update(plants)
@@ -247,6 +262,7 @@ export async function markFertilized(plantId: number) {
 }
 
 export async function deletePlant(plantId: number) {
+  await requireAccess();
   const db = getDb();
   const photos = await db
     .select({ blobUrl: plantPhotos.blobUrl })
@@ -264,6 +280,7 @@ export async function deletePlant(plantId: number) {
 }
 
 export async function searchSpecies(query: string): Promise<{ scientificName: string }[]> {
+  await requireAccess();
   const trimmed = query.trim();
   if (trimmed.length === 0) return [];
 
@@ -295,6 +312,7 @@ export async function correctPlantSpecies(
   plantId: number,
   scientificName: string,
 ): Promise<{ ok: boolean; error?: string }> {
+  await requireAccess();
   const trimmed = scientificName.trim();
   if (!trimmed) return { ok: false, error: "Bitte eine Pflanzenart auswählen." };
 
@@ -339,6 +357,7 @@ export async function correctPlantSpecies(
 }
 
 export async function retryEnrichment(plantId: number) {
+  await requireAccess();
   const db = getDb();
   await db
     .update(plants)

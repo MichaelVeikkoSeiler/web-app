@@ -127,14 +127,29 @@ Basierend auf der FHGR-Security-Checkliste für vibe-coded Apps (Stack: Claude C
 - [x] Publizierte URL im Inkognito-Fenster geprüft
 - [x] Hartes Ausgabenlimit (50$/Monat) plus Spend-Alerts bei 80%/100% auf OpenAI gesetzt
 
+- [x] Die App ist durch einen gemeinsamen Zugangscode geschützt (siehe unten)
+
+**Nachträglich behoben — die wichtigste Lehre aus dem Feedback:**
+
+In der ersten Fassung war die App ohne jeden Schutz erreichbar. Begründet hatte ich das damit, dass die URL «nirgends beworben» werde — während sie gleichzeitig hier im README stand, drei Zeilen über der Stelle, an der ich es behauptete. Ein öffentliches Repository macht eine URL öffentlich. Fremde hätten Gartendaten ändern, Fotos hochladen und KI-Aufrufe auslösen können.
+
+Der Schutz besteht jetzt aus zwei Linien:
+
+1. **`proxy.ts`** (in Next.js 16 der Nachfolger von `middleware.ts`) fängt jede Anfrage ab und leitet ohne gültiges Cookie zur Zugangsseite. Schnittstellen bekommen `401` statt einer Weiterleitung.
+2. **`requireAccess()` in jeder der 65 verändernden Server Actions** sowie im Upload-Endpunkt. Das ist bewusst doppelt: Server Actions sind POST-Anfragen an die Route, in der sie verwendet werden — zieht man eine Action später um, kann sie lautlos aus dem Proxy-Muster fallen. Die Next.js-Dokumentation formuliert es als Regel: *«Always verify authentication and authorization inside each Server Function rather than relying on Proxy alone.»* Dass die zweite Linie eigenständig hält, habe ich geprüft, indem ich den Proxy für den Upload-Endpunkt vorübergehend ausgehängt habe — die Absage kam weiterhin.
+
+Bewusst **kein** Benutzerkonto-System: Es gibt einen einzigen gemeinsamen Code für den Haushalt, keine Konten, keine Passwortdatenbank, keine Sessions. Aus dem Code wird ein HMAC gebildet und als `httpOnly`-Cookie abgelegt; der Code selbst verlässt den Server nie. Ändert man ihn, werden alle ausgestellten Cookies ungültig. Ist kein Code hinterlegt, kommt niemand herein — die Prüflogik ist in elf Fällen getestet, einschliesslich dieses Fehlerfalls.
+
+Damit entfällt weiterhin die Notwendigkeit für Row-Level-Security: Es gibt keine Nutzerkonten, zwischen denen Daten zu trennen wären. Für eine öffentliche App mit fremden Nutzerdaten wäre stattdessen eine etablierte Auth-Lösung richtig — der geteilte Code passt zu genau einem Haushalt, nicht mehr.
+
 **Bewusst nicht anwendbar (Begründung):**
-- Login/Auth, Session-Cookies, Row-Level-Security, Autorisierung pro Route: Die App hat kein Mehrbenutzer-/Login-System — sie ist für den privaten, gemeinsamen Gebrauch innerhalb der Familie über einen einzigen geteilten Link gedacht, nicht öffentlich beworben. Es gibt daher keine Nutzerkonten, zwischen denen Daten getrennt werden müssten.
 - Vercel Spend Management: Auf dem Hobby-Plan nicht verfügbar (Pro-Feature). Stattdessen greifen Vercels automatische Fair-Use-Grenzen mit automatischer Benachrichtigung.
 
 **Offen / bewusst zurückgestellt:**
 - Keine vollständige Content-Security-Policy — Risiko, damit unter Zeitdruck etwas an der laufenden App zu beschädigen, wurde höher eingeschätzt als der Sicherheitsgewinn in diesem Rahmen.
 - Kein serverseitiges Rate-Limiting auf den KI-Aufrufen — durch das harte Ausgabenlimit bei OpenAI abgefedert.
-- Der Foto-Upload-Endpunkt ist ohne Login erreichbar. Das ist die direkte Folge der bewussten Entscheidung gegen ein Benutzerkonto-System: Ohne Sessions gibt es nichts zu prüfen. Begrenzt wird das Risiko über Dateityp, Grössenlimit und die Tatsache, dass die URL nirgends beworben wird. Bei einer öffentlichen App wäre das der erste Punkt, den ich nachrüsten würde.
+- Sieben reine Lesefunktionen (Hero-Bild- und Logo-URLs) tragen bewusst keinen Wächter: Sie laufen beim Vorberechnen der statischen Seiten, wo es noch keine Cookies gibt. Sie liefern ausschliesslich Bild-Adressen, keine Garten-Daten, und die Seiten selbst sind durch den Proxy geschützt.
+- Der geteilte Zugangscode kennt keine einzelnen Personen. Wer ihn hat, sieht alles; ein Entzug für Einzelne ist nur möglich, indem man den Code für alle wechselt.
 
 ## GEO-Checkliste (Marketing-Seite)
 

@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { Quicksand } from "next/font/google";
 import "./globals.css";
-import { AppShell } from "@/components/layout/app-shell";
 
 const quicksand = Quicksand({
   variable: "--font-quicksand",
@@ -27,7 +26,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       className={`${quicksand.variable} h-full overflow-x-hidden antialiased`}
     >
       <body className="min-h-full flex flex-col overflow-x-hidden bg-cream text-forest">
-        <AppShell>{children}</AppShell>
+        {children}
       </body>
     </html>
   );

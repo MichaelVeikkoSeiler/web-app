@@ -8,11 +8,13 @@ import { getDb, isDbConfigured } from "@/lib/db";
 import { animals, animalZoneAssignments, animalPhotos, animalNotes, zones } from "@/lib/db/schema";
 import { identifyAnimalPhotoWithVision, type AnimalCandidate } from "@/lib/animal-vision-id";
 import { enrichAnimal } from "@/lib/animal-enrichment";
+import { requireAccess } from "@/lib/access";
 
 export async function identifyAnimal(formData: FormData): Promise<{
   candidates: AnimalCandidate[];
   error?: string;
 }> {
+  await requireAccess();
   const file = formData.get("photo");
   if (!(file instanceof File) || file.size === 0) {
     return { candidates: [], error: "Kein Foto empfangen." };
@@ -26,6 +28,7 @@ export async function identifyAnimal(formData: FormData): Promise<{
 }
 
 export async function findExistingAnimal(scientificName: string) {
+  await requireAccess();
   if (!isDbConfigured) return null;
   const db = getDb();
   const [animal] = await db
@@ -50,6 +53,7 @@ export async function createAnimalAndAssign(input: {
   commonName?: string;
   zoneIds: number[];
 }) {
+  await requireAccess();
   const db = getDb();
   const [animal] = await db
     .insert(animals)
@@ -75,6 +79,7 @@ export async function createAnimalAndAssign(input: {
 }
 
 export async function addZoneAssignmentsAnimal(animalId: number, zoneIds: number[]) {
+  await requireAccess();
   if (zoneIds.length === 0) return;
   const db = getDb();
   await db
@@ -90,6 +95,7 @@ export async function addZoneAssignmentsAnimal(animalId: number, zoneIds: number
 }
 
 export async function removeZoneAssignmentAnimal(animalId: number, zoneId: number) {
+  await requireAccess();
   const db = getDb();
   await db
     .delete(animalZoneAssignments)
@@ -104,6 +110,7 @@ export async function removeZoneAssignmentAnimal(animalId: number, zoneId: numbe
 }
 
 export async function saveAnimalPhoto(animalId: number, blobUrl: string, isPrimary: boolean) {
+  await requireAccess();
   const db = getDb();
   if (isPrimary) {
     await db.update(animalPhotos).set({ isPrimary: false }).where(eq(animalPhotos.animalId, animalId));
@@ -118,6 +125,7 @@ export async function saveAnimalPhoto(animalId: number, blobUrl: string, isPrima
 }
 
 export async function setAnimalPhotoTakenAt(animalId: number, photoId: number, takenAt: Date) {
+  await requireAccess();
   await getDb()
     .update(animalPhotos)
     .set({ takenAt })
@@ -126,6 +134,7 @@ export async function setAnimalPhotoTakenAt(animalId: number, photoId: number, t
 }
 
 export async function deleteAnimalPhoto(photoId: number, animalId: number) {
+  await requireAccess();
   const db = getDb();
   const [photo] = await db
     .select()
@@ -155,6 +164,7 @@ export async function deleteAnimalPhoto(photoId: number, animalId: number) {
 }
 
 export async function reorderAnimalPhotos(animalId: number, orderedPhotoIds: number[]) {
+  await requireAccess();
   const db = getDb();
   await Promise.all(
     orderedPhotoIds.map((photoId, index) =>
@@ -170,6 +180,7 @@ export async function reorderAnimalPhotos(animalId: number, orderedPhotoIds: num
 }
 
 export async function addAnimalNote(animalId: number, text: string) {
+  await requireAccess();
   const trimmed = text.trim();
   if (!trimmed) return;
   await getDb().insert(animalNotes).values({ animalId, text: trimmed });
@@ -178,12 +189,14 @@ export async function addAnimalNote(animalId: number, text: string) {
 }
 
 export async function deleteAnimalNote(animalId: number, noteId: number) {
+  await requireAccess();
   await getDb().delete(animalNotes).where(eq(animalNotes.id, noteId));
   revalidatePath(`/tiere/${animalId}`);
   revalidatePath("/");
 }
 
 export async function deleteAnimal(animalId: number) {
+  await requireAccess();
   const db = getDb();
   const photos = await db
     .select({ blobUrl: animalPhotos.blobUrl })
@@ -201,6 +214,7 @@ export async function deleteAnimal(animalId: number) {
 }
 
 export async function searchSpeciesAnimal(query: string): Promise<{ scientificName: string }[]> {
+  await requireAccess();
   const trimmed = query.trim();
   if (trimmed.length === 0) return [];
 
@@ -232,6 +246,7 @@ export async function correctAnimalSpecies(
   animalId: number,
   scientificName: string,
 ): Promise<{ ok: boolean; error?: string }> {
+  await requireAccess();
   const trimmed = scientificName.trim();
   if (!trimmed) return { ok: false, error: "Bitte eine Tierart auswählen." };
 
@@ -261,6 +276,7 @@ export async function correctAnimalSpecies(
 }
 
 export async function retryAnimalEnrichment(animalId: number) {
+  await requireAccess();
   const db = getDb();
   await db
     .update(animals)

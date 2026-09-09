@@ -3,6 +3,7 @@
 import { or, ilike } from "drizzle-orm";
 import { getDb, isDbConfigured } from "@/lib/db";
 import { plants, zones } from "@/lib/db/schema";
+import { requireAccess } from "@/lib/access";
 
 export type SearchResult = {
   type: "plant" | "zone";
@@ -12,6 +13,7 @@ export type SearchResult = {
 };
 
 export async function searchSiteContent(query: string): Promise<SearchResult[]> {
+  await requireAccess();
   const trimmed = query.trim();
   if (trimmed.length === 0 || !isDbConfigured) return [];
 

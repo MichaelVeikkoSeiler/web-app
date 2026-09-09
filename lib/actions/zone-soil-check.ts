@@ -6,6 +6,7 @@ import { getDb, isDbConfigured } from "@/lib/db";
 import { zones, zoneSoilChecks } from "@/lib/db/schema";
 import { evaluateSoilCheck } from "@/lib/soil-check-logic";
 import type { SoilCheckAnswers } from "@/lib/soil-check-types";
+import { requireAccess } from "@/lib/access";
 
 function assertPlausibleAnswers(answers: SoilCheckAnswers) {
   if (!Number.isFinite(answers.ph) || answers.ph < 3 || answers.ph > 10) {
@@ -21,6 +22,7 @@ function assertPlausibleAnswers(answers: SoilCheckAnswers) {
 }
 
 export async function submitSoilCheck(zoneId: number, answers: SoilCheckAnswers): Promise<{ checkId: number }> {
+  await requireAccess();
   assertPlausibleAnswers(answers);
 
   const db = getDb();
@@ -53,6 +55,7 @@ export async function submitSoilCheck(zoneId: number, answers: SoilCheckAnswers)
 }
 
 export async function getLatestSoilCheck(zoneId: number) {
+  await requireAccess();
   if (!isDbConfigured) return null;
   const [row] = await getDb()
     .select()

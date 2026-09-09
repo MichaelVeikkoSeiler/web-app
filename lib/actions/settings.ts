@@ -5,6 +5,7 @@ import { eq, sql } from "drizzle-orm";
 import { del } from "@vercel/blob";
 import { getDb, isDbConfigured } from "@/lib/db";
 import { settings, heroImages } from "@/lib/db/schema";
+import { requireAccess } from "@/lib/access";
 
 export async function getSiteSettings(): Promise<{
   heroImageUrl: string | null;
@@ -30,6 +31,7 @@ export async function getHeroImages(): Promise<HeroPhoto[]> {
 }
 
 export async function addHeroImage(url: string): Promise<HeroPhoto> {
+  await requireAccess();
   const db = getDb();
   const [{ maxOrder }] = await db
     .select({ maxOrder: sql<number>`coalesce(max(${heroImages.orderIndex}), -1)` })
@@ -43,6 +45,7 @@ export async function addHeroImage(url: string): Promise<HeroPhoto> {
 }
 
 export async function deleteHeroImage(id: number) {
+  await requireAccess();
   const db = getDb();
   const [row] = await db
     .select({ blobUrl: heroImages.blobUrl })
@@ -63,6 +66,7 @@ export async function getPlantsHeroImageUrl(): Promise<string | null> {
 }
 
 export async function setPlantsHeroImage(url: string) {
+  await requireAccess();
   const db = getDb();
   const [existing] = await db
     .select({ url: settings.plantsHeroImageUrl })
@@ -83,6 +87,7 @@ export async function setPlantsHeroImage(url: string) {
 }
 
 export async function clearPlantsHeroImage() {
+  await requireAccess();
   const db = getDb();
   const [existing] = await db
     .select({ url: settings.plantsHeroImageUrl })
@@ -106,6 +111,7 @@ export async function getAnimalsHeroImageUrl(): Promise<string | null> {
 }
 
 export async function setAnimalsHeroImage(url: string) {
+  await requireAccess();
   const db = getDb();
   const [existing] = await db
     .select({ url: settings.animalsHeroImageUrl })
@@ -126,6 +132,7 @@ export async function setAnimalsHeroImage(url: string) {
 }
 
 export async function clearAnimalsHeroImage() {
+  await requireAccess();
   const db = getDb();
   const [existing] = await db
     .select({ url: settings.animalsHeroImageUrl })
@@ -149,6 +156,7 @@ export async function getZonesHeroImageUrl(): Promise<string | null> {
 }
 
 export async function setZonesHeroImage(url: string) {
+  await requireAccess();
   const db = getDb();
   const [existing] = await db
     .select({ url: settings.zonesHeroImageUrl })
@@ -169,6 +177,7 @@ export async function setZonesHeroImage(url: string) {
 }
 
 export async function clearZonesHeroImage() {
+  await requireAccess();
   const db = getDb();
   const [existing] = await db
     .select({ url: settings.zonesHeroImageUrl })
@@ -192,6 +201,7 @@ export async function getBesonderheitenHeroImageUrl(): Promise<string | null> {
 }
 
 export async function setBesonderheitenHeroImage(url: string) {
+  await requireAccess();
   const db = getDb();
   const [existing] = await db
     .select({ url: settings.besonderheitenHeroImageUrl })
@@ -212,6 +222,7 @@ export async function setBesonderheitenHeroImage(url: string) {
 }
 
 export async function clearBesonderheitenHeroImage() {
+  await requireAccess();
   const db = getDb();
   const [existing] = await db
     .select({ url: settings.besonderheitenHeroImageUrl })
@@ -235,6 +246,7 @@ export async function getWetterHeroImageUrl(): Promise<string | null> {
 }
 
 export async function setWetterHeroImage(url: string) {
+  await requireAccess();
   const db = getDb();
   const [existing] = await db
     .select({ url: settings.wetterHeroImageUrl })
@@ -255,6 +267,7 @@ export async function setWetterHeroImage(url: string) {
 }
 
 export async function clearWetterHeroImage() {
+  await requireAccess();
   const db = getDb();
   const [existing] = await db
     .select({ url: settings.wetterHeroImageUrl })
@@ -278,6 +291,7 @@ export async function getPlantDocHeroImageUrl(): Promise<string | null> {
 }
 
 export async function setPlantDocHeroImage(url: string) {
+  await requireAccess();
   const db = getDb();
   const [existing] = await db
     .select({ url: settings.plantDocHeroImageUrl })
@@ -298,6 +312,7 @@ export async function setPlantDocHeroImage(url: string) {
 }
 
 export async function clearPlantDocHeroImage() {
+  await requireAccess();
   const db = getDb();
   const [existing] = await db
     .select({ url: settings.plantDocHeroImageUrl })
@@ -321,6 +336,7 @@ export async function getDiversHeroImageUrl(): Promise<string | null> {
 }
 
 export async function setDiversHeroImage(url: string) {
+  await requireAccess();
   const db = getDb();
   const [existing] = await db
     .select({ url: settings.diversHeroImageUrl })
@@ -341,6 +357,7 @@ export async function setDiversHeroImage(url: string) {
 }
 
 export async function clearDiversHeroImage() {
+  await requireAccess();
   const db = getDb();
   const [existing] = await db
     .select({ url: settings.diversHeroImageUrl })
@@ -358,6 +375,7 @@ export async function clearDiversHeroImage() {
 }
 
 export async function setLogoImage(url: string) {
+  await requireAccess();
   await getDb()
     .insert(settings)
     .values({ id: 1, logoUrl: url })

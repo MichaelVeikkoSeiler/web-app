@@ -1,7 +1,14 @@
 import { handleUpload, type HandleUploadBody } from "@vercel/blob/client";
 import { NextResponse } from "next/server";
+import { hasAccess } from "@/lib/access";
 
 export async function POST(request: Request): Promise<NextResponse> {
+  // Zweite Verteidigungslinie neben dem Proxy: Der Endpunkt legt Dateien im
+  // Blob-Speicher ab und darf ohne gültigen Zugang nichts entgegennehmen.
+  if (!(await hasAccess())) {
+    return NextResponse.json({ error: "Kein Zugriff" }, { status: 401 });
+  }
+
   const body = (await request.json()) as HandleUploadBody;
 
   try {

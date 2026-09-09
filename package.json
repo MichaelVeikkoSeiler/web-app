@@ -8,7 +8,10 @@
     "start": "next start",
     "lint": "eslint",
     "db:push": "drizzle-kit push",
-    "db:studio": "drizzle-kit studio"
+    "db:studio": "drizzle-kit studio",
+    "backup": "node scripts/backup-db.mjs && node scripts/backup-photos.mjs $(ls -td ../Backups/horttia_* | head -1)",
+    "backup:db": "node scripts/backup-db.mjs",
+    "restore": "node scripts/restore-db.mjs"
   },
   "dependencies": {
     "@neondatabase/serverless": "^1.1.0",

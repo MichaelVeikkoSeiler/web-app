@@ -9,12 +9,14 @@ import { plantDocCases, plantDocPhotos, plantDocCaseStatusEnum } from "@/lib/db/
 import { gatherPlantDocContext } from "@/lib/plant-doc-context";
 import { analyzePlantDocCase } from "@/lib/plant-doc-ai";
 import { PLANT_DOC_MAX_PHOTOS, type PlantDocAnswers } from "@/lib/plant-doc-types";
+import { requireAccess } from "@/lib/access";
 
 export async function startPlantDocCase(
   plantId: number,
   photos: { url: string; role: string | null }[],
   answers: PlantDocAnswers,
 ): Promise<{ caseId: number }> {
+  await requireAccess();
   if (photos.length === 0) {
     throw new Error("Mindestens ein Foto ist erforderlich.");
   }
@@ -48,6 +50,7 @@ export async function startPlantDocCase(
 }
 
 export async function retryPlantDocAnalysis(caseId: number) {
+  await requireAccess();
   const db = getDb();
   await db
     .update(plantDocCases)
@@ -61,6 +64,7 @@ export async function updatePlantDocCaseStatus(
   caseId: number,
   status: (typeof plantDocCaseStatusEnum.enumValues)[number],
 ) {
+  await requireAccess();
   const db = getDb();
   const [docCase] = await db
     .update(plantDocCases)
@@ -74,6 +78,7 @@ export async function updatePlantDocCaseStatus(
 }
 
 export async function deletePlantDocCase(caseId: number) {
+  await requireAccess();
   const db = getDb();
   const [docCase] = await db
     .select({ plantId: plantDocCases.plantId })

@@ -6,6 +6,7 @@ import { eq, sql } from "drizzle-orm";
 import { z } from "zod";
 import { getDb } from "@/lib/db";
 import { zones, zonePhotos, zoneNotes } from "@/lib/db/schema";
+import { requireAccess } from "@/lib/access";
 
 const zoneSchema = z.object({
   name: z.string().trim().min(1, "Name ist erforderlich"),
@@ -18,6 +19,7 @@ const zoneSchema = z.object({
 export type ZoneInput = z.infer<typeof zoneSchema>;
 
 export async function createZone(input: ZoneInput) {
+  await requireAccess();
   const data = zoneSchema.parse(input);
   const db = getDb();
   const [{ maxOrder }] = await db
@@ -42,6 +44,7 @@ export async function createZone(input: ZoneInput) {
 }
 
 export async function updateZone(id: number, input: ZoneInput) {
+  await requireAccess();
   const data = zoneSchema.parse(input);
   const db = getDb();
   const [zone] = await db
@@ -62,6 +65,7 @@ export async function updateZone(id: number, input: ZoneInput) {
 }
 
 export async function addZonePhoto(zoneId: number, blobUrl: string, isPrimary: boolean) {
+  await requireAccess();
   const db = getDb();
   if (isPrimary) {
     await db.update(zonePhotos).set({ isPrimary: false }).where(eq(zonePhotos.zoneId, zoneId));
@@ -74,6 +78,7 @@ export async function addZonePhoto(zoneId: number, blobUrl: string, isPrimary: b
 }
 
 export async function deleteZonePhoto(photoId: number, zoneId: number) {
+  await requireAccess();
   const db = getDb();
   const [photo] = await db
     .select()
@@ -103,6 +108,7 @@ export async function deleteZonePhoto(photoId: number, zoneId: number) {
 }
 
 export async function deleteZone(id: number) {
+  await requireAccess();
   const db = getDb();
   const photos = await db
     .select({ blobUrl: zonePhotos.blobUrl })
@@ -120,6 +126,7 @@ export async function deleteZone(id: number) {
 }
 
 export async function addZoneNote(zoneId: number, text: string) {
+  await requireAccess();
   const trimmed = text.trim();
   if (!trimmed) return;
   await getDb().insert(zoneNotes).values({ zoneId, text: trimmed });
@@ -128,12 +135,14 @@ export async function addZoneNote(zoneId: number, text: string) {
 }
 
 export async function deleteZoneNote(zoneId: number, noteId: number) {
+  await requireAccess();
   await getDb().delete(zoneNotes).where(eq(zoneNotes.id, noteId));
   revalidatePath(`/zonen/${zoneId}`);
   revalidatePath("/");
 }
 
 export async function reorderZones(orderedIds: number[]) {
+  await requireAccess();
   const db = getDb();
   await Promise.all(
     orderedIds.map((id, index) =>
