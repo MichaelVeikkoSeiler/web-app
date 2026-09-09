@@ -3,12 +3,18 @@ import { eq } from "drizzle-orm";
 import { getDb, isDbConfigured } from "@/lib/db";
 import { zones } from "@/lib/db/schema";
 import { SoilCheckWizard } from "@/components/zones/soil-check/soil-check-wizard";
+import { isDemoMode } from "@/lib/access-token";
+import { redirect } from "next/navigation";
 
 export default async function BodenCheckPage({
   params,
 }: {
   params: Promise<{ id: string }>;
 }) {
+  // Im Schaufenster gar nicht erst öffnen: Der Assistent würde beim ersten Foto
+  // scheitern. Die Hinweisseite erklärt stattdessen, warum es hier nicht geht.
+  if (isDemoMode()) redirect("/demo-hinweis");
+
   const { id } = await params;
   const zoneId = Number(id);
   if (Number.isNaN(zoneId)) notFound();
