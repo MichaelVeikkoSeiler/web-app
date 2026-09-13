@@ -28,7 +28,10 @@ export default async function BodenCheckPage({
   if (!zone) notFound();
 
   return (
-    <div className="flex min-h-[calc(100dvh-8rem)] flex-col">
+    // Mobil: Kopfzeile (71px + 16px Abstand) UND die feste Navigationsleiste unten
+    // (65px + max(0.75rem, iPhone-Rand)) abziehen, sonst liegt der Hauptknopf des
+    // Assistenten teilweise hinter der Leiste. Ab sm gibt es die Leiste nicht.
+    <div className="flex min-h-[calc(100dvh-10.25rem-max(0.75rem,env(safe-area-inset-bottom)))] flex-col sm:min-h-[calc(100dvh-8rem)]">
       <SoilCheckWizard zoneId={zone.id} zoneName={zone.name} />
     </div>
   );
