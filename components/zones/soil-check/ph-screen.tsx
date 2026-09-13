@@ -4,9 +4,11 @@ import { useEffect } from "react";
 import { Minus, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ScreenShell, Hint } from "@/components/zones/soil-check/soil-check-shells";
+import { PH_TEST_UPPER_LIMIT } from "@/lib/soil-check-logic";
 
 const PH_MIN = 3.5;
-const PH_MAX = 9;
+/** Der Test misst nur bis 7.0 – der oberste Wert steht für "7.0 oder höher". */
+const PH_MAX = PH_TEST_UPPER_LIMIT;
 const PH_STEP = 0.5;
 const PH_DEFAULT = 7;
 
@@ -64,7 +66,10 @@ export function PhScreen({
           >
             <Minus className="h-5 w-5" />
           </button>
-          <span className="font-display text-4xl text-forest">{current.toFixed(1)}</span>
+          <span className="flex flex-col items-center">
+            <span className="font-display text-4xl text-forest">{current.toFixed(1)}</span>
+            {current >= PH_MAX && <span className="text-sm font-medium text-forest-muted">oder höher</span>}
+          </span>
           <button
             type="button"
             onClick={() => adjust(PH_STEP)}

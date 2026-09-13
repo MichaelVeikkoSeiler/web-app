@@ -2,6 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import type { SoilProfile } from "@/lib/soil-check-types";
+import { formatPhValue } from "@/lib/soil-check-logic";
 
 const TEXTURE_LABEL: Record<SoilProfile["soilTexture"], string> = {
   sandig: "Sandig",
@@ -71,7 +72,7 @@ export function ResultScreen({
 
       <div className="rounded-2xl border border-border bg-warm-white p-4">
         <Row label="Bodenart" value={TEXTURE_LABEL[profile.soilTexture]} />
-        <Row label="pH-Wert" value={`${profile.phValue.toFixed(1).replace(".", ",")} · ${profile.phClassification}`} />
+        <Row label="pH-Wert" value={`${formatPhValue(profile.phValue, profile.phClassification)} · ${profile.phClassification}`} />
         <Row label="Drainage" value={DRAINAGE_LABEL[profile.drainageClass]} />
         <Row label="Wasserspeicherung" value={RETENTION_LABEL[profile.waterRetentionClass]} />
         <Row label="Steinanteil" value={STONE_LABEL[profile.stoneContentClass]} />

@@ -1,6 +1,13 @@
 export type SoilTexture = "sandig" | "sandig-lehmig" | "lehmig" | "tonig-lehmig" | "tonig";
 
-export type PhClassification = "sauer" | "leicht sauer" | "neutral" | "leicht alkalisch" | "alkalisch";
+export type PhClassification =
+  | "sauer"
+  | "leicht sauer"
+  | "neutral"
+  | "leicht alkalisch"
+  | "alkalisch"
+  /** Test zeigt nur "7 oder höher" – der genaue Wert darüber ist nicht messbar. */
+  | "neutral bis alkalisch";
 
 export type DrainageClass = "schnell" | "mittel" | "langsam";
 
@@ -40,6 +47,11 @@ export type SoilCheckAnswers = {
   drainage: DrainageAnswer;
   /** Screen 11 – abgelesener pH-Wert, in 0.5er-Schritten */
   ph: number;
+  /**
+   * true, wenn der Test an seiner Obergrenze (7.0) steht und damit nur "7 oder
+   * höher" aussagt. Optional, damit ältere gespeicherte Antworten gültig bleiben.
+   */
+  phOrHigher?: boolean;
   /** Screen 12 – Verhalten nach Regen */
   afterRain: ChoiceABCDE;
   /** Screen 13 – Verhalten bei Trockenheit (Mehrfachauswahl, "F" = weiss nicht, exklusiv) */

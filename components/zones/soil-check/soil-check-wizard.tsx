@@ -13,6 +13,7 @@ import {
 } from "@/components/zones/soil-check/soil-check-shells";
 import { DrainageMeasureScreen } from "@/components/zones/soil-check/drainage-measure-screen";
 import { PhScreen } from "@/components/zones/soil-check/ph-screen";
+import { PH_TEST_UPPER_LIMIT } from "@/lib/soil-check-logic";
 import { ResultScreen } from "@/components/zones/soil-check/result-screen";
 import { submitSoilCheck } from "@/lib/actions/zone-soil-check";
 import { evaluateSoilCheck, checkFormabilityPlausibility } from "@/lib/soil-check-logic";
@@ -296,7 +297,14 @@ export function SoilCheckWizard({ zoneId, zoneName }: { zoneId: number; zoneName
         <DrainageMeasureScreen value={answers.drainage} onChange={(v) => set("drainage", v)} onNext={next} />
       )}
 
-      {stepIndex === 10 && <PhScreen value={answers.ph} onChange={(v) => set("ph", v)} onNext={next} />}
+      {stepIndex === 10 && <PhScreen
+          value={answers.ph}
+          onChange={(v) => {
+            set("ph", v);
+            set("phOrHigher", v >= PH_TEST_UPPER_LIMIT);
+          }}
+          onNext={next}
+        />}
 
       {stepIndex === 11 && (
         <SingleChoiceScreen

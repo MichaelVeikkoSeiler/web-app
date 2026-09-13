@@ -104,6 +104,7 @@ export default async function ZoneDetailPage({
       .select({
         soilTexture: zoneSoilChecks.soilTexture,
         phValue: zoneSoilChecks.phValue,
+        phClassification: zoneSoilChecks.phClassification,
         drainageClass: zoneSoilChecks.drainageClass,
       })
       .from(zoneSoilChecks)

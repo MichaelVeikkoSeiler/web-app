@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Shovel } from "lucide-react";
+import { formatPhValue } from "@/lib/soil-check-logic";
 
 const TEXTURE_LABEL: Record<string, string> = {
   sandig: "Sandig",
@@ -12,6 +13,7 @@ const TEXTURE_LABEL: Record<string, string> = {
 type LatestSoilCheck = {
   soilTexture: string;
   phValue: number;
+  phClassification: string;
   drainageClass: string;
 } | null;
 
@@ -35,7 +37,7 @@ export function SoilSection({
       </div>
       <p className="text-sm text-forest-muted">
         {latestCheck
-          ? `${TEXTURE_LABEL[latestCheck.soilTexture] ?? latestCheck.soilTexture} · pH ${latestCheck.phValue.toFixed(1).replace(".", ",")} · Drainage ${latestCheck.drainageClass}`
+          ? `${TEXTURE_LABEL[latestCheck.soilTexture] ?? latestCheck.soilTexture} · pH ${formatPhValue(latestCheck.phValue, latestCheck.phClassification)} · Drainage ${latestCheck.drainageClass}`
           : "Noch nicht analysiert"}
       </p>
     </section>

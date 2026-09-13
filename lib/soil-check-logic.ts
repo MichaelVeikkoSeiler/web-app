@@ -118,6 +118,18 @@ export function checkFormabilityPlausibility(
 // Kein wissenschaftlicher Standard, aber für eine Garteneinschätzung üblich
 // und für Laien gut nachvollziehbar.
 
+/**
+ * Obergrenze des verwendeten Boden-pH-Tests (Neudorff): Er zeigt Werte nur bis
+ * 7.0 an. Alles darüber ist nicht messbar und wird als "7 oder höher" erfasst.
+ */
+export const PH_TEST_UPPER_LIMIT = 7;
+
+/** Einheitliche Anzeige, z. B. "6,5" oder "7,0 oder höher". */
+export function formatPhValue(phValue: number, phClassification: string): string {
+  const zahl = phValue.toFixed(1).replace(".", ",");
+  return phClassification === "neutral bis alkalisch" ? `${zahl} oder höher` : zahl;
+}
+
 export function classifyPh(phValue: number): PhClassification {
   if (phValue < 5.5) return "sauer";
   if (phValue < 6.5) return "leicht sauer";
@@ -266,6 +278,18 @@ const RETENTION_BLURB: Record<WaterRetentionClass, string> = {
   gut: "Insgesamt speichert dieser Boden Wasser gut – das reduziert den Giessaufwand, erhöht aber bei Nässe das Risiko von Staunässe.",
 };
 
+/**
+ * Gebeugte Formen für "einen … Boden". Bewusst ausgeschrieben statt per
+ * angehängtem "-en": Das ergab "saueren" statt korrekt "sauren".
+ */
+const PH_ADJEKTIV: Record<Exclude<PhClassification, "neutral bis alkalisch">, string> = {
+  sauer: "sauren",
+  "leicht sauer": "leicht sauren",
+  neutral: "neutralen",
+  "leicht alkalisch": "leicht alkalischen",
+  alkalisch: "alkalischen",
+};
+
 export function buildSummaryText(profile: {
   soilTexture: SoilTexture;
   phClassification: PhClassification;
@@ -276,7 +300,9 @@ export function buildSummaryText(profile: {
     TEXTURE_BLURB[profile.soilTexture],
     DRAINAGE_BLURB[profile.drainageClass],
     RETENTION_BLURB[profile.waterRetentionClass],
-    `Der pH-Wert deutet auf ${profile.phClassification === "neutral" ? "einen neutralen Boden" : `einen ${profile.phClassification}en Boden`} hin – das beeinflusst, welche Pflanzen sich hier besonders wohlfühlen.`,
+    profile.phClassification === "neutral bis alkalisch"
+      ? "Der pH-Wert liegt bei 7 oder höher – der Boden ist also neutral bis kalkhaltig. Genauer lässt es sich mit diesem Test nicht bestimmen; das beeinflusst, welche Pflanzen sich hier besonders wohlfühlen."
+      : `Der pH-Wert deutet auf einen ${PH_ADJEKTIV[profile.phClassification]} Boden hin – das beeinflusst, welche Pflanzen sich hier besonders wohlfühlen.`,
   ];
   return parts.join(" ");
 }
@@ -302,7 +328,10 @@ export function evaluateSoilCheck(answers: SoilCheckAnswers): SoilProfile {
     stoneContentClass,
   });
   const organicMatterIndicator = deriveOrganicMatterIndicator(answers.organicMatter);
-  const phClassification = classifyPh(phValue);
+  // Steht der Test an seiner Obergrenze, ist "neutral" nicht belegt: Der wahre
+  // Wert kann auch im leicht alkalischen oder alkalischen Bereich liegen.
+  const phOrHigher = answers.phOrHigher === true && phValue >= PH_TEST_UPPER_LIMIT;
+  const phClassification: PhClassification = phOrHigher ? "neutral bis alkalisch" : classifyPh(phValue);
 
   return {
     soilTexture,
