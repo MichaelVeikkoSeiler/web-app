@@ -38,8 +38,14 @@ export const config = {
    * - der Zugangsseite selbst (sonst käme man nie zur Eingabe)
    * - den Bausteinen, die diese Seite zum Anzeigen braucht
    *
+   * Ebenfalls frei: das Web-Manifest und die App-Symbole. Browser laden beides
+   * beim "Zum Startbildschirm hinzufügen" oft ohne Cookies; gesperrt bekäme das
+   * Handy kein Symbol. Beide enthalten nur Name, Farben und Bild – nichts Privates.
+   *
    * Bewusst NICHT ausgenommen: /api/blob/upload. Der Endpunkt kostet Speicher
    * und muss ebenso geschützt sein wie der Rest.
    */
-  matcher: ["/((?!zugang|_next/static|_next/image|favicon.ico|images|sounds|.*\\.svg$).*)"],
+  matcher: [
+    "/((?!zugang|_next/static|_next/image|favicon\\.ico|icon\\.png|apple-icon\\.png|icons/|manifest\\.webmanifest|images|sounds|.*\\.svg$).*)",
+  ],
 };
