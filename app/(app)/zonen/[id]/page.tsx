@@ -1,6 +1,5 @@
 import { notFound } from "next/navigation";
 import { desc, eq } from "drizzle-orm";
-import { Sun, CloudSun, CloudMoon } from "lucide-react";
 import { getDb, isDbConfigured } from "@/lib/db";
 import {
   zones,
@@ -22,14 +21,6 @@ import { SoilSection } from "@/components/zones/soil-section";
 import { OtherZonesOverview } from "@/components/zones/other-zones-overview";
 import { NoteList } from "@/components/ui/note-list";
 import { addZoneNote, deleteZoneNote } from "@/lib/actions/zones";
-
-const lightIcon = {
-  sonnig: Sun,
-  halbschattig: CloudSun,
-  schattig: CloudMoon,
-};
-
-const orientationLabel = { N: "Norden", O: "Osten", S: "Süden", W: "Westen" };
 
 export default async function ZoneDetailPage({
   params,
@@ -152,8 +143,6 @@ export default async function ZoneDetailPage({
     photoUrl: photoByAnimal.get(a.id) ?? null,
   }));
 
-  const Icon = lightIcon[zone.light];
-
   return (
     <div className="flex flex-col gap-6">
       <ZoneHero zoneId={zone.id} photos={zonePhotoRows} name={zone.name} />
@@ -161,21 +150,6 @@ export default async function ZoneDetailPage({
       <div className="flex w-full flex-col gap-6">
         <div>
           <h1 className="font-display text-3xl text-forest">{zone.name}</h1>
-        </div>
-
-        <div className="flex flex-wrap gap-2 text-xs">
-          <span className="flex items-center gap-1 rounded-full bg-sun/40 px-2.5 py-1 text-sun-text">
-            <Icon className="h-3.5 w-3.5" />
-            {zone.light}
-          </span>
-          <span className="rounded-full bg-water/40 px-2.5 py-1 text-water-text">
-            {orientationLabel[zone.orientation]}
-          </span>
-          {zone.soilType && (
-            <span className="rounded-full bg-soil/40 px-2.5 py-1 text-soil-text">
-              {zone.soilType}
-            </span>
-          )}
         </div>
 
         {zone.notes && <p className="text-sm text-forest-muted">{zone.notes}</p>}
@@ -206,9 +180,6 @@ export default async function ZoneDetailPage({
             zone={{
               id: zone.id,
               name: zone.name,
-              light: zone.light,
-              orientation: zone.orientation,
-              soilType: zone.soilType ?? "",
               notes: zone.notes ?? "",
             }}
           />

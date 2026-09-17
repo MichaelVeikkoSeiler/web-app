@@ -31,8 +31,11 @@ export const zones = pgTable("zones", {
   id: serial("id").primaryKey(),
   name: text("name").notNull(),
   orderIndex: integer("order_index").notNull().default(0),
-  light: lightConditionEnum("light").notNull(),
-  orientation: orientationEnum("orientation").notNull(),
+  /** Nicht mehr erfasst (seit 9/2026). Spalte bleibt für ältere Daten bestehen, ist aber leer. */
+  light: lightConditionEnum("light"),
+  /** Nicht mehr erfasst (seit 9/2026). Spalte bleibt für ältere Daten bestehen, ist aber leer. */
+  orientation: orientationEnum("orientation"),
+  /** Wird ausschliesslich vom Bodencheck gesetzt (submitSoilCheck), nicht mehr von Hand. */
   soilType: text("soil_type"),
   notes: text("notes"),
   imageUrl: text("image_url"),

@@ -8,11 +8,10 @@ import { getDb } from "@/lib/db";
 import { zones, zonePhotos, zoneNotes } from "@/lib/db/schema";
 import { requireAccess } from "@/lib/access";
 
+// Lichtverhältnis, Himmelsrichtung und Bodenart werden nicht mehr von Hand
+// erfasst. Die Bodenart setzt ausschliesslich der Bodencheck.
 const zoneSchema = z.object({
   name: z.string().trim().min(1, "Name ist erforderlich"),
-  light: z.enum(["schattig", "halbschattig", "sonnig"]),
-  orientation: z.enum(["N", "O", "S", "W"]),
-  soilType: z.string().trim().optional(),
   notes: z.string().trim().optional(),
 });
 
@@ -30,9 +29,6 @@ export async function createZone(input: ZoneInput) {
     .insert(zones)
     .values({
       name: data.name,
-      light: data.light,
-      orientation: data.orientation,
-      soilType: data.soilType || null,
       notes: data.notes || null,
       orderIndex: maxOrder + 1,
     })
@@ -51,10 +47,9 @@ export async function updateZone(id: number, input: ZoneInput) {
     .update(zones)
     .set({
       name: data.name,
-      light: data.light,
-      orientation: data.orientation,
-      soilType: data.soilType || null,
       notes: data.notes || null,
+      // soilType bewusst NICHT anfassen: sonst würde das Bearbeiten der Zone
+      // das Ergebnis des Bodenchecks überschreiben.
       updatedAt: new Date(),
     })
     .where(eq(zones.id, id))

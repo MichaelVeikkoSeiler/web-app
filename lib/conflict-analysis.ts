@@ -14,9 +14,10 @@ const SYSTEM_PROMPT = `Du bist ein Gartenexperte, der eine Gartenzone auf Konfli
 Der Garten liegt in Müntschemier, Kanton Bern, Schweiz (gemässigtes mitteleuropäisches Klima, ca. 480 m ü. M.).
 
 Ein Konflikt liegt vor, wenn:
-- die Bodenart der Zone nicht zu einer der zugeordneten Pflanzen passt,
-- zwei oder mehr zugeordnete Pflanzen sich konkurrenzieren (z. B. um Licht, Wasser, Nährstoffe oder Platz, oder eine hemmt das Wachstum der anderen),
-- oder eine Pflanze nicht zu den Licht-/Ausrichtungsbedingungen der Zone passt.
+- die Bodenart der Zone nicht zu einer der zugeordneten Pflanzen passt – aber NUR, wenn eine Bodenart angegeben ist,
+- oder zwei oder mehr zugeordnete Pflanzen sich konkurrenzieren (z. B. um Licht, Wasser, Nährstoffe oder Platz, oder eine hemmt das Wachstum der anderen).
+
+Wichtig: Lichtverhältnis und Himmelsrichtung der Zone werden nicht erfasst und sind dir unbekannt. Beurteile deshalb NICHT, ob eine Pflanze zum Licht oder zur Lage der Zone passt, und nimm dazu nichts an. Ist die Bodenart "unbekannt", beurteile auch keine Bodenkonflikte.
 
 Nutze die Websuche, um das zu prüfen.
 Antworte ausschliesslich auf Deutsch in Schweizer Rechtschreibung (kein ß, immer "ss") und am Ende AUSSCHLIESSLICH mit einem einzigen JSON-Objekt (keine Markdown-Codeblöcke, kein Fliesstext davor oder danach) exakt in diesem Format:
@@ -34,8 +35,6 @@ Regeln:
 
 async function analyzeConflict(input: {
   zoneName: string;
-  light: string;
-  orientation: string;
   soilType: string | null;
   plantNames: string[];
 }): Promise<ConflictAnalysis> {
@@ -54,7 +53,7 @@ async function analyzeConflict(input: {
       {
         type: "message",
         role: "user",
-        content: `Zone "${input.zoneName}" mit Licht: ${input.light}, Ausrichtung: ${input.orientation}, Boden: ${input.soilType ?? "unbekannt"}.
+        content: `Zone "${input.zoneName}", Bodenart laut Bodencheck: ${input.soilType ?? "unbekannt"}.
 Zugeordnete Pflanzen: ${input.plantNames.join(", ")}.
 Prüfe auf Konflikte und gib danach ausschliesslich das JSON-Objekt zurück.`,
       },
@@ -97,8 +96,6 @@ export async function checkZoneConflict(zoneId: number) {
 
     const result = await analyzeConflict({
       zoneName: zone.name,
-      light: zone.light,
-      orientation: zone.orientation,
       soilType: zone.soilType,
       plantNames: assignedPlants.map((p) => p.germanName ?? p.scientificName),
     });

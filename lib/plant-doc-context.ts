@@ -22,8 +22,6 @@ export async function gatherPlantDocContext(plantId: number): Promise<PlantDocCo
       db
         .select({
           name: zones.name,
-          light: zones.light,
-          orientation: zones.orientation,
           soilType: zones.soilType,
           notes: zones.notes,
         })

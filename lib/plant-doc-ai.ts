@@ -70,8 +70,8 @@ function formatContext(context: PlantDocContext, answers: PlantDocAnswers): stri
 
   for (const z of context.zones) {
     lines.push(
-      `Zone "${z.name}": Licht ${z.light}, Ausrichtung ${z.orientation}` +
-        (z.soilType ? `, Boden ${z.soilType}` : "") +
+      `Zone "${z.name}"` +
+        (z.soilType ? `: Boden ${z.soilType} (laut Bodencheck)` : "") +
         (z.notes ? `, Notiz: ${z.notes}` : ""),
     );
   }

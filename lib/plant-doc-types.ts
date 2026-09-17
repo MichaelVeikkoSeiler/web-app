@@ -27,8 +27,6 @@ export type PlantDocContext = {
   };
   zones: {
     name: string;
-    light: string;
-    orientation: string;
     soilType: string | null;
     notes: string | null;
   }[];
